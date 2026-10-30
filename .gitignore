@@ -1,7 +1,47 @@
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Production build
 dist/
+build/
+
+# Environment files
 .env
 .env.*
 !.env.example
-*.log
+
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Editor and IDE directories
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Vite & build caches
+.cache/
+.vite/
+vite.config.*.timestamp-*
+*.tsbuildinfo
+logs/
+*.log
+*-debug.log*
+.tmp-*
+
+# Figma / agent platform internal context
+/.figma/design-context/
+/.plugins/
+/.opencode-skills/
