@@ -63,11 +63,11 @@ export function Success({ go, notify, contract }: SuccessProps) {
           icon="document"
           onClick={() => {
             window.print()
-            notify("Print / PDF dialog opened.")
+            notify("PDF dialog opened.")
           }}
-          ariaLabel="Print or Save Contract PDF"
+          ariaLabel="Save Contract as PDF"
         >
-          Print / Save PDF
+          Save PDF
         </Button>
         <Button
           variant="secondary"

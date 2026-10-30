@@ -53,8 +53,8 @@ The Vite development server will start at `http://localhost:5173` (or the port s
 4. **Smart Check (Safety Review):**
    * Tap **"Smart Check"** to review recommendations tailored for Cagayan de Oro rentals (guest curfews, sub-meter billing deadlines, move-out notice periods).
    * Tap **"Add this clause"** to automatically insert safeguards into the lease.
-5. **Print & Share:**
-   * Tap **"Print / Save PDF"** to trigger a clean printout with all app UI stripped away via `@media print`.
+5. **Save PDF & Share:**
+   * Tap **"Save PDF"** to trigger a clean printout or save as PDF with all app UI stripped away via `@media print`.
    * Enable **Monthly Rent Reminders** to keep track of payment cycles on your dashboard.
 
 ---
@@ -66,7 +66,7 @@ The Vite development server will start at `http://localhost:5173` (or the port s
 * Client-side form validation (Philippine 11-digit phone numbers, password complexity checks, letters-only name fields).
 * Dynamic contract drafting with customizable clauses.
 * Interactive in-browser contract paper editor.
-* Print / Save PDF stylesheet (`@media print`) rendering clean physical paper agreements.
+* Save PDF stylesheet (`@media print`) rendering clean physical paper agreements.
 * Local session persistence and contract storage via `localStorage`.
 * Rent reminder toggles and payment record tracking per tenant.
 * Automated ID masking (always hides sensitive ID characters, revealing only the last 4 digits).

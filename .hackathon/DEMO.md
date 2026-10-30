@@ -61,7 +61,7 @@
 ### 1:40 – 2:00: Success, Reminders & Closing
 * **Action:** Show the **Success screen** (Screen 11).
 * **Say:** 
-  > *"The contract is ready! The landlord can tap 'Print / Save PDF' to print physical copies or share the PDF directly via messenger."*
+  > *"The contract is ready! The landlord can tap 'Save PDF' to print physical copies or share the PDF directly via messenger."*
 * **Action:** Tap **"Add rent reminder"** or navigate to **"My Tenants"** (Screen 12) and **"Rent Reminders"** (Screen 16).
 * **Say:** 
   > *"Rent reminders keep track of upcoming payments without sending unsolicited automated spam to tenants. Landlords stay in control. Rent in Peace: good contracts make good neighbors. Thank you!"*

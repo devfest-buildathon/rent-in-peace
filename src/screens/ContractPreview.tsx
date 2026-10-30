@@ -113,11 +113,11 @@ export function ContractPreview({
           full={false}
           onClick={() => {
             window.print()
-            notify("Print / PDF dialog opened.")
+            notify("PDF dialog opened.")
           }}
-          ariaLabel="Print or Save Contract as PDF"
+          ariaLabel="Save Contract as PDF"
         >
-          Print / Save PDF
+          Save PDF
         </Button>
         <Button
           variant={isEditing ? "primary" : "soft"}
