@@ -10,3 +10,4 @@ export interface SessionState {
   isLoading: boolean
   error: string | null
 }
+

@@ -2,11 +2,13 @@ import { useState, type ChangeEvent, type FormEvent } from "react"
 import { Logo, Button, AuthInput, Icon, Banner } from "../components"
 import { validateName, validateMobile, validatePassword } from "../lib/formatters"
 import type { SignUpRequest } from "../types/auth"
+import type { UserProfile } from "../types/user"
 
 export interface SignUpProps {
   go?: (n: number) => void
   notify?: (message: string, tone?: "success" | "error") => void
   onRegister: (data: SignUpRequest) => Promise<{ success: boolean; error?: string }>
+  onOfflineLogin?: (profile: UserProfile) => void
   onNavigateSignIn: () => void
   onBack: () => void
   isLoading?: boolean
@@ -16,6 +18,7 @@ export interface SignUpProps {
 export function SignUp({
   notify,
   onRegister,
+  onOfflineLogin,
   onNavigateSignIn,
   onBack,
   isLoading = false,
@@ -107,6 +110,15 @@ export function SignUp({
     if (notify) notify("Google Sign-In is awaiting backend OAuth configuration.", "error")
   }
 
+  const handleEnterOffline = () => {
+    if (onOfflineLogin) {
+      onOfflineLogin({
+        name: name.trim() || "Landlord",
+        mobile: mobile.trim() || "09170000000",
+      })
+    }
+  }
+
   const activeError = submitError || apiError
 
   return (
@@ -128,6 +140,17 @@ export function SignUp({
           <Banner tone="danger" icon="warning">
             {activeError}
           </Banner>
+          {onOfflineLogin && (
+            <div style={{ marginTop: "0.5rem" }}>
+              <Button
+                variant="secondary"
+                onClick={handleEnterOffline}
+                ariaLabel="Continue in offline preview mode"
+              >
+                Continue in Offline Preview <Icon name="arrow" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -207,6 +230,14 @@ export function SignUp({
           Sign in
         </button>
       </p>
+      {onOfflineLogin && (
+        <p className="auth-switch" style={{ marginTop: "0.625rem", fontSize: "0.8125rem", color: "#6b7280" }}>
+          Testing without backend?{" "}
+          <button type="button" onClick={handleEnterOffline} style={{ fontWeight: 600, color: "#166534" }}>
+            Enter in Offline Mode
+          </button>
+        </p>
+      )}
     </main>
   )
 }

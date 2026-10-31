@@ -116,3 +116,4 @@ export function isRouteAuthorized(route: ParsedRoute, currentRole: UserRole): bo
   }
   return false
 }
+

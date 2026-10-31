@@ -85,3 +85,4 @@ export function NotFound({ reason, currentRole, onGoHome, onSwitchRole }: NotFou
     </main>
   )
 }
+

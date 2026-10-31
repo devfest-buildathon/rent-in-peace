@@ -124,6 +124,20 @@ export function App() {
     [session, router, notify]
   )
 
+  const handleOfflineLogin = useCallback(
+    (profile: { name: string; mobile: string }) => {
+      session.loginOffline(profile)
+      setActiveContract((prev) => ({
+        ...prev,
+        landlordName: profile.name,
+        landlordContact: profile.mobile,
+      }))
+      notify(`Entered as ${profile.name} (Offline Preview).`, "success")
+      router.navigate("/landlord/dashboard")
+    },
+    [session, router, notify]
+  )
+
   const handleSignOut = useCallback(async () => {
     await session.logout()
     notify("Signed out successfully.")
@@ -202,6 +216,7 @@ export function App() {
         return (
           <SignIn
             onLogin={handleLogin}
+            onOfflineLogin={handleOfflineLogin}
             onNavigateSignUp={() => router.navigate("/landlord/signup")}
             onBack={() => {
               session.setRole(null)
@@ -217,6 +232,7 @@ export function App() {
         return (
           <SignUp
             onRegister={handleRegister}
+            onOfflineLogin={handleOfflineLogin}
             onNavigateSignIn={() => router.navigate("/landlord/signin")}
             onBack={() => {
               session.setRole(null)

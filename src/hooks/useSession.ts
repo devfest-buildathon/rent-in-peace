@@ -104,6 +104,21 @@ export function useSession() {
     }
   }, [])
 
+  const loginOffline = useCallback((profile: UserProfile): { success: boolean } => {
+    setUser(profile)
+    setToken("offline-demo-token")
+    setRoleState("landlord")
+    setError(null)
+    try {
+      sessionStorage.setItem(STORAGE_KEY_TOKEN, "offline-demo-token")
+      sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(profile))
+      sessionStorage.setItem(STORAGE_KEY_ROLE, "landlord")
+    } catch {
+      // ignore
+    }
+    return { success: true }
+  }, [])
+
   const logout = useCallback(async (): Promise<void> => {
     setIsLoading(true)
     try {
@@ -142,6 +157,8 @@ export function useSession() {
     setRole,
     login,
     register,
+    loginOffline,
     logout,
   }
 }
+

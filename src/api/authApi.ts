@@ -30,3 +30,4 @@ export async function logOut(): Promise<{ success: boolean }> {
     method: "POST",
   })
 }
+
