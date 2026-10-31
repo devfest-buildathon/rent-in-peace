@@ -93,13 +93,14 @@ export function App() {
   const handleLogin = useCallback(
     async (credentials: { mobile: string; password: string; remember?: boolean }) => {
       const result = await session.login(credentials)
-      if (result.success && session.user) {
+      if (result.success) {
+        const loggedUser = result.user || { name: "Landlord", mobile: credentials.mobile }
         setActiveContract((prev) => ({
           ...prev,
-          landlordName: session.user?.name || prev.landlordName,
-          landlordContact: session.user?.mobile || prev.landlordContact,
+          landlordName: loggedUser.name,
+          landlordContact: loggedUser.mobile,
         }))
-        notify(`Signed in as ${session.user.name}.`, "success")
+        notify(`Signed in as ${loggedUser.name}.`, "success")
         router.navigate("/landlord/dashboard")
       }
       return result
@@ -110,13 +111,14 @@ export function App() {
   const handleRegister = useCallback(
     async (data: { name: string; mobile: string; password: string }) => {
       const result = await session.register(data)
-      if (result.success && session.user) {
+      if (result.success) {
+        const registeredUser = result.user || { name: data.name || "Landlord", mobile: data.mobile }
         setActiveContract((prev) => ({
           ...prev,
-          landlordName: session.user?.name || prev.landlordName,
-          landlordContact: session.user?.mobile || prev.landlordContact,
+          landlordName: registeredUser.name,
+          landlordContact: registeredUser.mobile,
         }))
-        notify(`Account created for ${session.user.name}.`, "success")
+        notify(`Account created for ${registeredUser.name}.`, "success")
         router.navigate("/landlord/dashboard")
       }
       return result

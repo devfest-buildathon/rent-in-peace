@@ -49,7 +49,7 @@ export function useSession() {
     }
   }, [])
 
-  const login = useCallback(async (req: LogInRequest): Promise<{ success: boolean; error?: string }> => {
+  const login = useCallback(async (req: LogInRequest): Promise<{ success: boolean; user?: UserProfile; error?: string }> => {
     setIsLoading(true)
     setError(null)
     try {
@@ -68,7 +68,7 @@ export function useSession() {
       }
 
       setIsLoading(false)
-      return { success: true }
+      return { success: true, user: res.user }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to sign in. Please try again."
       setError(message)
@@ -77,7 +77,7 @@ export function useSession() {
     }
   }, [])
 
-  const register = useCallback(async (req: SignUpRequest): Promise<{ success: boolean; error?: string }> => {
+  const register = useCallback(async (req: SignUpRequest): Promise<{ success: boolean; user?: UserProfile; error?: string }> => {
     setIsLoading(true)
     setError(null)
     try {
@@ -95,7 +95,7 @@ export function useSession() {
       }
 
       setIsLoading(false)
-      return { success: true }
+      return { success: true, user: res.user }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to create account. Please try again."
       setError(message)
