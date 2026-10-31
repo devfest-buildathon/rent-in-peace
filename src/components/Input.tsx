@@ -107,6 +107,8 @@ export interface AuthInputProps {
   hint?: string
   inputMode?: "text" | "numeric" | "tel" | "search" | "email" | "url"
   maxLength?: number
+  disabled?: boolean
+  autoCapitalize?: string
 }
 
 export function AuthInput({
@@ -119,6 +121,8 @@ export function AuthInput({
   hint,
   inputMode,
   maxLength,
+  disabled = false,
+  autoCapitalize,
 }: AuthInputProps) {
   const [showPassword, setShowPassword] = useState(false)
   const isPassword = type === "password"
@@ -135,6 +139,8 @@ export function AuthInput({
           onChange={onChange}
           inputMode={inputMode}
           maxLength={maxLength}
+          disabled={disabled}
+          autoCapitalize={autoCapitalize}
         />
         {isPassword && (
           <button

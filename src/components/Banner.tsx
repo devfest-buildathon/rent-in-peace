@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { Icon, type IconName } from "./Icons"
 
 export interface BannerProps {
-  tone: "info" | "warning" | "success"
+  tone: "info" | "warning" | "success" | "danger"
   icon: IconName
   children: ReactNode
 }

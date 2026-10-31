@@ -49,3 +49,36 @@ test("contract flow generates valid initial sections without mock data", () => {
   assert.ok(sections[0][0].includes("Parties"))
   assert.ok(sections[0][1].includes("Elena Santos"))
 })
+
+import { parseRoute, isRouteAuthorized } from "../src/lib/router.ts"
+
+test("parseRoute parses hash, routes, and query parameters correctly", () => {
+  const parsed1 = parseRoute("#/tenant/join?code=CDO-9988")
+  assert.equal(parsed1.path, "/tenant/join")
+  assert.equal(parsed1.params.code, "CDO-9988")
+  assert.equal(parsed1.isValid, true)
+  assert.equal(parsed1.requiredRole, "tenant")
+
+  const parsed2 = parseRoute("#/unknown/route")
+  assert.equal(parsed2.path, "/not-found")
+  assert.equal(parsed2.isValid, false)
+})
+
+test("isRouteAuthorized enforces strict role boundaries between landlord and tenant", () => {
+  const landlordRoute = parseRoute("/landlord/dashboard")
+  const tenantRoute = parseRoute("/tenant/join")
+  const publicRoute = parseRoute("/welcome")
+
+  // Public routes allowed for everyone
+  assert.equal(isRouteAuthorized(publicRoute, null), true)
+  assert.equal(isRouteAuthorized(publicRoute, "landlord"), true)
+  assert.equal(isRouteAuthorized(publicRoute, "tenant"), true)
+
+  // Landlord routes allowed for landlord, forbidden for tenant
+  assert.equal(isRouteAuthorized(landlordRoute, "landlord"), true)
+  assert.equal(isRouteAuthorized(landlordRoute, "tenant"), false)
+
+  // Tenant routes allowed for tenant, forbidden for landlord
+  assert.equal(isRouteAuthorized(tenantRoute, "tenant"), true)
+  assert.equal(isRouteAuthorized(tenantRoute, "landlord"), false)
+})

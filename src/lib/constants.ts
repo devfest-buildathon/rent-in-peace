@@ -18,6 +18,8 @@ export const SCREENS = [
   "Privacy & Help",
   "Account & Settings",
   "Rent Reminders",
+  "Tenant Portal (Join)",
+  "Screen Not Found",
 ] as const
 
 export const LEGAL_DISCLAIMER = "Template for review, not legal advice."

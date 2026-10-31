@@ -1,15 +1,26 @@
 import { useState, type ChangeEvent, type FormEvent } from "react"
-import { Logo, Button, AuthInput, Icon } from "../components"
-import type { UserProfile } from "../types/user"
+import { Logo, Button, AuthInput, Icon, Banner } from "../components"
 import { validateMobile, validatePassword } from "../lib/formatters"
+import type { LogInRequest } from "../types/auth"
 
 export interface SignInProps {
-  go: (n: number) => void
+  go?: (n: number) => void
   notify: (message: string, tone?: "success" | "error") => void
-  onLogin: (user: UserProfile, remember?: boolean) => void
+  onLogin: (credentials: LogInRequest) => Promise<{ success: boolean; error?: string }>
+  onNavigateSignUp: () => void
+  onBack: () => void
+  isLoading?: boolean
+  apiError?: string | null
 }
 
-export function SignIn({ go, notify, onLogin }: SignInProps) {
+export function SignIn({
+  notify,
+  onLogin,
+  onNavigateSignUp,
+  onBack,
+  isLoading = false,
+  apiError = null,
+}: SignInProps) {
   const [mobile, setMobile] = useState(() => {
     try {
       return localStorage.getItem("rip_remembered_mobile") || ""
@@ -27,20 +38,25 @@ export function SignIn({ go, notify, onLogin }: SignInProps) {
     }
   })
   const [errors, setErrors] = useState<{ mobile?: string; password?: string }>({})
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const handleMobileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 11)
     setMobile(digitsOnly)
     if (errors.mobile) setErrors((prev) => ({ ...prev, mobile: undefined }))
+    if (submitError) setSubmitError(null)
   }
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value)
     if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
+    if (submitError) setSubmitError(null)
   }
 
-  const handleSubmit = (e?: FormEvent) => {
+  const handleSubmit = async (e?: FormEvent) => {
     if (e) e.preventDefault()
+    setSubmitError(null)
+
     const mobileCheck = validateMobile(mobile)
     const passwordCheck = validatePassword(password)
 
@@ -58,42 +74,69 @@ export function SignIn({ go, notify, onLogin }: SignInProps) {
       return
     }
 
-    const saved = localStorage.getItem("rip_registered_users")
-    const usersMap = saved ? JSON.parse(saved) : {}
-    const rememberedName = usersMap[mobile]?.name || "Landlord"
-    const userObj: UserProfile = { name: rememberedName, mobile }
+    try {
+      if (rememberAccount) {
+        localStorage.setItem("rip_remember_me", "true")
+        localStorage.setItem("rip_remembered_mobile", mobile)
+      } else {
+        localStorage.removeItem("rip_remember_me")
+        localStorage.removeItem("rip_remembered_mobile")
+      }
+    } catch {
+      // ignore storage errors
+    }
 
-    onLogin(userObj, rememberAccount)
-    notify(`Signed in as ${rememberedName}.`, "success")
-    go(3)
+    // Call API via centralized session hook
+    const result = await onLogin({
+      mobile,
+      password,
+      remember: rememberAccount,
+    })
+
+    if (!result.success && result.error) {
+      setSubmitError(result.error)
+      notify(result.error, "error")
+    }
   }
 
   const handleGoogleSignIn = () => {
-    notify("Google Sign-In requires backend connection.", "error")
+    notify("Google Sign-In is awaiting backend OAuth configuration.", "error")
   }
+
+  const activeError = submitError || apiError
 
   return (
     <main className="screen auth-screen">
-      <button className="auth-back" onClick={() => go(0)} aria-label="Go back">
+      <button className="auth-back" onClick={onBack} aria-label="Go back">
         ‹
       </button>
       <div className="auth-brand">
         <Logo />
       </div>
       <div className="auth-heading">
-        <span className="eyebrow">WELCOME BACK</span>
+        <span className="eyebrow">LANDLORD PORTAL</span>
         <h1>Sign in to your account</h1>
         <p>See your tenants, contracts, and rent reminders.</p>
       </div>
+
+      {activeError && (
+        <div style={{ marginBottom: "1rem" }}>
+          <Banner tone="danger" icon="warning">
+            {activeError}
+          </Banner>
+        </div>
+      )}
+
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <AuthInput
           label="Mobile number"
-          placeholder="09XX XXX XXXX (numbers only)"
+          placeholder="09XX XXX XXXX (11 digits)"
           value={mobile}
           onChange={handleMobileChange}
           inputMode="numeric"
           maxLength={11}
           error={errors.mobile}
+          disabled={isLoading}
         />
         <AuthInput
           label="Password"
@@ -102,6 +145,7 @@ export function SignIn({ go, notify, onLogin }: SignInProps) {
           value={password}
           onChange={handlePasswordChange}
           error={errors.password}
+          disabled={isLoading}
         />
         <div className="auth-actions-row">
           <label className="remember-account-toggle">
@@ -109,6 +153,7 @@ export function SignIn({ go, notify, onLogin }: SignInProps) {
               type="checkbox"
               checked={rememberAccount}
               onChange={(e) => setRememberAccount(e.target.checked)}
+              disabled={isLoading}
             />
             <span
               className="checkbox-box"
@@ -129,7 +174,9 @@ export function SignIn({ go, notify, onLogin }: SignInProps) {
             Forgot password?
           </button>
         </div>
-        <Button onClick={handleSubmit}>Sign in</Button>
+        <Button onClick={handleSubmit} disabled={isLoading}>
+          {isLoading ? "Signing in..." : "Sign in"}
+        </Button>
       </form>
       <div className="auth-divider">
         <span>or</span>
@@ -139,12 +186,15 @@ export function SignIn({ go, notify, onLogin }: SignInProps) {
         icon="user"
         onClick={handleGoogleSignIn}
         ariaLabel="Continue with Google Sign-In"
+        disabled={isLoading}
       >
         Continue with Google
       </Button>
       <p className="auth-switch">
         New to Rent in Peace?{" "}
-        <button onClick={() => go(2)}>Create an account</button>
+        <button type="button" onClick={onNavigateSignUp}>
+          Create an account
+        </button>
       </p>
     </main>
   )

@@ -3,11 +3,19 @@ import type { UserProfile } from "../types/user"
 import { LEGAL_DISCLAIMER } from "../lib/constants"
 
 export interface WelcomeProps {
-  go: (n: number) => void
+  go?: (n: number) => void
+  onSelectLandlord: () => void
+  onSelectTenant: () => void
   user?: UserProfile | null
+  onContinueLandlord?: () => void
 }
 
-export function Welcome({ go, user }: WelcomeProps) {
+export function Welcome({
+  onSelectLandlord,
+  onSelectTenant,
+  user,
+  onContinueLandlord,
+}: WelcomeProps) {
   const benefits: [IconName, string, string][] = [
     ["document", "Clear contracts", "Easy to review"],
     ["shield", "Spot risky terms", "Helpful checks"],
@@ -52,20 +60,31 @@ export function Welcome({ go, user }: WelcomeProps) {
       <div className="action-stack">
         {user ? (
           <>
-            <Button onClick={() => go(3)}>
-              Continue as {user.name.split(" ")[0]} <Icon name="arrow" />
+            <Button
+              onClick={onContinueLandlord || onSelectLandlord}
+              ariaLabel={`Continue as Landlord ${user.name}`}
+            >
+              Continue as Landlord ({user.name.split(" ")[0]}) <Icon name="arrow" />
             </Button>
-            <Button variant="secondary" onClick={() => go(1)}>
-              Switch account
+            <Button
+              variant="secondary"
+              onClick={onSelectTenant}
+              ariaLabel="I have a code from my landlord"
+            >
+              I have a code from my landlord
             </Button>
           </>
         ) : (
           <>
-            <Button onClick={() => go(2)}>
-              Create free account <Icon name="arrow" />
+            <Button onClick={onSelectLandlord} ariaLabel="I'm a landlord">
+              I'm a landlord <Icon name="arrow" />
             </Button>
-            <Button variant="secondary" onClick={() => go(1)}>
-              I already have an account
+            <Button
+              variant="secondary"
+              onClick={onSelectTenant}
+              ariaLabel="I have a code from my landlord"
+            >
+              I have a code from my landlord
             </Button>
           </>
         )}
