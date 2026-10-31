@@ -59,6 +59,47 @@ The Vite development server will start at `http://localhost:5173` (or the port s
 
 ---
 
+## Legal & Community Reality: Physical (Wet-Ink) vs. Digital (E-Signature)
+
+### Can rental contracts ONLY be signed via e-signature?
+
+**No, that is completely incorrect.** 
+
+Traditional physical handwritten (**"wet-ink"**) signatures on paper are **not only 100% legal**, they remain the **most trusted and universal standard** in the Philippines.
+
+#### 1. The Legal Reality in the Philippines
+* **The Law on E-Signatures (RA 8792 - E-Commerce Act of 2000):**
+  * When the Philippines passed the E-Commerce Act, it gave electronic signatures the **same** legal validity as pen-and-paper signatures.
+  * **It did NOT ban or replace paper signatures.** It simply established: *“If you sign digitally, it is as valid as signing on paper.”*
+* **The Philippine Civil Code (RA 386, Art. 1356):**
+  * Contracts are obligatory in whatever form they may have been entered into. A printed contract signed with a ballpen by the landlord and tenant is a fully binding legal document under Philippine law.
+
+#### 2. The Barangay Reality (Cagayan de Oro Context)
+When a rental dispute happens in CDO (e.g. over an unpaid electric sub-meter bill, late rent, or a damaged room), where do the landlord and tenant go first?
+* **They go to the Barangay Hall (Lupon Tagapamayapa)**, not a high court.
+* The Barangay Captain or Lupon mediator will immediately ask:  
+  > *"Asa man inyong kasabutan? Naa moy pinirmahan nga papel?"* *(Where is your agreement? Do you have a signed paper?)*
+* Showing a **printed piece of paper signed with a pen** is the most trusted, tangible proof at the barangay level. Many elderly landlords and barangay officials still distrust or lack the technical means to verify digital hashes or e-signature certificates.
+
+#### 3. Why Forcing "ONLY E-Signatures" Hurts the App
+If the app were to force digital e-signatures only:
+1. **It violates the core user promise:** One of Rent in Peace's strongest features is that **your tenant does not need the app**. They can receive a printed copy or a shared PDF summary without being forced to install software or register an account.
+2. **Tech barrier for small landlords:** Many boarding house and bedspace owners in CDO are older homeowners, titas, or retirees. Forcing them into complex digital signing flows causes them to abandon software and revert to risky verbal agreements.
+
+#### 4. The Winning Solution: Support BOTH!
+
+The smartest, most realistic product design gives users the choice:
+
+| Method | How It Works in Rent in Peace | Legal Basis |
+| :--- | :--- | :--- |
+| **Physical (Wet-Ink) Signing** *(Recommended for most)* | Landlord taps **"Save PDF"** → Prints 2 copies → Both parties sign with a pen on the signature line → One copy for each. | **Philippine Civil Code (Art. 1356)** |
+| **Digital (E-Signature)** *(Optional for remote renters)* | Landlord saves/shares the PDF → Sends to tenant via Messenger/Viber → Tenant signs on their phone/tablet via digital markup or e-signature pad. | **E-Commerce Act (RA 8792)** |
+
+#### How to Pitch This to Buildathon Judges:
+> *"Rent in Peace bridges the digital and physical worlds. While we support digital PDF sharing and e-signatures under the Philippine E-Commerce Act (RA 8792), we also provide clean, printable agreements for traditional ballpen signatures. Because in the real world of CDO boarding houses, an agreement you can physically print, sign, and hold is still what landlords and barangay halls trust most."*
+
+---
+
 ## Status: What is Working & What is Not Connected Yet
 
 ### Currently Working (100% Functional in Frontend):

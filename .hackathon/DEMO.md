@@ -77,3 +77,11 @@
    * Smart Check falls back to built-in local community rules (guest policies, utility deadlines, move-out notice periods), allowing full demonstration of clause injection without needing cloud network access.
 3. **Local Storage:**
    * All contracts and tenant records work 100% offline via local storage, ensuring zero risk of demo crashes on stage.
+
+---
+
+## Judge Q&A Defense: E-Signatures vs. Physical Wet-Ink Signatures
+
+**Question:** *"Why did you make printable contracts instead of forcing both parties to e-sign in the app?"*  
+**Answer:**
+> *"Rent in Peace bridges the digital and physical worlds. While e-signatures are legally recognized under the Philippine E-Commerce Act (RA 8792), traditional pen-and-paper signatures under the Civil Code (Art. 1356) remain the gold standard of trust in Cagayan de Oro. When disputes reach the Barangay Lupon Tagapamayapa, the first thing they ask is: 'Asa inyong pinirmahan nga papel?' By generating a clean, printable PDF alongside digital options, we respect the reality of CDO boarding houses while removing the barrier of forcing tenants to install an app."*

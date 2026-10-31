@@ -21,6 +21,10 @@ export function PrivacyHelp({ go }: PrivacyHelpProps) {
       "Yes! When viewing the contract preview, click 'Edit Paper' to edit titles, clause texts, or add custom terms.",
     ],
     [
+      "Can contracts be signed with a pen, or is e-signature required?",
+      "Physical ballpen signatures are 100% legal under the Philippine Civil Code (Art. 1356) and are the most trusted format in Cagayan de Oro barangay halls. Rent in Peace supports both: print and sign with a pen, or sign digitally under the E-Commerce Act (RA 8792).",
+    ],
+    [
       "How do I delete a tenant?",
       "Open the tenant record, choose the menu, then select Delete record.",
     ],
