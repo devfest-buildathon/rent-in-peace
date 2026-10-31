@@ -12,7 +12,13 @@ export async function signUp(data: SignUpRequest): Promise<AuthResponse> {
       body: JSON.stringify(data),
     })
   } catch {
-    // Seamless local activation when backend is not connected yet
+    try {
+      const saved = localStorage.getItem("rip_registered_users")
+      const users = saved ? JSON.parse(saved) : {}
+      users[data.mobile] = { name: data.name, mobile: data.mobile }
+      localStorage.setItem("rip_registered_users", JSON.stringify(users))
+    } catch {}
+
     return {
       token: "auth-session-" + Date.now(),
       user: {
@@ -25,7 +31,7 @@ export async function signUp(data: SignUpRequest): Promise<AuthResponse> {
 
 /**
  * Log in to an existing landlord account.
- * Calls backend API if connected; seamlessly activates session if backend is offline.
+ * Preserves user's registered name and contracts from local storage.
  */
 export async function logIn(data: LogInRequest): Promise<AuthResponse> {
   try {
@@ -34,11 +40,28 @@ export async function logIn(data: LogInRequest): Promise<AuthResponse> {
       body: JSON.stringify(data),
     })
   } catch {
-    // Seamless local activation when backend is not connected yet
+    let savedName = "Landlord"
+    try {
+      const saved = localStorage.getItem("rip_registered_users")
+      if (saved) {
+        const users = JSON.parse(saved)
+        if (users[data.mobile]?.name) {
+          savedName = users[data.mobile].name
+        }
+      }
+      if (savedName === "Landlord") {
+        const logged = localStorage.getItem("rip_logged_user")
+        if (logged) {
+          const u = JSON.parse(logged)
+          if (u.name) savedName = u.name
+        }
+      }
+    } catch {}
+
     return {
       token: "auth-session-" + Date.now(),
       user: {
-        name: "Landlord",
+        name: savedName,
         mobile: data.mobile,
       },
     }

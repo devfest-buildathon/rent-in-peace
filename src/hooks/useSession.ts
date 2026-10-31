@@ -12,12 +12,15 @@ function loadInitialState(): Pick<SessionState, "role" | "user" | "token"> {
   try {
     const role = (sessionStorage.getItem(STORAGE_KEY_ROLE) || localStorage.getItem(STORAGE_KEY_ROLE)) as UserRole
     const token = sessionStorage.getItem(STORAGE_KEY_TOKEN) || localStorage.getItem(STORAGE_KEY_TOKEN)
-    const savedUser = sessionStorage.getItem(STORAGE_KEY_USER) || localStorage.getItem(STORAGE_KEY_USER)
+    const savedUser =
+      sessionStorage.getItem(STORAGE_KEY_USER) ||
+      localStorage.getItem(STORAGE_KEY_USER) ||
+      localStorage.getItem("rip_logged_user")
     const user = savedUser ? (JSON.parse(savedUser) as UserProfile) : null
 
     return {
-      role: role || null,
-      token: token || null,
+      role: role || (user ? "landlord" : null),
+      token: token || (user ? "saved-session" : null),
       user: user || null,
     }
   } catch {
@@ -40,6 +43,7 @@ export function useSession() {
     try {
       if (newRole) {
         sessionStorage.setItem(STORAGE_KEY_ROLE, newRole)
+        localStorage.setItem(STORAGE_KEY_ROLE, newRole)
       } else {
         sessionStorage.removeItem(STORAGE_KEY_ROLE)
         localStorage.removeItem(STORAGE_KEY_ROLE)
@@ -49,62 +53,79 @@ export function useSession() {
     }
   }, [])
 
-  const login = useCallback(async (req: LogInRequest): Promise<{ success: boolean; user?: UserProfile; error?: string }> => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const res = await apiLogIn(req)
-      setToken(res.token)
-      setUser(res.user)
-      setRoleState("landlord")
-
-      const storage = req.remember ? localStorage : sessionStorage
+  const login = useCallback(
+    async (req: LogInRequest): Promise<{ success: boolean; user?: UserProfile; error?: string }> => {
+      setIsLoading(true)
+      setError(null)
       try {
-        storage.setItem(STORAGE_KEY_TOKEN, res.token)
-        storage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user))
-        storage.setItem(STORAGE_KEY_ROLE, "landlord")
-      } catch {
-        // ignore storage errors
+        const res = await apiLogIn(req)
+        setToken(res.token)
+        setUser(res.user)
+        setRoleState("landlord")
+
+        try {
+          sessionStorage.setItem(STORAGE_KEY_TOKEN, res.token)
+          sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user))
+          sessionStorage.setItem(STORAGE_KEY_ROLE, "landlord")
+          localStorage.setItem(STORAGE_KEY_TOKEN, res.token)
+          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user))
+          localStorage.setItem(STORAGE_KEY_ROLE, "landlord")
+          localStorage.setItem("rip_logged_user", JSON.stringify(res.user))
+          if (req.remember) {
+            localStorage.setItem("rip_remember_me", "true")
+            localStorage.setItem("rip_remembered_mobile", req.mobile)
+          }
+        } catch {
+          // ignore storage errors
+        }
+
+        setIsLoading(false)
+        return { success: true, user: res.user }
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to sign in. Please try again."
+        setError(message)
+        setIsLoading(false)
+        return { success: false, error: message }
       }
+    },
+    []
+  )
 
-      setIsLoading(false)
-      return { success: true, user: res.user }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to sign in. Please try again."
-      setError(message)
-      setIsLoading(false)
-      return { success: false, error: message }
-    }
-  }, [])
-
-  const register = useCallback(async (req: SignUpRequest): Promise<{ success: boolean; user?: UserProfile; error?: string }> => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const res = await apiSignUp(req)
-      setToken(res.token)
-      setUser(res.user)
-      setRoleState("landlord")
-
+  const register = useCallback(
+    async (req: SignUpRequest): Promise<{ success: boolean; user?: UserProfile; error?: string }> => {
+      setIsLoading(true)
+      setError(null)
       try {
-        sessionStorage.setItem(STORAGE_KEY_TOKEN, res.token)
-        sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user))
-        sessionStorage.setItem(STORAGE_KEY_ROLE, "landlord")
-      } catch {
-        // ignore storage errors
+        const res = await apiSignUp(req)
+        setToken(res.token)
+        setUser(res.user)
+        setRoleState("landlord")
+
+        try {
+          sessionStorage.setItem(STORAGE_KEY_TOKEN, res.token)
+          sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user))
+          sessionStorage.setItem(STORAGE_KEY_ROLE, "landlord")
+          localStorage.setItem(STORAGE_KEY_TOKEN, res.token)
+          localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(res.user))
+          localStorage.setItem(STORAGE_KEY_ROLE, "landlord")
+          localStorage.setItem("rip_logged_user", JSON.stringify(res.user))
+        } catch {
+          // ignore storage errors
+        }
+
+        setIsLoading(false)
+        return { success: true, user: res.user }
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to create account. Please try again."
+        setError(message)
+        setIsLoading(false)
+        return { success: false, error: message }
       }
+    },
+    []
+  )
 
-      setIsLoading(false)
-      return { success: true, user: res.user }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to create account. Please try again."
-      setError(message)
-      setIsLoading(false)
-      return { success: false, error: message }
-    }
-  }, [])
-
-  const loginOffline = useCallback((profile: UserProfile): { success: boolean } => {
+  const loginOffline = useCallback((profile: UserProfile): { success: boolean; user: UserProfile } => {
     setUser(profile)
     setToken("offline-demo-token")
     setRoleState("landlord")
@@ -113,10 +134,11 @@ export function useSession() {
       sessionStorage.setItem(STORAGE_KEY_TOKEN, "offline-demo-token")
       sessionStorage.setItem(STORAGE_KEY_USER, JSON.stringify(profile))
       sessionStorage.setItem(STORAGE_KEY_ROLE, "landlord")
+      localStorage.setItem("rip_logged_user", JSON.stringify(profile))
     } catch {
       // ignore
     }
-    return { success: true }
+    return { success: true, user: profile }
   }, [])
 
   const logout = useCallback(async (): Promise<void> => {
@@ -137,6 +159,7 @@ export function useSession() {
         localStorage.removeItem(STORAGE_KEY_TOKEN)
         localStorage.removeItem(STORAGE_KEY_USER)
         localStorage.removeItem(STORAGE_KEY_ROLE)
+        localStorage.removeItem("rip_logged_user")
       } catch {
         // ignore
       }
@@ -161,4 +184,3 @@ export function useSession() {
     logout,
   }
 }
-

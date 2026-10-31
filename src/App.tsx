@@ -61,8 +61,14 @@ export function App() {
   const router = useRoleRouter(session.role)
   const { notice, notify } = useNotice()
 
-  // In-memory contracts state (Hard Rule 4: no storing contracts in localStorage)
-  const [contracts, setContracts] = useState<ContractData[]>([])
+  const [contracts, setContracts] = useState<ContractData[]>(() => {
+    try {
+      const saved = localStorage.getItem("rip_saved_contracts")
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
   const [activeContract, setActiveContract] = useState<ContractData>(() =>
     createEmptyContract(session.user)
   )
@@ -159,12 +165,19 @@ export function App() {
   const handleSaveContract = useCallback((savedContract: ContractData) => {
     setContracts((prev) => {
       const existingIdx = prev.findIndex((c) => c.id === savedContract.id)
+      let updated: ContractData[]
       if (existingIdx >= 0) {
-        const updated = [...prev]
+        updated = [...prev]
         updated[existingIdx] = savedContract
-        return updated
+      } else {
+        updated = [savedContract, ...prev]
       }
-      return [savedContract, ...prev]
+      try {
+        localStorage.setItem("rip_saved_contracts", JSON.stringify(updated))
+      } catch (e) {
+        console.error(e)
+      }
+      return updated
     })
     setActiveContract(savedContract)
     setSelectedContract(savedContract)
@@ -172,7 +185,15 @@ export function App() {
 
   const handleDeleteContract = useCallback(
     (id: string) => {
-      setContracts((prev) => prev.filter((c) => c.id !== id))
+      setContracts((prev) => {
+        const updated = prev.filter((c) => c.id !== id)
+        try {
+          localStorage.setItem("rip_saved_contracts", JSON.stringify(updated))
+        } catch (e) {
+          console.error(e)
+        }
+        return updated
+      })
       if (selectedContract?.id === id) {
         setSelectedContract(null)
       }
