@@ -2,30 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rent in Peace (RIP) - AI Lease & Rent Ledger</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/pwa-192x192.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#14532D" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Rent in Peace" />
+    <meta name="description" content="AI-assisted residential lease drafting and rental ledger for CDO landlords and tenants." />
+    <title>Rent in Peace — AI Lease & Rental Ledger</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+              sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
             },
             colors: {
-              emerald: {
+              brand: {
                 50: '#ecfdf5',
                 100: '#d1fae5',
                 500: '#10b981',
                 600: '#059669',
                 700: '#047857',
-                800: '#065f46',
-                900: '#064e3b',
+                800: '#14532D',
+                900: '#0f4022',
+                950: '#052e16',
+              },
+              gold: {
+                500: '#EAB308',
+                600: '#D97706',
               }
             }
           }
@@ -33,22 +45,58 @@
       }
     </script>
     <style>
+      /* Safe area insets for notched mobile devices */
+      :root {
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      body {
+        overscroll-behavior-y: none;
+        -webkit-tap-highlight-color: transparent;
+      }
       @media print {
-        body { background: white !important; padding: 0 !important; color: black !important; }
-        .no-print { display: none !important; }
-        .print-only { display: block !important; }
-        .print-contract { 
-          box-shadow: none !important; 
-          border: none !important; 
-          width: 100% !important; 
-          max-width: 100% !important; 
-          margin: 0 !important; 
-          padding: 0 !important; 
+        @page {
+          size: A4 portrait;
+          margin: 8mm 14mm 8mm 14mm;
+        }
+        html, body {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          height: auto !important;
+          min-height: 0 !important;
+          overflow: visible !important;
+        }
+        #root, #root > div, .app-shell-root {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          height: auto !important;
+          min-height: 0 !important;
+          display: block !important;
+          overflow: visible !important;
+          box-shadow: none !important;
+          border: none !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .print-contract-root {
+          display: block !important;
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #ffffff !important;
+          color: #000000 !important;
         }
       }
     </style>
   </head>
-  <body class="bg-slate-50 text-slate-800 antialiased font-sans">
+  <body class="bg-[#F1F5F2] text-slate-800 antialiased font-sans selection:bg-emerald-200 selection:text-emerald-900">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

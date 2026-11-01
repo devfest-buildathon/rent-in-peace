@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 
 // Layout Components
-import PitchBar from './components/layout/PitchBar';
 import MobileFrame from './components/layout/MobileFrame';
 import PrintableContract from './components/shared/PrintableContract';
+
+// Auth Screens (Landlord & Tenant)
+import LandlordAuthScreen from './screens/auth/LandlordAuthScreen';
+import TenantAuthScreen from './screens/auth/TenantAuthScreen';
 
 // Landlord Screens
 import SplashScreen from './screens/landlord/SplashScreen';
@@ -20,18 +23,54 @@ import TenantDetailScreen from './screens/landlord/TenantDetailScreen';
 import SettingsScreen from './screens/landlord/SettingsScreen';
 
 // Tenant Screens
-import InviteCodeScreen from './screens/tenant/InviteCodeScreen';
+import TenantHomeScreen from './screens/tenant/TenantHomeScreen';
 import TenantPortalScreen from './screens/tenant/TenantPortalScreen';
 import SuccessPinScreen from './screens/tenant/SuccessPinScreen';
 
 function RentInPeaceContent() {
-  const { currentScreen } = useApp();
+  const { currentScreen, setCurrentScreen, setRoomCodeInput, lookupContractByCode } = useApp();
+  const hasHandledUrlRef = useRef(false);
+
+  // Auto-detect invite code in URL once on mount (e.g. ?code=RIP-4B92 or #code=RIP-4B92)
+  useEffect(() => {
+    if (hasHandledUrlRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get('code') || params.get('invite');
+    if (codeParam) {
+      hasHandledUrlRef.current = true;
+      const upper = codeParam.toUpperCase();
+      setRoomCodeInput(upper);
+      lookupContractByCode(upper).then((found) => {
+        // Direct tenant to registration/login with this room code pre-loaded
+        setCurrentScreen('TENANT_AUTH');
+      });
+
+      // Clear query params from browser URL so subsequent state updates never re-trigger this
+      try {
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      } catch (e) {
+        // Safe fallback for restricted environments
+      }
+    }
+  }, []); // Strictly run once on initial mount
 
   const renderScreen = () => {
     switch (currentScreen) {
-      // Landlord Flow
+      // Entry / Splash
       case 'SPLASH':
         return <SplashScreen />;
+
+      // Auth Flows (Dedicated for both roles)
+      case 'LANDLORD_AUTH':
+      case 'LANDLORD_REGISTER':
+        return <LandlordAuthScreen />;
+
+      case 'TENANT_AUTH':
+      case 'TENANT_CODE_ENTRY':
+        return <TenantAuthScreen />;
+
+      // Landlord Flow
       case 'LANDLORD_HOME':
         return <LandlordHomeScreen />;
       case 'WIZARD_PROPERTY':
@@ -54,8 +93,8 @@ function RentInPeaceContent() {
         return <SettingsScreen />;
 
       // Tenant Flow
-      case 'TENANT_CODE_ENTRY':
-        return <InviteCodeScreen />;
+      case 'TENANT_HOME':
+        return <TenantHomeScreen />;
       case 'TENANT_PORTAL':
         return <TenantPortalScreen />;
       case 'SUCCESS_PIN':
@@ -67,11 +106,8 @@ function RentInPeaceContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E5E9EE] text-slate-800 flex flex-col items-center justify-start sm:justify-center p-0 md:p-4 font-sans antialiased selection:bg-emerald-200 selection:text-emerald-900">
-      {/* Top Demo & Pitch Controller Bar */}
-      <PitchBar />
-
-      {/* Responsive Mobile Phone Container */}
+    <div className="app-shell-root min-h-screen bg-[#E5EAE7] text-slate-800 flex flex-col items-center justify-start sm:justify-center p-0 sm:py-6 font-sans antialiased selection:bg-emerald-200 selection:text-emerald-900">
+      {/* Responsive PWA Mobile App Container */}
       <MobileFrame>
         {renderScreen()}
       </MobileFrame>

@@ -1,35 +1,56 @@
-import React from 'react';
-import { useApp } from '../../context/AppContext';
-import { Wifi, Signal, Battery } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Download } from 'lucide-react';
 
 export default function MobileFrame({ children }) {
-  const { layoutMode } = useApp();
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone);
+  });
+
+  useEffect(() => {
+    // Listen for PWA beforeinstallprompt event
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+      setIsInstalled(true);
+    }
+  };
 
   return (
-    <div className={`no-print w-full max-w-[430px] bg-[#F4F8F5] flex flex-col relative transition-all duration-200 ${
-      layoutMode === 'phone-bezel'
-        ? 'h-[890px] rounded-[48px] shadow-2xl border-[10px] border-slate-900 overflow-hidden my-2'
-        : 'min-h-[820px] rounded-none sm:rounded-[36px] shadow-xl sm:border sm:border-slate-300/80 overflow-hidden'
-    }`}>
-      {/* iOS Top Status Bar (9:41) */}
-      <div className="pt-2 px-6 pb-1 flex items-center justify-between text-slate-800 text-xs font-semibold select-none bg-[#F4F8F5]">
-        <span>9:41</span>
-        <div className="flex items-center gap-1.5 text-slate-800">
-          <Signal className="w-3.5 h-3.5 fill-current" />
-          <Wifi className="w-3.5 h-3.5" />
-          <Battery className="w-4 h-4 fill-current" />
+    <div className="no-print w-full h-[100dvh] sm:h-[844px] sm:max-h-[94vh] sm:max-w-lg sm:my-auto sm:rounded-3xl bg-[#F4F8F5] sm:shadow-2xl sm:border sm:border-slate-300/70 flex flex-col relative overflow-hidden transition-all duration-200">
+      {/* PWA Install Banner (only appears on browsers supporting install prompt when not yet installed) */}
+      {installPrompt && !isInstalled && (
+        <div className="bg-[#14532D] text-white px-4 py-2 flex items-center justify-between text-xs shadow-xs z-30 shrink-0">
+          <div className="flex items-center gap-2">
+            <Download className="w-3.5 h-3.5 text-amber-300" />
+            <span className="font-semibold">Install Rent in Peace as PWA App</span>
+          </div>
+          <button 
+            onClick={handleInstallClick}
+            className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-2.5 py-1 rounded-lg text-[11px] transition cursor-pointer"
+          >
+            Install
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* Main Screen Content Viewport */}
-      <main className="flex-1 flex flex-col overflow-y-auto relative scrollbar-none">
+      {/* Main Screen Content Viewport - Natural responsive scrolling without mock bezels */}
+      <main className="flex-1 flex flex-col overflow-y-auto relative scrollbar-none w-full min-h-0">
         {children}
       </main>
-
-      {/* Mobile Device Home Bar (Indicator) */}
-      <div className="py-2 flex justify-center bg-[#F4F8F5]">
-        <div className="w-32 h-1 bg-slate-900/20 rounded-full"></div>
-      </div>
     </div>
   );
 }
