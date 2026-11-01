@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import SignaturePad from '../../components/shared/SignaturePad';
 import { 
   Home, 
   Sparkles, 
@@ -11,13 +12,17 @@ import {
   ChevronLeft, 
   Plus, 
   Trash2,
-  Loader2
+  Loader2,
+  Printer,
+  PenTool,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function KasulatanScreen() {
   const { 
     setCurrentScreen,
     roomNumber,
+    landlordName,
     contractClauses,
     setContractClauses,
     aiCustomPrompt,
@@ -26,7 +31,11 @@ export default function KasulatanScreen() {
     aiUpdateToast,
     handleApplyAiCustomization,
     saveFinalizedContract,
-    userRole
+    userRole,
+    landlordSigningMode,
+    setLandlordSigningMode,
+    landlordSignature,
+    setLandlordSignature
   } = useApp();
 
   const [showAddClause, setShowAddClause] = useState(false);
@@ -34,6 +43,29 @@ export default function KasulatanScreen() {
   const [newText, setNewText] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const clausesEndRef = useRef(null);
+
+  // Quick signature generator using landlord's legal name
+  const handleQuickLandlordSign = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 150;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = 'italic bold 28px Georgia, serif';
+    ctx.fillStyle = '#14532D';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`~ ${landlordName || 'Landlord Signature'} ~`, 200, 75);
+    ctx.strokeStyle = '#14532D';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(50, 105);
+    ctx.lineTo(350, 105);
+    ctx.stroke();
+    const dataUrl = canvas.toDataURL('image/png');
+    setLandlordSignature(dataUrl);
+  };
 
   // Auto-scroll to bottom of clauses container when new clause is added
   useEffect(() => {
@@ -284,6 +316,151 @@ export default function KasulatanScreen() {
                 )}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Lessor Execution & Signing Mode (Landlord) */}
+        {userRole !== 'TENANT' ? (
+          <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs mt-3 mb-1">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2.5">
+              <div>
+                <span className="font-bold text-xs text-slate-900 block">
+                  Lessor Signature & Execution (Nagpapaupa)
+                </span>
+                <span className="text-[10px] text-slate-500">
+                  Select your legal execution method for this Kasulatan
+                </span>
+              </div>
+              <span className="text-[9px] bg-emerald-100 text-[#14532D] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">
+                Philippine Law
+              </span>
+            </div>
+
+            {/* Mode Selector Tabs: Digital E-Sign vs Wet-Ink Physical */}
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => setLandlordSigningMode('DIGITAL')}
+                className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex flex-col gap-1 ${
+                  landlordSigningMode === 'DIGITAL'
+                    ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] shadow-xs'
+                    : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black flex items-center gap-1.5">
+                    <PenTool className="w-3.5 h-3.5" />
+                    <span>Digital E-Sign</span>
+                  </span>
+                  {landlordSigningMode === 'DIGITAL' && (
+                    <span className="w-2 h-2 rounded-full bg-[#14532D]"></span>
+                  )}
+                </div>
+                <p className="text-[9.5px] leading-tight text-slate-500">
+                  Draw or generate e-signature. Valid under RA 8792 E-Commerce Act.
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setLandlordSigningMode('WET_INK')}
+                className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex flex-col gap-1 ${
+                  landlordSigningMode === 'WET_INK'
+                    ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                    : 'border-slate-200 bg-slate-50/70 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black flex items-center gap-1.5">
+                    <Printer className={`w-3.5 h-3.5 ${landlordSigningMode === 'WET_INK' ? 'text-amber-400' : 'text-slate-700'}`} />
+                    <span>Wet-Ink Physical</span>
+                  </span>
+                  {landlordSigningMode === 'WET_INK' && (
+                    <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                  )}
+                </div>
+                <p className={`text-[9.5px] leading-tight ${landlordSigningMode === 'WET_INK' ? 'text-slate-300' : 'text-slate-500'}`}>
+                  Print A4 copies to sign with ballpen. Valid under Civil Code Art. 1356.
+                </p>
+              </button>
+            </div>
+
+            {/* Mode Details & Controls */}
+            {landlordSigningMode === 'DIGITAL' ? (
+              <div className="space-y-2">
+                <SignaturePad
+                  onSave={(dataUrl) => setLandlordSignature(dataUrl)}
+                  initialSignature={landlordSignature}
+                />
+                <div className="flex justify-between items-center pt-0.5">
+                  <span className="text-[10px] text-slate-400">Draw with your finger, mouse, or stylus</span>
+                  <button
+                    type="button"
+                    onClick={handleQuickLandlordSign}
+                    className="text-[10px] bg-[#ECFDF5] hover:bg-emerald-100 text-[#14532D] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition cursor-pointer shadow-2xs"
+                  >
+                    <PenTool className="w-3 h-3" />
+                    <span>Sign with Legal Name</span>
+                  </button>
+                </div>
+                {landlordSignature && (
+                  <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-[10px] text-[#14532D] font-semibold flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[3]" />
+                    <span>Your electronic signature is attached and will appear on the contract.</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-amber-950 space-y-2.5">
+                <div className="flex items-start gap-2">
+                  <Printer className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-xs font-bold text-amber-950">Article 1356 Physical Execution (Wet-Ink)</h4>
+                    <p className="text-[10px] text-amber-800 leading-snug mt-0.5">
+                      The printed contract will feature an official blank signature line (_____________________) for your handwritten ballpen signature in the presence of 2 witnesses.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-[10px] text-amber-900 bg-white/70 p-2 rounded-lg border border-amber-200/60 space-y-1">
+                  <p className="font-bold text-slate-800">Instructions for Wet-Ink Physical Signing:</p>
+                  <p>1. Print 2 copies of this Kasulatan on standard Letter / A4 paper.</p>
+                  <p>2. Sign both copies with dark ballpen above your printed name.</p>
+                  <p>3. Have the tenant and two witnesses sign under 'Saksi'.</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="w-full py-2.5 px-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Print Document for Physical Wet-Ink Signing (A4)</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Tenant View: Landlord Execution Status */
+          <div className="bg-white p-3 rounded-2xl border border-slate-200/90 shadow-2xs mt-3 mb-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#14532D]" />
+                <span className="text-xs font-bold text-slate-900">Landlord Execution Status</span>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                landlordSigningMode === 'WET_INK' 
+                  ? 'bg-amber-100 text-amber-900' 
+                  : 'bg-emerald-100 text-[#14532D]'
+              }`}>
+                {landlordSigningMode === 'WET_INK' ? 'Physical Wet-Ink (Ballpen)' : 'Digital E-Sign'}
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-1">
+              {landlordSigningMode === 'WET_INK' 
+                ? 'The landlord has prepared this contract for physical ballpen signing under Article 1356.'
+                : 'The landlord has approved and digitally executed this contract under RA 8792.'}
+            </p>
           </div>
         )}
       </div>

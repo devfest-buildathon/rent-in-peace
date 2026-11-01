@@ -159,6 +159,10 @@ export function AppProvider({ children }) {
 
   const [tenantName, setTenantName] = useState('');
 
+  // Landlord Signing State: 'DIGITAL' | 'WET_INK'
+  const [landlordSigningMode, setLandlordSigningMode] = useState('DIGITAL');
+  const [landlordSignature, setLandlordSignature] = useState(null);
+
   // Persistence: Saved Contracts List
   const [contracts, setContractsState] = useState(() => {
     try {
@@ -477,6 +481,8 @@ export function AppProvider({ children }) {
       leaseDuration,
       rentReminderEnabled,
       contractClauses,
+      landlordSigningMode,
+      landlordSignature,
       status: 'Active',
       isSigned: false,
       dueDay: 'Every 5th',
@@ -597,6 +603,8 @@ export function AppProvider({ children }) {
     setDeposit(contractData.deposit || '');
     setAdvanceRent(contractData.advanceRent || '');
     setActiveCode(contractData.code || contractData.id || '');
+    setLandlordSigningMode(contractData.landlordSigningMode || 'DIGITAL');
+    setLandlordSignature(contractData.landlordSignature || null);
 
     const currentClauses = contractData.contractClauses || generateDefaultClauses({
       landlord: contractData.landlordName,
@@ -1205,6 +1213,8 @@ export function AppProvider({ children }) {
     setMonthlyRent('');
     setDeposit('');
     setAdvanceRent('');
+    setLandlordSigningMode('DIGITAL');
+    setLandlordSignature(null);
     setSignatureData(null);
     setIdFileData(null);
     setGcashFileData(null);
@@ -1254,6 +1264,8 @@ export function AppProvider({ children }) {
       gcashFileData, setGcashFileData,
       gcashRefNumber, setGcashRefNumber,
       signatureData, setSignatureData,
+      landlordSigningMode, setLandlordSigningMode,
+      landlordSignature, setLandlordSignature,
       tenantHasReadContract, setTenantHasReadContract,
       signingMode, setSigningMode,
       copiedLink, setCopiedLink,

@@ -12,7 +12,8 @@ export default function AllDoneScreen() {
     copiedLink,
     handleCopyLink,
     rentReminderEnabled,
-    setRentReminderEnabled
+    setRentReminderEnabled,
+    landlordSigningMode
   } = useApp();
 
   const [copiedAll, setCopiedAll] = useState(false);
@@ -43,7 +44,7 @@ export default function AllDoneScreen() {
         {/* Title */}
         <div className="text-center mb-4">
           <span className="text-[10px] bg-emerald-100 text-[#14532D] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">
-            Contract Saved & Live
+            {landlordSigningMode === 'WET_INK' ? 'Contract Ready · Wet-Ink Physical' : 'Contract Saved · Digital E-Sign'}
           </span>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-1.5">
             Check-In Credentials Ready

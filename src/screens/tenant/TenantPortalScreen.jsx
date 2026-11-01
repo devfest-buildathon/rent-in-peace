@@ -12,7 +12,8 @@ import {
   AlertCircle,
   Loader2,
   CheckCircle2,
-  PenTool
+  PenTool,
+  Printer
 } from 'lucide-react';
 import SignaturePad from '../../components/shared/SignaturePad';
 import FileUpload from '../../components/shared/FileUpload';
@@ -277,15 +278,28 @@ export default function TenantPortalScreen() {
               </div>
             </div>
           ) : (
-            <FileUpload 
-              label="Snap or upload photo of physically signed paper contract"
-              helperText="Under Article 1356 of the Philippine Civil Code"
-              onFileSelect={(data) => {
-                setSignatureData(data?.dataUrl || null);
-                setError('');
-              }}
-              initialPreview={signatureData}
-            />
+            <div className="space-y-2">
+              <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[10px] text-amber-900 flex items-center justify-between">
+                <span>Article 1356: Print contract to physically sign with ballpen.</span>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-2 py-1 bg-amber-800 hover:bg-amber-900 text-white rounded-lg font-bold text-[9px] transition flex items-center gap-1 cursor-pointer shrink-0"
+                >
+                  <Printer className="w-3 h-3 text-amber-200" />
+                  <span>Print A4</span>
+                </button>
+              </div>
+              <FileUpload 
+                label="Snap or upload photo of physically signed paper contract"
+                helperText="Under Article 1356 of the Philippine Civil Code"
+                onFileSelect={(data) => {
+                  setSignatureData(data?.dataUrl || null);
+                  setError('');
+                }}
+                initialPreview={signatureData}
+              />
+            </div>
           )}
         </div>
 

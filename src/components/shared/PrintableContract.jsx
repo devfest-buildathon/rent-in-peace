@@ -14,7 +14,10 @@ export default function PrintableContract() {
     advanceRent,
     leaseDuration,
     contractClauses,
-    signatureData 
+    signatureData,
+    landlordSigningMode,
+    landlordSignature,
+    signingMode
   } = useApp();
 
   const lessor = (landlordName || 'NAGPAPAUPA (LESSOR)').trim();
@@ -372,19 +375,38 @@ export default function PrintableContract() {
               {/* Lessor (Nagpapaupa) */}
               <div>
                 <div className={`border-b-2 border-black w-48 mx-auto mb-0.5 ${scale.sigHeight} flex items-end justify-center`}>
-                  <span className="font-serif italic font-bold text-[10.5pt] text-black">
-                    {lessor}
-                  </span>
+                  {landlordSigningMode === 'WET_INK' ? (
+                    <span className="text-[6.5pt] font-sans text-slate-500 italic mb-0.5">
+                      (Lagda gamit ang pluma / Ballpen signature)
+                    </span>
+                  ) : landlordSignature ? (
+                    <img 
+                      src={landlordSignature} 
+                      alt="Landlord Signature" 
+                      className="max-h-7 max-w-[150px] object-contain filter grayscale contrast-200" 
+                    />
+                  ) : (
+                    <span className="font-serif italic font-bold text-[10.5pt] text-black">
+                      {lessor}
+                    </span>
+                  )}
                 </div>
                 <p className={`font-serif uppercase text-black ${scale.sigName}`}>{lessor}</p>
                 <p className={`font-sans font-semibold text-black uppercase ${scale.sigSub}`}>NAGPAPAUPA (Lessor)</p>
+                <p className="text-[6.5pt] font-sans text-black">
+                  {landlordSigningMode === 'WET_INK' ? 'Wet-Ink Signatory (Art. 1356)' : 'Digital E-Signature Verified (RA 8792)'}
+                </p>
                 {phone && <p className="text-[6.5pt] font-mono text-black">Kontak: {phone}</p>}
               </div>
 
               {/* Lessee (Umuupa) */}
               <div>
                 <div className={`border-b-2 border-black w-48 mx-auto mb-0.5 ${scale.sigHeight} flex items-end justify-center`}>
-                  {signatureData ? (
+                  {signingMode === 'WET_INK' && !signatureData ? (
+                    <span className="text-[6.5pt] font-sans text-slate-500 italic mb-0.5">
+                      (Lagda gamit ang pluma / Ballpen signature)
+                    </span>
+                  ) : signatureData ? (
                     <img 
                       src={signatureData} 
                       alt="Signature" 
@@ -398,7 +420,9 @@ export default function PrintableContract() {
                 </div>
                 <p className={`font-serif uppercase text-black ${scale.sigName}`}>{lessee}</p>
                 <p className={`font-sans font-semibold text-black uppercase ${scale.sigSub}`}>UMUUPA (Lessee)</p>
-                <p className="text-[6.5pt] font-sans text-black">PhilSys Verified / Lumagda Kusang-loob</p>
+                <p className="text-[6.5pt] font-sans text-black">
+                  {signingMode === 'WET_INK' ? 'Wet-Ink Signatory (Art. 1356)' : 'PhilSys Verified / Lumagda Kusang-loob'}
+                </p>
               </div>
             </div>
 
