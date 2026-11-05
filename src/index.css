@@ -6,4 +6,36 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism helpers matching reference with forest emerald & gold */
+.glass-frost {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.glass-frost-dark {
+  background: rgba(20, 83, 45, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Signature Brand Emerald Gradient Mesh Card */
+.bg-mesh-card {
+  background: linear-gradient(135deg, #14532D 0%, #059669 60%, #10b981 100%);
+}
+
+.bg-mesh-dark {
+  background: linear-gradient(145deg, #052e16 0%, #0f4022 50%, #14532D 100%);
+}
+
+.bg-mesh-aurora {
+  background: radial-gradient(circle at 10% 20%, rgba(20, 83, 45, 0.12) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(234, 179, 8, 0.10) 0%, transparent 40%);
 }
