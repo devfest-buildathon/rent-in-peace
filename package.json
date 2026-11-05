@@ -22,5 +22,26 @@
     "oxlint": "^1.89.0",
     "vite": "^8.3.5",
     "vite-plugin-pwa": "^2.0.0"
-  }
+  },
+  "author": "Danlord Farell Soriano <soriano.danlordfarell@gmail.com>",
+  "contributors": [
+    {
+      "name": "Danlord Farell Soriano",
+      "email": "soriano.danlordfarell@gmail.com",
+      "role": "Team Lead & System Architect"
+    },
+    {
+      "name": "Pia Pa\u00f1a",
+      "email": "pacana.pia123@gmail.com",
+      "role": "Lead UI/UX Designer"
+    },
+    {
+      "name": "Justine Roy Salva",
+      "role": "Lead Backend & AI Engineer"
+    },
+    {
+      "name": "John Kurt",
+      "role": "Co-Developer & DevOps"
+    }
+  ]
 }

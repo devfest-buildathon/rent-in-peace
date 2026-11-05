@@ -141,6 +141,16 @@ npm run preview
 
 ---
 
-## 👥 Contributors
-Developed by the **Rent in Peace** Team for **GDG CDO Buildathon 2026**.
+## 👥 The Team Behind Rent in Peace (GDG CDO Buildathon 2026)
+
+| Member | Role | Responsibilities & Contributions |
+|---|---|---|
+| **Danlord Farell Soriano (Daf)** | **Team Lead & System Architect** | System prompts, stage pitch presenter, Phygital dual-signing architecture, feature orchestration |
+| **Pia Paña** (@pyuuh) | **Lead UI/UX Designer** | Figma 10-screen design system, branding, color palette, typography |
+| **Justine Roy Salva** (@jrsstuff) | **Lead Backend & AI Engineer** | Google Gemini Flash integration, Cloud Firestore schemas, in-app GCash logic |
+| **John Kurt** | **Co-Developer & DevOps** | Deployment, persistence validation, PWA caching |
+
+---
+
+## 📄 License
 Licensed under the [MIT License](LICENSE).

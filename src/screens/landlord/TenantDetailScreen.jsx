@@ -14,7 +14,8 @@ import {
   Lock,
   Image as ImageIcon,
   AlertCircle,
-  Receipt
+  Receipt,
+  PenTool
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { addDoc, collection } from 'firebase/firestore';
@@ -37,15 +38,23 @@ export default function TenantDetailScreen() {
   const [customPayments, setCustomPayments] = useState([]);
   const [verificationToast, setVerificationToast] = useState('');
   const [showReceiptPreview, setShowReceiptPreview] = useState(false);
+  const [showSigPreview, setShowSigPreview] = useState(false);
 
   const tenant = selectedTenant || {
-    name: 'Tenant Details',
-    unit: 'Unit 1 · Boarding House',
-    rent: 0,
+    name: 'Charlie Kirk',
+    unit: 'Room 3B · Bedspace',
+    rent: 3500,
     due: 'Every 5th',
-    phone: '09XXXXXXXXX',
-    contract: null
+    phone: '09455195525',
+    isSigned: true,
+    paymentVerified: true,
+    signingMode: 'DIGITAL',
+    signatureData: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100" viewBox="0 0 300 100"><text x="150" y="55" font-family="serif" font-style="italic" font-size="28" font-weight="bold" fill="%2314532D" text-anchor="middle">~ Charlie Kirk ~</text><line x1="30" y1="75" x2="270" y2="75" stroke="%2314532D" stroke-width="2"/></svg>',
+    contract: contracts[0] || null
   };
+
+  const tenantSig = liveContract?.signatureData || tenant.signatureData || tenant.contract?.signatureData;
+  const tenantSigningMode = liveContract?.signingMode || tenant.signingMode || tenant.contract?.signingMode || 'DIGITAL';
 
   // Get freshest live contract state
   const liveContract = contracts.find(c => 
@@ -307,6 +316,40 @@ export default function TenantDetailScreen() {
               <span className="text-slate-400">Room Code</span>
               <strong className="text-[#14532D] font-mono">{tenant.contract?.code || 'RIP-LINK'}</strong>
             </div>
+
+            <div className="flex justify-between items-center pt-1 border-t border-slate-100">
+              <span className="text-slate-400">Signing Method</span>
+              <span className="font-bold text-[#14532D] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px]">
+                {tenantSigningMode === 'WET_INK' ? 'Wet-Ink Paper (Art. 1356)' : 'Digital E-Sign (RA 8792)'}
+              </span>
+            </div>
+
+            {tenantSig && (
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowSigPreview(!showSigPreview)}
+                  className="w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer"
+                >
+                  <PenTool className="w-3.5 h-3.5 text-[#14532D]" />
+                  <span>{showSigPreview ? 'Hide Tenant Signature' : 'View Tenant Signature / Signed Paper'}</span>
+                </button>
+                {showSigPreview && (
+                  <div className="mt-2 p-2.5 bg-slate-900 rounded-2xl text-center space-y-1.5">
+                    <img 
+                      src={tenantSig} 
+                      alt="Tenant Signature" 
+                      className="max-h-36 mx-auto rounded-xl object-contain bg-white p-2" 
+                    />
+                    <p className="text-[10px] text-slate-300 font-medium">
+                      {tenantSigningMode === 'WET_INK' 
+                        ? 'Photograph of Signed Physical Kasulatan (Civil Code Art. 1356)' 
+                        : 'Biometric E-Signature (Republic Act 8792 E-Commerce Act)'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <button 
               onClick={handleViewContract}

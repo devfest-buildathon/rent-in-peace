@@ -3,26 +3,28 @@ import { useApp } from '../../context/AppContext';
 import { Home, Smartphone, Zap } from 'lucide-react';
 
 const SCREENS = [
-  { id: 'SPLASH', label: '1. Splash' },
-  { id: 'LANDLORD_HOME', label: '2. Home' },
-  { id: 'WIZARD_PROPERTY', label: '3. Renting Out?' },
-  { id: 'WIZARD_DETAILS', label: '4. Basics' },
-  { id: 'WIZARD_REVIEW', label: '5. Review' },
-  { id: 'WIZARD_CONTRACT', label: '6. Kasulatan' },
-  { id: 'WIZARD_CHECK', label: '7. Check' },
-  { id: 'ALL_DONE', label: '8. Ready!' },
-  { id: 'LANDLORD_TENANTS', label: '9. My Tenants' },
-  { id: 'TENANT_DETAIL', label: '10. Charlie Kirk' },
-  { id: 'SETTINGS', label: '11. Settings' },
-  { id: 'TENANT_CODE_ENTRY', label: '12. Invite Code' },
-  { id: 'TENANT_PORTAL', label: '13. Tenant Sign' },
-  { id: 'SUCCESS_PIN', label: '14. Key PIN' },
+  { id: 'SPLASH', label: '1. Welcome' },
+  { id: 'LANDLORD_AUTH', label: '2. Landlord Sign In' },
+  { id: 'LANDLORD_HOME', label: '3. Landlord Home' },
+  { id: 'WIZARD_PROPERTY', label: '4. Property Type' },
+  { id: 'WIZARD_DETAILS', label: '5. Contract Terms' },
+  { id: 'WIZARD_REVIEW', label: '6. Review Code' },
+  { id: 'WIZARD_CONTRACT', label: '7. Kasulatan & AI' },
+  { id: 'WIZARD_CHECK', label: '8. Smart Check' },
+  { id: 'ALL_DONE', label: '9. Contract Ready' },
+  { id: 'LANDLORD_TENANTS', label: '10. My Tenants' },
+  { id: 'TENANT_DETAIL', label: '11. Verify & PIN' },
+  { id: 'SETTINGS', label: '12. Settings' },
+  { id: 'TENANT_AUTH', label: '13. Tenant Code' },
+  { id: 'TENANT_PORTAL', label: '14. Tenant Sign & Pay' },
+  { id: 'SUCCESS_PIN', label: '15. Key PIN (5829)' },
+  { id: 'TENANT_HOME', label: '16. Tenant Hub' },
 ];
 
 export default function PitchBar() {
   const { currentScreen, setCurrentScreen, layoutMode, setLayoutMode } = useApp();
 
-  const isTenantMode = currentScreen === 'TENANT_CODE_ENTRY' || currentScreen === 'TENANT_PORTAL' || currentScreen === 'SUCCESS_PIN';
+  const isTenantMode = currentScreen === 'TENANT_AUTH' || currentScreen === 'TENANT_CODE_ENTRY' || currentScreen === 'TENANT_PORTAL' || currentScreen === 'SUCCESS_PIN' || currentScreen === 'TENANT_HOME';
 
   return (
     <header className="no-print w-full max-w-[430px] md:max-w-2xl bg-slate-900 text-white py-2 px-3 sm:px-4 rounded-b-xl md:rounded-2xl mb-2 sm:mb-3 shadow-lg flex flex-col gap-2 z-50">
@@ -54,7 +56,7 @@ export default function PitchBar() {
 
           {/* Quick Switch Landlord / Tenant Portal */}
           <button
-            onClick={() => setCurrentScreen(isTenantMode ? 'LANDLORD_HOME' : 'TENANT_CODE_ENTRY')}
+            onClick={() => setCurrentScreen(isTenantMode ? 'LANDLORD_HOME' : 'TENANT_PORTAL')}
             className={`text-[10px] px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 cursor-pointer ${
               isTenantMode 
                 ? 'bg-amber-500 text-slate-950 font-black' 

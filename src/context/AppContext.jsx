@@ -78,6 +78,55 @@ export function generateDefaultClauses({
   ];
 }
 
+// Default Demo Contract for Charlie Kirk (Pia's Figma Screen 10)
+const DEFAULT_DEMO_CONTRACT = {
+  id: 'RIP-8842',
+  code: 'RIP-8842',
+  roomNumber: 'Room 3B',
+  propertyType: 'Bedspace',
+  propertyAddress: '142 J.V. Serina St, Carmen, Cagayan de Oro City',
+  monthlyRent: 3500,
+  deposit: 3500,
+  advanceRent: 3500,
+  leaseDuration: '6 months',
+  rentReminderEnabled: true,
+  status: 'Active',
+  isSigned: true,
+  paymentVerified: true,
+  dueDay: 'Every 5th',
+  landlordName: 'Engr. Daf (Lessor)',
+  tenantName: 'Charlie Kirk',
+  contactNumber: '09455195525',
+  tenantPhone: '09171234567',
+  signingMode: 'DIGITAL',
+  landlordSigningMode: 'DIGITAL',
+  signatureData: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100" viewBox="0 0 300 100"><text x="150" y="55" font-family="serif" font-style="italic" font-size="28" font-weight="bold" fill="%2314532D" text-anchor="middle">~ Charlie Kirk ~</text><line x1="30" y1="75" x2="270" y2="75" stroke="%2314532D" stroke-width="2"/></svg>',
+  gcashRef: '902837491028',
+  lockboxPin: '5829',
+  contractClauses: generateDefaultClauses({
+    landlord: 'Engr. Daf (Lessor)',
+    tenant: 'Charlie Kirk',
+    room: 'Room 3B',
+    address: '142 J.V. Serina St, Carmen, Cagayan de Oro City',
+    propType: 'Bedspace',
+    rent: 3500,
+    dep: 3500,
+    advance: 3500,
+    duration: '6 months'
+  })
+};
+
+const DEFAULT_DEMO_PAYMENT = {
+  id: 'pay-demo-1',
+  contractCode: 'RIP-8842',
+  tenantName: 'Charlie Kirk',
+  cycleName: 'Advance Rent & Move-in Deposit',
+  amount: 3500,
+  date: new Date().toLocaleDateString(),
+  gcashRef: '902837491028',
+  status: 'Verified'
+};
+
 export function AppProvider({ children }) {
   // Navigation Screens: 'SPLASH' | 'LANDLORD_AUTH' | 'TENANT_AUTH' | 'LANDLORD_HOME' | 'TENANT_HOME' ...
   const [currentScreen, setCurrentScreen] = useState(() => {
@@ -167,9 +216,13 @@ export function AppProvider({ children }) {
   const [contracts, setContractsState] = useState(() => {
     try {
       const saved = localStorage.getItem('rip_contracts');
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return [DEFAULT_DEMO_CONTRACT];
     } catch {
-      return [];
+      return [DEFAULT_DEMO_CONTRACT];
     }
   });
 
@@ -182,9 +235,13 @@ export function AppProvider({ children }) {
   const [payments, setPaymentsState] = useState(() => {
     try {
       const saved = localStorage.getItem('rip_payments');
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return [DEFAULT_DEMO_PAYMENT];
     } catch {
-      return [];
+      return [DEFAULT_DEMO_PAYMENT];
     }
   });
 
@@ -946,6 +1003,9 @@ export function AppProvider({ children }) {
       paymentVerified: false,
       tenantSignedAt: new Date().toISOString(),
       tenantName: checkinPayload.tenantName,
+      signingMode: signingMode || checkinPayload.signingMode,
+      signatureData: signatureData || null,
+      idFileData: idFileData || null,
       gcashRef: checkinPayload.gcashRef,
       gcashReceiptData: receiptPreview,
       advancePaidAmount: amountVal
@@ -1163,11 +1223,14 @@ export function AppProvider({ children }) {
     id: c.id || c.code || idx + 1,
     avatar: (c.tenantName || 'T').substring(0, 2).toUpperCase(),
     name: c.tenantName || 'Unnamed Tenant',
-    unit: `${c.roomNumber} · ${c.propertyType}`,
+    unit: `${c.roomNumber} · ${c.propertyType || 'Bedspace'}`,
     rent: c.monthlyRent || 0,
     status: c.status || 'Active',
     isSigned: Boolean(c.isSigned),
     paymentVerified: Boolean(c.paymentVerified),
+    signingMode: c.signingMode || 'DIGITAL',
+    signatureData: c.signatureData || null,
+    idFileData: c.idFileData || null,
     gcashRef: c.gcashRef || c.latestGcashRef || '',
     gcashReceiptData: c.gcashReceiptData || null,
     due: c.dueDay || 'Every 5th',

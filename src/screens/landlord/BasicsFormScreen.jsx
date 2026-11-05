@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ChevronLeft, ChevronRight, AlertCircle, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertCircle, Calendar, Edit3, FileText, Check } from 'lucide-react';
 import StepIndicator from '../../components/shared/StepIndicator';
 
 export default function BasicsFormScreen() {
@@ -15,6 +15,7 @@ export default function BasicsFormScreen() {
     deposit, setDeposit,
     advanceRent, setAdvanceRent,
     leaseDuration, setLeaseDuration,
+    signingMode, setSigningMode,
     refreshClausesFromDraft
   } = useApp();
 
@@ -25,10 +26,6 @@ export default function BasicsFormScreen() {
       setError('Please provide the landlord full legal name.');
       return;
     }
-    if (!tenantName.trim()) {
-      setError('Please provide the tenant full legal name.');
-      return;
-    }
     if (!roomNumber.trim()) {
       setError('Please specify the room or unit identifier (e.g. Room 3B).');
       return;
@@ -36,6 +33,10 @@ export default function BasicsFormScreen() {
     if (!monthlyRent || Number(monthlyRent) <= 0) {
       setError('Please enter a valid monthly rent amount.');
       return;
+    }
+
+    if (!tenantName.trim()) {
+      setTenantName('Prospective Lessee');
     }
 
     setError('');
@@ -94,7 +95,9 @@ export default function BasicsFormScreen() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Tenant full legal name</label>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Tenant full legal name <span className="text-slate-400 font-normal">(Optional — tenant can enter upon check-in)</span>
+              </label>
               <input 
                 type="text"
                 value={tenantName}
@@ -102,7 +105,7 @@ export default function BasicsFormScreen() {
                 className="w-full p-2.5 bg-white border border-slate-200 rounded-xl focus:border-[#14532D] focus:ring-1 focus:ring-[#14532D] outline-none text-slate-800 text-xs font-semibold"
                 placeholder="e.g. Juan Miguel Dela Cruz"
               />
-              <p className="text-[10px] text-slate-400 mt-0.5">As indicated on tenant's government-issued identification.</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Leave blank if setting up open room code for prospective tenant.</p>
             </div>
 
             <div>
@@ -144,6 +147,53 @@ export default function BasicsFormScreen() {
                 placeholder="e.g. 12 Velez St., Barangay 29, Cagayan de Oro City"
               />
             </div>
+          </div>
+
+          {/* Signing Method Box (Phygital Dual-Signing) */}
+          <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl shadow-2xs space-y-3">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
+              <span className="text-[11px] font-bold text-[#14532D] uppercase tracking-wider">
+                Allowed Signing Method
+              </span>
+              <span className="text-[9px] bg-emerald-100 text-[#14532D] font-bold px-2 py-0.5 rounded-full">
+                Phygital Dual-Signing
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div 
+                onClick={() => setSigningMode('DIGITAL')}
+                className={`p-2.5 rounded-xl border text-center cursor-pointer transition ${
+                  signingMode === 'DIGITAL' 
+                    ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] shadow-xs' 
+                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-1 font-bold text-xs">
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Digital E-Sign</span>
+                </div>
+                <p className="text-[9px] text-slate-500 mt-0.5">RA 8792 E-Commerce Act</p>
+              </div>
+
+              <div 
+                onClick={() => setSigningMode('WET_INK')}
+                className={`p-2.5 rounded-xl border text-center cursor-pointer transition ${
+                  signingMode === 'WET_INK' 
+                    ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] shadow-xs' 
+                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-1 font-bold text-xs">
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Wet-Ink Paper</span>
+                </div>
+                <p className="text-[9px] text-slate-500 mt-0.5">Civil Code Art. 1356</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400">
+              Tenants will be offered your chosen signing method on the check-in portal.
+            </p>
           </div>
 
           {/* Financials Box */}

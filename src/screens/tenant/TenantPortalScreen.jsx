@@ -86,8 +86,12 @@ export default function TenantPortalScreen() {
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
-    if (signingMode === 'DIGITAL' && !signatureData) {
-      setError('Please draw your signature below or tap "Sign with Full Legal Name".');
+    if (!signatureData) {
+      setError(
+        signingMode === 'DIGITAL' 
+          ? 'Please draw your signature below or tap "Sign with My Legal Name".' 
+          : 'Please upload a photo of the signed physical contract or tap "Fast Demo Signed Paper".'
+      );
       const el = document.getElementById('signature-section');
       el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -156,10 +160,16 @@ export default function TenantPortalScreen() {
 
         {/* Step 1: ID Verification */}
         <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl mb-3 shadow-2xs">
-          <p className="text-xs font-bold text-slate-900 mb-2 flex items-center gap-1.5">
-            <Camera className="w-3.5 h-3.5 text-[#14532D]" />
-            <span>1. Identity Verification (PhilSys / Gov ID)</span>
-          </p>
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <Camera className="w-3.5 h-3.5 text-[#14532D]" />
+              <span>1. Identity Verification (PhilSys / Gov ID)</span>
+            </p>
+            <span className="text-[9px] bg-emerald-50 text-[#14532D] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+              RA 10173 Protected
+            </span>
+          </div>
+
           <FileUpload 
             label="Upload photo of your Valid Government ID"
             helperText="PhilSys National ID, Driver's License, UMID, or Student ID"
@@ -171,6 +181,24 @@ export default function TenantPortalScreen() {
             }}
             initialPreview={idFileData?.dataUrl}
           />
+
+          {/* Fast Demo Fill Button */}
+          <div className="pt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                setIdFileData({ 
+                  name: 'philsys_sample.jpg', 
+                  dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180" viewBox="0 0 300 180"><rect width="300" height="180" fill="%23f1f5f9" rx="15" stroke="%2314532D" stroke-width="2"/><text x="150" y="70" font-family="sans-serif" font-size="14" font-weight="bold" fill="%2314532D" text-anchor="middle">PhilSys National ID Verified</text><text x="150" y="100" font-family="sans-serif" font-size="11" fill="%23047857" text-anchor="middle">98% Biometric Facial Match</text><text x="150" y="130" font-family="sans-serif" font-size="9" fill="%2364748b" text-anchor="middle">RA 10173 Compliant</text></svg>' 
+                });
+                if (!tenantName) setTenantName('Verified Tenant');
+                setError('');
+              }}
+              className="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-[#14532D] font-bold px-2.5 py-1 rounded-lg border border-emerald-200 transition cursor-pointer flex items-center gap-1 shadow-2xs"
+            >
+              <span>⚡ Fast Demo ID (PhilSys 98% Match)</span>
+            </button>
+          </div>
         </div>
 
         {/* Step 2: Read Kasulatan with Bisaya Translation */}
@@ -231,28 +259,48 @@ export default function TenantPortalScreen() {
           </label>
         </div>
 
-        {/* Step 3: Signature Pad */}
+        {/* Step 3: Phygital Dual-Signing (Wet-Ink vs E-Sign) */}
         <div id="signature-section" className="p-3.5 bg-white border border-slate-200/90 rounded-2xl mb-3 shadow-2xs">
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-2.5">
             <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
               <Edit3 className="w-3.5 h-3.5 text-[#14532D]" />
-              <span>3. Affix Tenant Signature</span>
+              <span>3. Phygital Dual-Signing</span>
             </p>
-            <div className="flex bg-slate-100 p-0.5 rounded-lg text-[9px] font-bold">
-              <button 
-                type="button"
-                onClick={() => setSigningMode('DIGITAL')}
-                className={`px-2 py-0.5 rounded cursor-pointer ${signingMode === 'DIGITAL' ? 'bg-[#14532D] text-white' : 'text-slate-600'}`}
-              >
-                E-Sign Pad
-              </button>
-              <button 
-                type="button"
-                onClick={() => setSigningMode('WET_INK')}
-                className={`px-2 py-0.5 rounded cursor-pointer ${signingMode === 'WET_INK' ? 'bg-slate-900 text-white' : 'text-slate-600'}`}
-              >
-                Wet-Ink Photo
-              </button>
+            <span className="text-[9px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-full">
+              Legal Options
+            </span>
+          </div>
+
+          {/* Prominent Dual Card Option Selector */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div 
+              onClick={() => setSigningMode('DIGITAL')} 
+              className={`p-2.5 rounded-xl border text-center cursor-pointer transition ${
+                signingMode === 'DIGITAL' 
+                  ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] shadow-xs' 
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-1.5 font-black text-xs">
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Digital E-Sign</span>
+              </div>
+              <p className="text-[9px] text-slate-500 mt-0.5 font-medium">RA 8792 E-Commerce Act</p>
+            </div>
+
+            <div 
+              onClick={() => setSigningMode('WET_INK')} 
+              className={`p-2.5 rounded-xl border text-center cursor-pointer transition ${
+                signingMode === 'WET_INK' 
+                  ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] shadow-xs' 
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-1.5 font-black text-xs">
+                <FileText className="w-3.5 h-3.5" />
+                <span>Wet-Ink Paper</span>
+              </div>
+              <p className="text-[9px] text-slate-500 mt-0.5 font-medium">Civil Code Art. 1356</p>
             </div>
           </div>
 
@@ -278,21 +326,50 @@ export default function TenantPortalScreen() {
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[10px] text-amber-900 flex items-center justify-between">
-                <span>Article 1356: Print contract to physically sign with ballpen.</span>
+            <div className="space-y-2.5">
+              <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-xl text-amber-900 text-[10px] leading-relaxed">
+                <strong>Physical Wet-Ink Process (Article 1356):</strong>
+                <p>1. Print the official A4 Kasulatan sa Pag-Abang using the button below.</p>
+                <p>2. Affix signatures with a ballpen in front of the landlord or witnesses.</p>
+                <p>3. Snap or upload a clear photo of the signed document page.</p>
+              </div>
+
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-2 py-1 bg-amber-800 hover:bg-amber-900 text-white rounded-lg font-bold text-[9px] transition flex items-center gap-1 cursor-pointer shrink-0"
+                  className="flex-1 py-2 bg-white border border-[#14532D] text-[#14532D] hover:bg-emerald-50 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  <Printer className="w-3 h-3 text-amber-200" />
-                  <span>Print A4</span>
+                  <Printer className="w-3.5 h-3.5" /> Print Blank A4 Kasulatan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 400;
+                    canvas.height = 150;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.font = 'bold 15px sans-serif';
+                    ctx.fillStyle = '#0f172a';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('✓ Signed Physical Kasulatan Page Uploaded', 200, 60);
+                    ctx.font = 'italic 12px serif';
+                    ctx.fillStyle = '#14532D';
+                    ctx.fillText(`~ ${tenantName || 'Tenant'} (Civil Code Art. 1356 Compliant) ~`, 200, 95);
+                    setSignatureData(canvas.toDataURL('image/png'));
+                    setError('');
+                  }}
+                  className="py-2 px-3 bg-emerald-100 hover:bg-emerald-200 text-[#14532D] rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                >
+                  ⚡ Fast Demo Signed Paper
                 </button>
               </div>
+
               <FileUpload 
-                label="Snap or upload photo of physically signed paper contract"
-                helperText="Under Article 1356 of the Philippine Civil Code"
+                label="Upload photo of physically signed paper contract"
+                helperText="Showing signed notary or witness lines"
                 onFileSelect={(data) => {
                   setSignatureData(data?.dataUrl || null);
                   setError('');
@@ -321,6 +398,23 @@ export default function TenantPortalScreen() {
             onFileSelect={(data) => setGcashFileData(data)}
             initialPreview={gcashFileData?.dataUrl}
           />
+
+          {/* Fast Demo GCash Button */}
+          <div className="pt-1 flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                setGcashFileData({ 
+                  name: 'gcash_receipt.png', 
+                  dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150"><rect width="300" height="150" fill="%23007dfe" rx="12"/><text x="150" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">GCash Express Send Verified</text><text x="150" y="85" font-family="monospace" font-size="12" fill="white" text-anchor="middle">Ref: 902837491028</text><text x="150" y="115" font-family="sans-serif" font-size="11" fill="%23a7f3d0" text-anchor="middle">Status: Completed</text></svg>' 
+                });
+                setGcashRefNumber('902837491028');
+              }}
+              className="text-[10px] bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg border border-blue-200 transition cursor-pointer flex items-center gap-1 shadow-2xs"
+            >
+              <span>⚡ Fast Demo GCash (Ref: 902837491028)</span>
+            </button>
+          </div>
 
           <div>
             <label className="block text-[11px] font-bold text-slate-700 mb-1">
