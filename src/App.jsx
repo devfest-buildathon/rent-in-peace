@@ -42,19 +42,17 @@ function RentInPeaceContent() {
       const upper = codeParam.toUpperCase();
       setRoomCodeInput(upper);
       lookupContractByCode(upper).then(() => {
-        // Direct tenant to registration/login with this room code pre-loaded
         setCurrentScreen('TENANT_AUTH');
       });
 
-      // Clear query params from browser URL so subsequent state updates never re-trigger this
       try {
         const cleanUrl = window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
       } catch (e) {
-        // Safe fallback for restricted environments
+        // Safe fallback
       }
     }
-  }, []); // Strictly run once on initial mount
+  }, []);
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -62,7 +60,7 @@ function RentInPeaceContent() {
       case 'SPLASH':
         return <SplashScreen />;
 
-      // Auth Flows (Dedicated for both roles)
+      // Auth Flows
       case 'LANDLORD_AUTH':
       case 'LANDLORD_REGISTER':
         return <LandlordAuthScreen />;

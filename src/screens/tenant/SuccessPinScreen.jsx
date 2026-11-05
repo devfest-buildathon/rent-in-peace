@@ -1,19 +1,17 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { CheckCircle2, FileText, Home, Clock, Lock, KeyRound, ChevronRight, CreditCard } from 'lucide-react';
+import { CheckCircle2, Clock, Lock, KeyRound, ArrowRight } from 'lucide-react';
 
 export default function SuccessPinScreen() {
   const { 
     setCurrentScreen,
     roomNumber,
-    tenantName,
     propertyAddress,
     monthlyRent,
     activeCode,
     roomCodeInput,
     contracts,
-    tenantProfile,
-    gcashRefNumber
+    tenantProfile
   } = useApp();
 
   const currentCode = activeCode || roomCodeInput || tenantProfile?.contractCode;
@@ -21,17 +19,17 @@ export default function SuccessPinScreen() {
   const isVerified = Boolean(activeContract.paymentVerified);
 
   const displayRoom = roomNumber || activeContract.roomNumber || 'Unit 1';
-  const displayTenant = tenantName || activeContract.tenantName || tenantProfile?.name || 'Valued Tenant';
   const displayAddress = propertyAddress || activeContract.propertyAddress || 'Cagayan de Oro City';
   const displayRent = Number(monthlyRent || activeContract.monthlyRent || 0);
-  const displayRef = activeContract.gcashRef || gcashRefNumber || 'Direct Payment';
 
   return (
-    <div className="flex-1 flex flex-col justify-between px-6 py-5 max-w-lg mx-auto w-full">
-      <div>
-        {/* Success / Pending Status Badge */}
-        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto my-3 shadow-2xs ${
-          isVerified ? 'bg-[#ECFDF5] text-[#14532D]' : 'bg-amber-100 text-amber-800'
+    <div className="flex-1 flex flex-col justify-between px-6 py-5 max-w-lg mx-auto w-full bg-[#F4F8F5]">
+      <div className="overflow-y-auto scrollbar-none pb-2">
+        {/* Status Badge */}
+        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto my-3 shadow-md ${
+          isVerified 
+            ? 'bg-[#DCFCE7] text-[#14532D]' 
+            : 'bg-amber-100 text-amber-800'
         }`}>
           {isVerified ? (
             <CheckCircle2 className="w-10 h-10 stroke-[2.5]" />
@@ -40,124 +38,81 @@ export default function SuccessPinScreen() {
           )}
         </div>
 
-        <div className="text-center mb-4">
+        <div className="text-center mb-5">
           <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
             isVerified ? 'bg-emerald-100 text-[#14532D]' : 'bg-amber-100 text-amber-800'
           }`}>
-            {isVerified ? 'Payment Verified · Ready to Move-In' : 'Lease Signed · Awaiting Landlord Verification'}
+            {isVerified ? 'Payment Verified · Ready to Move-In' : 'Lease Signed · Awaiting Landlord Approval'}
           </span>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-2">
             {isVerified ? `Welcome to ${displayRoom}!` : 'Check-In Received!'}
           </h1>
-          <p className="text-xs text-slate-500 mt-1 max-w-[300px] mx-auto leading-relaxed">
+          <p className="text-xs text-slate-500 mt-1 max-w-[290px] mx-auto leading-relaxed">
             {isVerified 
-              ? 'Your payment has been verified by the landlord. You are cleared for room entry.' 
-              : 'Your signed contract and payment proof have been sent to your landlord for confirmation.'}
+              ? 'Your payment is approved. Use your PIN to retrieve keys from the physical lockbox.' 
+              : 'Your signed Kasulatan and payment reference have been sent to your landlord for confirmation.'}
           </p>
         </div>
 
-        {/* Lockbox Access Card: Unlocked vs Locked */}
+        {/* Lockbox Access Card */}
         {isVerified ? (
-          <div className="p-5 bg-gradient-to-br from-[#14532D] to-emerald-900 text-white rounded-3xl shadow-xl text-center mb-4">
-            <p className="text-[10px] text-emerald-200 uppercase tracking-widest font-bold">
-              Smart Lockbox Access PIN
-            </p>
-            
-            {/* 4-Digit PIN */}
-            <div className="flex items-center justify-center gap-3 my-3">
-              {['5', '8', '2', '9'].map((digit, idx) => (
-                <div 
-                  key={idx}
-                  className="w-12 h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center text-3xl font-black text-amber-300 shadow-inner font-mono"
-                >
-                  {digit}
-                </div>
-              ))}
-            </div>
+          <div className="p-5 rounded-3xl bg-[#052e16] text-white shadow-lg border border-emerald-900/60 text-center mb-4 relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
 
-            <p className="text-[11px] text-emerald-100 leading-snug">
-              Enter this 4-digit code into the lockbox at the unit door to retrieve your physical keys.
+            <p className="text-[10px] text-amber-300 uppercase tracking-widest font-bold flex items-center justify-center gap-1.5">
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Smart Lockbox Master PIN</span>
+            </p>
+            <div className="my-2">
+              <span className="font-mono text-4xl font-black tracking-widest text-emerald-400">
+                5829
+              </span>
+            </div>
+            <p className="text-[11px] text-emerald-200/80 leading-snug">
+              Punch 5829 into the lockbox on {displayRoom}'s door to retrieve your physical keys.
             </p>
           </div>
         ) : (
-          <div className="p-5 bg-amber-50 border border-amber-300 rounded-3xl shadow-md text-center mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-amber-200/80 text-amber-800 flex items-center justify-center mx-auto mb-2">
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-2xs text-center mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-2">
               <Lock className="w-5 h-5" />
             </div>
-            <p className="text-[10px] text-amber-800 uppercase tracking-widest font-black">
-              Door Key PIN Locked
-            </p>
-            
-            {/* Masked PIN */}
-            <div className="flex items-center justify-center gap-2.5 my-3">
-              {['●', '●', '●', '●'].map((dot, idx) => (
-                <div 
-                  key={idx}
-                  className="w-11 h-12 bg-white border border-amber-300 rounded-xl flex items-center justify-center text-xl font-black text-slate-400 font-mono shadow-2xs"
-                >
-                  {dot}
-                </div>
-              ))}
-            </div>
-
-            <p className="text-[11px] text-slate-700 leading-snug">
-              Your PIN will unlock immediately once your landlord verifies your GCash payment (Ref: <span className="font-mono font-bold">{displayRef}</span>).
-            </p>
-            <p className="text-[10px] text-amber-800 font-semibold mt-1.5">
-              Track live verification status in your Tenant Dashboard.
+            <p className="text-xs font-bold text-slate-900">Lockbox PIN is Protected</p>
+            <p className="text-[11px] text-slate-400 mt-1 max-w-[240px] mx-auto leading-relaxed">
+              Once your lessor confirms your advance rent payment on their dashboard, PIN 5829 will unlock here.
             </p>
           </div>
         )}
 
-        {/* Summary Details */}
-        <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl space-y-2 text-xs shadow-2xs">
-          <div className="flex justify-between">
-            <span className="text-slate-400">Tenant (Lessee)</span>
-            <strong className="text-slate-800">{displayTenant}</strong>
+        {/* Unit Info Summary Card */}
+        <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-2.5 text-xs mb-3">
+          <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+            <span className="text-slate-400">Assigned Room</span>
+            <span className="font-bold text-slate-900">{displayRoom}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Premises</span>
-            <strong className="text-slate-800">{displayRoom}, {displayAddress}</strong>
+
+          <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+            <span className="text-slate-400">Property Location</span>
+            <span className="font-bold text-slate-900">{displayAddress}</span>
           </div>
-          <div className="flex justify-between">
+
+          <div className="flex justify-between items-center">
             <span className="text-slate-400">Monthly Rent</span>
-            <strong className="text-[#14532D]">₱{displayRent.toLocaleString()} (Due every 5th)</strong>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Payment Reference</span>
-            <span className="font-mono font-bold text-slate-700">{displayRef}</span>
+            <span className="font-black text-[#14532D]">₱{displayRent.toLocaleString()}</span>
           </div>
         </div>
+
       </div>
 
-      {/* Action Buttons */}
-      <div className="space-y-2 pb-2 pt-3">
+      {/* Continue to Tenant Hub CTA */}
+      <div className="pt-2 pb-2">
         <button 
           onClick={() => setCurrentScreen('TENANT_HOME')}
-          className="w-full py-3.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
         >
-          <CreditCard className="w-4 h-4 text-amber-300" />
-          <span>Go to Tenant Dashboard & Payments</span>
-          <ChevronRight className="w-4 h-4 ml-0.5" />
+          <span>Open Tenant Resident Hub</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
-
-        <div className="grid grid-cols-2 gap-2">
-          <button 
-            onClick={() => window.print()}
-            className="py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-          >
-            <FileText className="w-3.5 h-3.5 text-slate-500" />
-            <span>Save Signed PDF</span>
-          </button>
-
-          <button 
-            onClick={() => setCurrentScreen('SPLASH')}
-            className="py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-          >
-            <Home className="w-3.5 h-3.5 text-slate-500" />
-            <span>Main Menu</span>
-          </button>
-        </div>
       </div>
     </div>
   );

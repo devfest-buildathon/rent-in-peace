@@ -1,19 +1,15 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
-  Home, 
   Bell, 
   Plus, 
   ChevronRight, 
   User, 
-  FileText, 
-  HelpCircle, 
-  ShieldCheck, 
   FilePlus, 
-  CheckCircle2,
-  Clock,
-  KeyRound,
-  Check
+  Clock, 
+  CreditCard,
+  ShieldCheck,
+  Home
 } from 'lucide-react';
 import BottomNav from '../../components/layout/BottomNav';
 
@@ -34,68 +30,189 @@ export default function LandlordHomeScreen() {
   const activeRemindersCount = contracts.filter(c => c.rentReminderEnabled).length;
   const pendingContracts = contracts.filter(c => (c.isSigned || c.status === 'Pending Verification' || c.gcashRef) && !c.paymentVerified);
 
+  // Total collected or active monthly volume
+  const totalMonthlyRoll = contracts.reduce((sum, c) => sum + (Number(c.monthlyRent) || 0), 0);
+
   return (
-    <div className="flex-1 flex flex-col justify-between">
-      <div className="px-5 pt-3">
-        {/* Header */}
+    <div className="flex-1 flex flex-col justify-between min-h-0 bg-[#F4F8F5]">
+      <div className="px-5 pt-3 overflow-y-auto scrollbar-none pb-4">
+        
+        {/* iOS Reference Top Bar: Avatar + Greeting + Bell */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#EAB308] flex items-center justify-center shadow-xs">
-              <Home className="w-5 h-5 text-emerald-950" />
+          <div className="flex items-center gap-2.5">
+            <button 
+              onClick={() => setCurrentScreen('SETTINGS')}
+              className="w-10 h-10 rounded-2xl bg-[#14532D] text-white font-extrabold text-sm flex items-center justify-center shadow-xs hover:opacity-95 transition cursor-pointer"
+              title="Account Settings"
+            >
+              {landlordDisplayName.charAt(0)}
+            </button>
+            <div>
+              <p className="text-[11px] text-slate-500 font-medium">Hello,</p>
+              <h2 className="text-sm font-extrabold text-slate-900 leading-tight">
+                {landlordDisplayName}
+              </h2>
             </div>
-            <span className="text-sm font-black">
-              <span className="text-[#14532D]">Rent in </span>
-              <span className="text-[#047857]">Peace</span>
-            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setCurrentScreen('SETTINGS')}
-              className="w-8 h-8 rounded-xl bg-[#14532D] text-white font-bold text-xs flex items-center justify-center hover:opacity-90 transition cursor-pointer shadow-xs"
-              title="Account Settings"
+              className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-700 shadow-2xs relative hover:bg-slate-50 transition cursor-pointer"
+              title="Notifications"
             >
-              {landlordDisplayName.charAt(0)}
+              <Bell className="w-4 h-4 stroke-[2]" />
+              {(activeRemindersCount > 0 || pendingContracts.length > 0) && (
+                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Greeting & Notification */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-[10px] font-bold text-[#14532D] uppercase tracking-wider">
-              {landlordProfile?.propertyName || 'DASHBOARD'}
-            </p>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">
-              Hi, {landlordDisplayName}.
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Live rental contracts & payment ledger.
-            </p>
-          </div>
-          <div className="w-10 h-10 rounded-2xl border border-slate-200/80 bg-white flex items-center justify-center text-slate-700 shadow-2xs relative">
-            <Bell className="w-5 h-5 text-slate-600" />
-            {(activeRemindersCount > 0 || pendingContracts.length > 0) && (
-              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-            )}
+        {/* Total Rent Roll Balance Display (Exact match to Reference 1 Header) */}
+        <div className="mb-5">
+          <span className="text-xs font-semibold text-slate-500 tracking-tight">Active Monthly Rent Roll</span>
+          <div className="flex items-baseline gap-1 mt-0.5">
+            <span className="text-3xl font-black text-slate-900 tracking-tight">
+              ₱{totalMonthlyRoll.toLocaleString()}
+            </span>
+            <span className="text-xs font-bold text-[#047857] ml-1">/ month</span>
           </div>
         </div>
 
-        {/* ================= PENDING PAYMENT VERIFICATION NOTIFICATION BANNER ================= */}
-        {pendingContracts.length > 0 && (
-          <div className="p-4 bg-amber-50 border-2 border-amber-400 rounded-3xl shadow-sm mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] bg-amber-200 text-amber-900 font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-amber-700 animate-pulse" />
-                Action Required · {pendingContracts.length} Tenant Payment{pendingContracts.length > 1 ? 's' : ''}
-              </span>
-              <span className="text-[10px] font-bold text-amber-800">Pending Verify</span>
+        {/* CARDS Carousel in Original Emerald Forest / Amber Color Theme */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">PROPERTIES & LEASES</span>
+            <button 
+              onClick={startNewContract}
+              className="text-xs font-bold text-[#14532D] hover:text-[#047857] flex items-center gap-0.5 cursor-pointer"
+            >
+              <span>Add</span>
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            </button>
+          </div>
+
+          {/* Horizontal scroll cards */}
+          <div className="flex items-stretch gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
+            
+            {/* Primary Featured Card (Original Forest Green Gradient) */}
+            <div className="min-w-[240px] max-w-[260px] h-[135px] rounded-3xl bg-gradient-to-tr from-[#14532D] via-[#047857] to-[#10b981] p-4 text-white shadow-[0_12px_28px_rgba(20,83,45,0.25)] flex flex-col justify-between shrink-0 snap-start relative overflow-hidden">
+              <div className="absolute right-0 bottom-0 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+              
+              <div className="flex items-center justify-between z-10">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
+                  {landlordProfile?.propertyName || 'Main Property'}
+                </span>
+                <span className="text-[10px] bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full font-black">CDO</span>
+              </div>
+
+              <div className="z-10">
+                <p className="text-[10px] text-emerald-100 font-medium">Total Leases</p>
+                <p className="text-lg font-black text-white tracking-tight">{activeContractsCount} Units Enrolled</p>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-emerald-100 border-t border-white/15 pt-1.5 z-10">
+                <span>Civil Code Compliant</span>
+                <span className="font-bold text-white">Active</span>
+              </div>
             </div>
 
-            <p className="text-sm font-black text-slate-900">
+            {/* Secondary Deep Forest Card */}
+            <div className="min-w-[200px] h-[135px] rounded-3xl bg-[#052e16] p-4 text-white shadow-md flex flex-col justify-between shrink-0 snap-start border border-emerald-900/60">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">GCash Verified</span>
+                <CreditCard className="w-4 h-4 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-[10px] text-emerald-300/80">Lockbox PIN Status</p>
+                <p className="text-base font-black text-white tracking-tight">Protected: 5829</p>
+              </div>
+              <div className="text-[10px] text-amber-400 font-bold">
+                Auto-releases on pay
+              </div>
+            </div>
+
+            {/* Quick Add Card */}
+            <button 
+              onClick={startNewContract}
+              className="min-w-[120px] h-[135px] rounded-3xl bg-white border-2 border-dashed border-slate-300 hover:border-[#14532D] flex flex-col items-center justify-center gap-2 p-3 text-slate-400 hover:text-[#14532D] transition shrink-0 snap-start cursor-pointer group"
+            >
+              <div className="w-8 h-8 rounded-full bg-emerald-50 group-hover:bg-emerald-100 text-[#14532D] flex items-center justify-center transition">
+                <Plus className="w-4 h-4 stroke-[3]" />
+              </div>
+              <span className="text-[11px] font-bold text-slate-700">New Lease</span>
+            </button>
+
+          </div>
+        </div>
+
+        {/* QUICK ACTIONS 4-GRID with Emerald / Amber tones */}
+        <div className="mb-5">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2.5">QUICK ACTIONS</span>
+          
+          <div className="grid grid-cols-4 gap-2.5">
+            {/* Action 1: New Lease */}
+            <button 
+              onClick={startNewContract}
+              className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center text-center gap-1.5 hover:bg-slate-50 transition cursor-pointer active:scale-95"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#14532D] flex items-center justify-center">
+                <Plus className="w-5 h-5 stroke-[3]" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-800 leading-tight">Draft Lease</span>
+            </button>
+
+            {/* Action 2: View Tenants */}
+            <button 
+              onClick={() => setCurrentScreen('LANDLORD_TENANTS')}
+              className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center text-center gap-1.5 hover:bg-slate-50 transition cursor-pointer active:scale-95"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#047857] flex items-center justify-center">
+                <User className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-800 leading-tight">Tenants</span>
+            </button>
+
+            {/* Action 3: Reminders */}
+            <button 
+              onClick={() => setCurrentScreen('LANDLORD_TENANTS')}
+              className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center text-center gap-1.5 hover:bg-slate-50 transition cursor-pointer active:scale-95"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                <Clock className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-800 leading-tight">Reminders</span>
+            </button>
+
+            {/* Action 4: Settings */}
+            <button 
+              onClick={() => setCurrentScreen('SETTINGS')}
+              className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center text-center gap-1.5 hover:bg-slate-50 transition cursor-pointer active:scale-95"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <span className="text-[10px] font-bold text-slate-800 leading-tight">Rules</span>
+            </button>
+          </div>
+        </div>
+
+        {/* PENDING ACTIONS BANNER */}
+        {pendingContracts.length > 0 && (
+          <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-3xl mb-5 shadow-xs">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] bg-amber-200 text-amber-900 font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider">
+                <Clock className="w-3.5 h-3.5 text-amber-700 animate-pulse" />
+                Action Required · {pendingContracts.length} Payment{pendingContracts.length > 1 ? 's' : ''}
+              </span>
+              <span className="text-[10px] font-bold text-amber-800">Pending Review</span>
+            </div>
+
+            <p className="text-xs font-black text-slate-900">
               Tenant submitted payment proof
             </p>
-            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+            <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
               Verify GCash receipts to approve check-in and release door lockbox PIN 5829.
             </p>
 
@@ -103,10 +220,10 @@ export default function LandlordHomeScreen() {
               {pendingContracts.map(c => (
                 <div 
                   key={c.code || c.id}
-                  className="p-3 bg-white border border-amber-200 rounded-2xl flex items-center justify-between text-xs shadow-2xs"
+                  className="p-3 bg-white rounded-2xl flex items-center justify-between text-xs shadow-2xs border border-amber-200"
                 >
                   <div>
-                    <p className="font-black text-slate-900">{c.tenantName || 'Tenant'}</p>
+                    <p className="font-bold text-slate-900">{c.tenantName || 'Tenant'}</p>
                     <p className="text-[10px] text-slate-500">
                       {c.roomNumber} · ₱{(c.advancePaidAmount || c.advanceRent || c.monthlyRent || 0).toLocaleString()} · Ref: <span className="font-mono font-bold text-amber-900">{c.gcashRef || 'Submitted'}</span>
                     </p>
@@ -126,9 +243,9 @@ export default function LandlordHomeScreen() {
                       });
                       setCurrentScreen('TENANT_DETAIL');
                     }}
-                    className="px-3 py-1.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-[11px] rounded-xl flex items-center gap-1 shadow-xs cursor-pointer transition"
+                    className="px-3 py-1.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-[11px] rounded-xl flex items-center gap-1 cursor-pointer transition shadow-xs"
                   >
-                    <span>Verify Now</span>
+                    <span>Verify</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -137,60 +254,33 @@ export default function LandlordHomeScreen() {
           </div>
         )}
 
-        {/* Big Action Banner (Create a new contract) */}
-        <div 
-          onClick={startNewContract}
-          className="p-4 bg-[#14532D] hover:bg-[#0f4022] text-white rounded-3xl shadow-md mb-4 flex items-center justify-between cursor-pointer transition"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#E5A93C] text-white flex items-center justify-center shadow-xs">
-              <Plus className="w-6 h-6 stroke-[3]" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black">Create a new contract</h3>
-              <p className="text-[11px] text-emerald-200">Draft a legally grounded lease agreement</p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-emerald-300" />
-        </div>
-
-        {/* Two Metric Cards */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="p-3.5 bg-white border border-slate-200/80 rounded-3xl shadow-2xs">
-            <p className="text-2xl font-black text-slate-900">{activeContractsCount}</p>
-            <p className="text-xs text-slate-400 mt-1">Active contracts</p>
-          </div>
-          <div className="p-3.5 bg-white border border-slate-200/80 rounded-3xl shadow-2xs">
-            <p className="text-2xl font-black text-slate-900">{activeRemindersCount}</p>
-            <p className="text-xs text-slate-400 mt-1">Rent reminders</p>
-          </div>
-        </div>
-
-        {/* Contracts Section (Empty state vs Real List) */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-bold text-slate-700">Recent agreements</p>
+        {/* RECENT AGREEMENTS FEED */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              RECENT AGREEMENTS
+            </span>
             {activeContractsCount > 0 && (
               <button 
                 onClick={() => setCurrentScreen('LANDLORD_TENANTS')}
-                className="text-[11px] font-bold text-[#14532D] hover:underline cursor-pointer"
+                className="text-xs font-bold text-[#14532D] hover:underline cursor-pointer"
               >
-                View all ({activeContractsCount})
+                See all ({activeContractsCount}) &gt;
               </button>
             )}
           </div>
 
           {activeContractsCount === 0 ? (
-            <div className="p-5 border border-dashed border-slate-300 rounded-3xl text-center bg-white/60 shadow-2xs">
+            <div className="p-6 border border-dashed border-slate-300 rounded-3xl text-center bg-white shadow-2xs">
               <FilePlus className="w-8 h-8 text-slate-400 mx-auto mb-2 opacity-70" />
               <p className="text-xs font-bold text-slate-700">No active contracts yet</p>
-              <p className="text-[11px] text-slate-400 mt-0.5 max-w-[240px] mx-auto leading-relaxed">
-                You haven't created any lease contracts. Tap "Create a new contract" above to begin.
+              <p className="text-[11px] text-slate-400 mt-1 max-w-[220px] mx-auto">
+                Tap "Draft Lease" above to create your first legal agreement.
               </p>
             </div>
           ) : (
             <div className="space-y-2">
-              {contracts.slice(0, 3).map((c) => (
+              {contracts.slice(0, 4).map((c) => (
                 <div 
                   key={c.code || c.id}
                   onClick={() => {
@@ -206,33 +296,36 @@ export default function LandlordHomeScreen() {
                     });
                     setCurrentScreen('TENANT_DETAIL');
                   }}
-                  className="p-3 bg-white border border-slate-200/90 rounded-2xl flex items-center justify-between hover:border-[#14532D] transition cursor-pointer shadow-2xs"
+                  className="p-3.5 bg-white rounded-2xl border border-slate-200/80 flex items-center justify-between shadow-2xs hover:border-emerald-300 transition cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#DCFCE7] text-[#14532D] font-bold text-xs flex items-center justify-center">
-                      {(c.tenantName || 'T').substring(0, 2).toUpperCase()}
+                    <div className="w-10 h-10 rounded-2xl bg-[#DCFCE7] text-[#14532D] font-black text-xs flex items-center justify-center group-hover:bg-[#14532D] group-hover:text-white transition-all">
+                      {c.tenantName ? c.tenantName.charAt(0).toUpperCase() : 'T'}
                     </div>
+
                     <div>
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-xs font-bold text-slate-900">{c.tenantName || 'Tenant'}</p>
-                        {c.paymentVerified ? (
-                          <span className="text-[9px] bg-emerald-100 text-[#14532D] font-bold px-1.5 py-0.2 rounded-full flex items-center gap-0.5">
-                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> Verified · PIN Active
-                          </span>
-                        ) : (c.isSigned || c.status === 'Pending Verification') ? (
-                          <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-full flex items-center gap-0.5">
-                            <Clock className="w-2.5 h-2.5 text-amber-600 animate-pulse" /> Verify Payment
-                          </span>
-                        ) : null}
-                      </div>
-                      <p className="text-[10px] text-slate-400">{c.roomNumber} · ₱{(c.monthlyRent || 0).toLocaleString()}/mo</p>
+                      <p className="text-xs font-bold text-slate-900 group-hover:text-[#14532D] transition">
+                        {c.tenantName || 'Tenant'}
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        {c.roomNumber} · Code: <span className="font-mono text-slate-600 font-bold">{c.code}</span>
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] bg-slate-100 text-slate-800 font-mono font-bold px-2 py-0.5 rounded-full">
-                      {c.code}
+
+                  <div className="text-right">
+                    <p className="text-xs font-black text-slate-900">
+                      ₱{Number(c.monthlyRent || 0).toLocaleString()}
+                    </p>
+                    <span className={`text-[10px] font-bold ${
+                      c.paymentVerified 
+                        ? 'text-emerald-700' 
+                        : c.isSigned 
+                        ? 'text-amber-600' 
+                        : 'text-slate-400'
+                    }`}>
+                      {c.paymentVerified ? 'Verified' : c.isSigned ? 'Pending' : 'Draft'}
                     </span>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
                   </div>
                 </div>
               ))}
@@ -240,44 +333,8 @@ export default function LandlordHomeScreen() {
           )}
         </div>
 
-        {/* Quick Actions Grid */}
-        <div className="mb-4">
-          <p className="text-xs font-bold text-slate-700 mb-2">Quick actions</p>
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div 
-              onClick={() => setCurrentScreen('LANDLORD_TENANTS')}
-              className="p-2.5 bg-white border border-slate-200/80 rounded-2xl cursor-pointer hover:border-[#14532D] transition shadow-2xs"
-            >
-              <User className="w-5 h-5 text-[#14532D] mx-auto mb-1" />
-              <p className="text-[9px] font-bold text-slate-700">My tenants</p>
-            </div>
-            <div 
-              onClick={startNewContract}
-              className="p-2.5 bg-white border border-slate-200/80 rounded-2xl cursor-pointer hover:border-[#14532D] transition shadow-2xs"
-            >
-              <FileText className="w-5 h-5 text-[#14532D] mx-auto mb-1" />
-              <p className="text-[9px] font-bold text-slate-700">New draft</p>
-            </div>
-            <div 
-              onClick={() => setCurrentScreen('LANDLORD_TENANTS')}
-              className="p-2.5 bg-white border border-slate-200/80 rounded-2xl cursor-pointer hover:border-[#14532D] transition shadow-2xs"
-            >
-              <Bell className="w-5 h-5 text-[#14532D] mx-auto mb-1" />
-              <p className="text-[9px] font-bold text-slate-700">Reminders</p>
-            </div>
-            <div 
-              onClick={() => setCurrentScreen('SETTINGS')}
-              className="p-2.5 bg-white border border-slate-200/80 rounded-2xl cursor-pointer hover:border-[#14532D] transition shadow-2xs"
-            >
-              <HelpCircle className="w-5 h-5 text-[#14532D] mx-auto mb-1" />
-              <p className="text-[9px] font-bold text-slate-700">Settings</p>
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      {/* Bottom Docked Nav */}
       <BottomNav />
     </div>
   );
