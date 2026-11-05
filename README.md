@@ -1,233 +1,156 @@
-# Rent in Peace
+# 🏠 Rent in Peace (RIP)
+**Autonomous Legal Lease & In-App Rental Ledger Platform**  
+*Built for the Google Developer Group (GDG) Cagayan de Oro Buildathon (Road to DevFest 2026)*
 
-> *"Good contracts make good neighbors."*
+[![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-4.0-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Gemini](https://img.shields.io/badge/Google%20Gemini-AI%20Clause%20Assistant-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 
-A mobile-first rental contract helper and tenancy manager designed specifically for small landlords, boarding house operators, and bedspace owners in Cagayan de Oro, Philippines.
+> **"Good contracts make good neighbors."**  
+> Rent in Peace bridges the gap between informal Philippine boarding house arrangements and legally grounded, frictionless lease agreements. It combines **Google Cloud Firestore**, **Gemini Multimodal AI**, and **in-app contactless key handover** into a seamless, mobile-first Progressive Web App.
 
 ---
 
-## Run Locally
+## 🚀 Quick Start Guide
 
-### Prerequisites
-* **Node.js**: v20 or higher (v22/v24 recommended)
-* **npm**: v10+
+### 1. Prerequisites
+- **Node.js** v18.0.0 or higher
+- **npm** v9.0.0 or higher
 
-### Setup & Launch
+### 2. Clone the Repository
 ```bash
-# 1. Clone or open the repository
+git clone https://github.com/devfest-buildathon/rent-in-peace.git
 cd rent-in-peace
+```
 
-# 2. Copy the example environment file
-cp .env.example .env
+### 3. Switch to the Working Branch
+```bash
+git checkout database-ai-stuff-yeah
+```
 
-# 3. Install dependencies
+### 4. Install Dependencies
+```bash
 npm install
+```
 
-# 4. Run the development server
+### 5. Configure Environment Variables
+Copy `.env.example` to create your local `.env` file:
+```bash
+cp .env.example .env
+```
+Populate your Firebase and Gemini credentials:
+```env
+# Firebase Cloud Firestore Configuration
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+# Google Gemini AI API Configuration
+VITE_GEMINI_API_KEY=your_gemini_api_key
+```
+*(Note: A fallback demo key is included in development mode for evaluation).*
+
+### 6. Run the Local Development Server
+```bash
 npm run dev
 ```
+Open **[http://localhost:5173/](http://localhost:5173/)** in your browser or mobile emulator.
 
-The Vite development server will start at `http://localhost:5173` (or the port specified by `$PORT`).
-
-### Environment Variables
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `VITE_API_BASE_URL` | Base URL pointing to the backend API service | `http://localhost:3000/api` |
-
----
-
-## How to Use (Step-by-Step Walkthrough)
-
-1. **Sign Up or Sign In:**
-   * Enter your name and 11-digit mobile number (e.g. `09171234567`).
-   * Passwords require at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.
-   * Enable *"Save account on this device"* to bypass repeated logins on returning visits.
-2. **Create a Rental Contract:**
-   * From the Dashboard, tap **"Create a new contract"**.
-   * Select a property type (e.g. *Boarding House / Bedspace*, *Apartment Unit*).
-   * Enter the tenant's legal name, unit (e.g. `Room 3B`), monthly rent, deposit, and utilities (sub-meter electricity and water sharing).
-3. **Review & Edit the Contract Paper:**
-   * Review all agreed terms.
-   * On the **Contract Preview** screen, view the contract rendered in universal Arial typography.
-   * Tap **"Edit Paper"** to modify clause titles, customize house rules, or add new sections directly.
-4. **Smart Check (Safety Review):**
-   * Tap **"Smart Check"** to review recommendations tailored for Cagayan de Oro rentals (guest curfews, sub-meter billing deadlines, move-out notice periods).
-   * Tap **"Add this clause"** to automatically insert safeguards into the lease.
-5. **Save PDF & Share:**
-   * Tap **"Save PDF"** to trigger a clean printout or save as PDF with all app UI stripped away via `@media print`.
-   * Enable **Monthly Rent Reminders** to keep track of payment cycles on your dashboard.
-
----
-
-## Legal & Community Reality: Physical (Wet-Ink) vs. Digital (E-Signature)
-
-### Can rental contracts ONLY be signed via e-signature?
-
-**No, that is completely incorrect.** 
-
-Traditional physical handwritten (**"wet-ink"**) signatures on paper are **not only 100% legal**, they remain the **most trusted and universal standard** in the Philippines.
-
-#### 1. The Legal Reality in the Philippines
-* **The Law on E-Signatures (RA 8792 - E-Commerce Act of 2000):**
-  * When the Philippines passed the E-Commerce Act, it gave electronic signatures the **same** legal validity as pen-and-paper signatures.
-  * **It did NOT ban or replace paper signatures.** It simply established: *“If you sign digitally, it is as valid as signing on paper.”*
-* **The Philippine Civil Code (RA 386, Art. 1356):**
-  * Contracts are obligatory in whatever form they may have been entered into. A printed contract signed with a ballpen by the landlord and tenant is a fully binding legal document under Philippine law.
-
-#### 2. The Barangay Reality (Cagayan de Oro Context)
-When a rental dispute happens in CDO (e.g. over an unpaid electric sub-meter bill, late rent, or a damaged room), where do the landlord and tenant go first?
-* **They go to the Barangay Hall (Lupon Tagapamayapa)**, not a high court.
-* The Barangay Captain or Lupon mediator will immediately ask:  
-  > *"Asa man inyong kasabutan? Naa moy pinirmahan nga papel?"* *(Where is your agreement? Do you have a signed paper?)*
-* Showing a **printed piece of paper signed with a pen** is the most trusted, tangible proof at the barangay level. Many elderly landlords and barangay officials still distrust or lack the technical means to verify digital hashes or e-signature certificates.
-
-#### 3. Why Forcing "ONLY E-Signatures" Hurts the App
-If the app were to force digital e-signatures only:
-1. **It violates the core user promise:** One of Rent in Peace's strongest features is that **your tenant does not need the app**. They can receive a printed copy or a shared PDF summary without being forced to install software or register an account.
-2. **Tech barrier for small landlords:** Many boarding house and bedspace owners in CDO are older homeowners, titas, or retirees. Forcing them into complex digital signing flows causes them to abandon software and revert to risky verbal agreements.
-
-#### 4. The Winning Solution: Support BOTH!
-
-The smartest, most realistic product design gives users the choice:
-
-| Method | How It Works in Rent in Peace | Legal Basis |
-| :--- | :--- | :--- |
-| **Physical (Wet-Ink) Signing** *(Recommended for most)* | Landlord taps **"Save PDF"** → Prints 2 copies → Both parties sign with a pen on the signature line → One copy for each. | **Philippine Civil Code (Art. 1356)** |
-| **Digital (E-Signature)** *(Optional for remote renters)* | Landlord saves/shares the PDF → Sends to tenant via Messenger/Viber → Tenant signs on their phone/tablet via digital markup or e-signature pad. | **E-Commerce Act (RA 8792)** |
-
-#### How to Pitch This to Buildathon Judges:
-> *"Rent in Peace bridges the digital and physical worlds. While we support digital PDF sharing and e-signatures under the Philippine E-Commerce Act (RA 8792), we also provide clean, printable agreements for traditional ballpen signatures. Because in the real world of CDO boarding houses, an agreement you can physically print, sign, and hold is still what landlords and barangay halls trust most."*
-
----
-
-## Status: What is Working & What is Not Connected Yet
-
-### Currently Working (100% Functional in Frontend):
-* Complete 16-screen interactive mobile flow (390px mobile-first with desktop interactive prototype switcher).
-* Client-side form validation (Philippine 11-digit phone numbers, password complexity checks, letters-only name fields).
-* Dynamic contract drafting with customizable clauses.
-* Interactive in-browser contract paper editor.
-* Save PDF stylesheet (`@media print`) rendering clean physical paper agreements.
-* Local session persistence and contract storage via `localStorage`.
-* Rent reminder toggles and payment record tracking per tenant.
-* Automated ID masking (always hides sensitive ID characters, revealing only the last 4 digits).
-
-### Not Connected Yet (Awaiting Backend Deployment):
-* **OCR ID Scanner (`/id/read`):** The optical recognition service for automatic driver's license/PhilID extraction requires the backend service. When offline, the UI shows a clear *"Backend service is not connected yet"* state with a fallback to manual typing.
-* **Backend AI Suggestions (`/contracts/check`):** Smart Check currently utilizes built-in local community rules while awaiting the cloud AI endpoint.
-* **Cloud Database Sync (`/leases`, `/tenants`):** Lease records are saved locally; server-side database syncing will activate once the backend endpoint is reached.
-* **Google OAuth Sign-In:** Displays an honest connection alert until the backend auth exchange is configured.
-
----
-
-## Privacy & Security
-
-* **No Biometric or ID Photo Storage:** Government ID photos uploaded for scanning are processed in memory and are **never saved** to persistent storage or local caches.
-* **Automatic ID Masking:** Identification numbers are strictly masked across all screens (e.g. `•••• •••• 9201`), showing only the last 4 characters.
-* **No Secrets in Code:** Zero hardcoded API keys or secrets in the client codebase. The only configuration is `VITE_API_BASE_URL`.
-* **Tenant Independence:** Tenants are not forced to register accounts or install apps; they receive clean, portable PDF summaries.
-
----
-
-## File Tree & Purpose
-
-```text
-rent-in-peace/
-├── .env.example                     # Sample environment file (VITE_API_BASE_URL)
-├── .gitignore                       # Git ignore rules for node_modules, dist, and env files
-├── package.json                     # Scripts and project dependencies
-├── package-lock.json                # Single deterministic npm lockfile
-├── tsconfig.json                    # TypeScript compiler configuration
-├── vite.config.ts                   # Vite bundler configuration with React and Tailwind CSS
-├── src/
-│   ├── main.tsx                     # Application entry point
-│   ├── App.tsx                      # Navigation coordinator and responsive prototype shell
-│   ├── index.css                    # Tailwind CSS v4 directives, responsive rules, and print styles
-│   ├── vite-env.d.ts                # Vite environment type declarations
-│   ├── api/
-│   │   ├── client.ts                # HTTP fetch client using VITE_API_BASE_URL
-│   │   ├── leaseApi.ts              # Typed API methods (readIdPhoto, checkContract, saveLease, etc.)
-│   │   └── API.md                   # Formal API specification for backend teammate
-│   ├── assets/
-│   │   ├── logo.svg                 # SVG brand mark
-│   │   └── fonts/
-│   │       ├── OFL.txt              # SIL Open Font License v1.1
-│   │       └── README.md            # Font documentation (Inter & Arial)
-│   ├── components/
-│   │   ├── index.ts                 # Re-export barrel for components
-│   │   ├── Icons.tsx                # SVG icon dictionary
-│   │   ├── Logo.tsx                 # Brand monogram and logotype
-│   │   ├── Button.tsx               # Accessible button supporting primary, secondary, soft, danger
-│   │   ├── Input.tsx                # Field, SelectField, AuthInput, and Section components
-│   │   ├── Card.tsx                 # MiniCard, SelectCard, TenantCard, and ReminderCard
-│   │   ├── Chip.tsx                 # Status indicator chips
-│   │   ├── Banner.tsx               # Informational alert banners
-│   │   ├── Stepper.tsx              # 4-stage wizard progress stepper
-│   │   ├── TopBar.tsx               # Header with back navigation and contextual actions
-│   │   ├── TabBar.tsx               # Fixed mobile bottom navigation
-│   │   └── ContractSheet.tsx        # Printable Arial lease document with live editing
-│   ├── hooks/
-│   │   ├── useNotice.ts             # Toast notification state and auto-dismiss timer
-│   │   └── useLocalStorage.ts       # Type-safe browser storage hook
-│   ├── lib/
-│   │   ├── formatters.ts            # Currency (₱), date, ID masking, and form validation
-│   │   └── constants.ts             # Property types, default clauses, and disclaimer
-│   ├── screens/
-│   │   ├── index.ts                 # Re-export barrel for screens
-│   │   ├── Welcome.tsx              # Landing screen with value proposition
-│   │   ├── SignIn.tsx               # Mobile + password login with "remember me"
-│   │   ├── SignUp.tsx               # Account creation with validation rules
-│   │   ├── Dashboard.tsx            # Landlord home, upcoming rent, quick actions
-│   │   ├── PropertyType.tsx         # Property category selection
-│   │   ├── ContractDetails.tsx      # Comprehensive lease terms form
-│   │   ├── IdScan.tsx               # Government ID photo reader with honest status
-│   │   ├── Review.tsx               # Pre-generation summary review
-│   │   ├── ContractPreview.tsx      # In-browser contract viewer and paper editor
-│   │   ├── SmartCheck.tsx           # AI-powered clause suggestion cards
-│   │   ├── Success.tsx              # Confirmation, print trigger, reminder link
-│   │   ├── MyTenants.tsx            # Searchable and filterable tenant list
-│   │   ├── TenantDetail.tsx         # Individual tenancy record, history, and options
-│   │   ├── PrivacyHelp.tsx          # Privacy guarantees and landlord FAQ
-│   │   ├── AccountSettings.tsx      # Profile settings and sign-out controls
-│   │   └── RentReminders.tsx        # Monthly reminder management
-│   └── types/
-│       ├── index.ts                 # Re-export barrel for types
-│       ├── contract.ts              # ContractData, PropertyType, Suggestion definitions
-│       ├── user.ts                  # UserProfile definition
-│       └── api.ts                   # Request/response interfaces for backend API
-├── tests/
-│   └── smoke.test.ts                # Smoke tests for formatting, masking, and contract logic
-└── .hackathon/
-    ├── QA.md                        # Verification results, fixes, and limitations
-    ├── DEMO.md                      # 2-minute live presentation script and fallback plan
-    └── screenshots/
-        └── README.md                # Viewport and breakpoint documentation (375, 390, 1440px)
+### 7. Build for Production
+```bash
+npm run build
+npm run preview
 ```
 
 ---
 
-## Verification & Test Results
+## 🌟 Key Application Features
 
-* **TypeScript Type Check (`npx tsc --noEmit`):**
-  * `0 errors`, `0 warnings`.
-* **Production Build (`npm run build`):**
-  * Built successfully in `~500ms` with 50 transformed modules.
-* **Automated Smoke Test (`npm test`):**
-  * `6 / 6` tests passing:
-    * `formatPesos` formats currency accurately
-    * `maskIdNumber` protects personal identification numbers
-    * `validateName` ensures valid legal names without numbers
-    * `validateMobile` checks 11-digit Philippine mobile format
-    * `validatePassword` enforces 8+ chars, upper, lower, number, special char
-    * `contract flow` generates valid initial sections without mock data
+### 🏢 1. Landlord Lease Studio
+- **Guided Contract Wizard**: Step-by-step drafting for Boarding Houses, Bedspaces, and Apartments in Cagayan de Oro.
+- **Gemini AI Legal Clause Assistant**: Type natural language prompts (e.g. *"Strict curfew at 10 PM with ₱500 penalty"*, *"Translate rules into Bisaya"*, or *"Add sub-meter billing at ₱15/kWh"*). Gemini synthesizes enforceable, professional clauses adhering to Philippine Civil Code standards.
+- **Persistent Single-Use Room Codes**: Generates persistent unique room links (e.g. `?code=RIP-4B92`) that remain stable across edits and sessions.
+- **Real-Time Cloud Firestore Sync**: Changes to contracts and payment statuses sync instantly across all devices.
+
+### 🔑 2. Seamless Tenant Onboarding & Registration
+- **No Complex Forms for Tenants**: The landlord pre-fills the tenant's legal name, unit number, and rent amount. The tenant only needs to set up a **Username** and **Password** to register.
+- **Direct Login to Dashboard**: Logging in takes the tenant straight to their **Tenant Dashboard** (`TENANT_HOME`) without forcing them through repetitive onboarding or setup flows.
+
+### 💳 3. In-App Rent Payments & Ledger
+- **GCash QR Ph Integration**: Tenants can view the landlord's GCash number, attach transfer receipt screenshots, and enter their GCash reference number directly in-app.
+- **Rent Schedule & Countdown Progress Tracker**: 
+  - Clear visual tracking of total payments (e.g., `6-month schedule: 1 of 6 payments completed · 5 remaining`).
+  - Next due date indicator (`Due every 5th of each month`).
+- **Live Transaction Ledger**: Both landlord and tenant see an immutable record of all submitted payments, cycles, and approval statuses (`Pending Verification` vs `Verified ✅`).
+
+### 🛡️ 4. Payment Verification & Smart Lockbox Key Access
+- **Locked Key PIN During Review**: When advance rent is submitted, the tenant's app displays an amber indicator: `⏳ Awaiting Landlord Verification`, keeping the physical door PIN masked (`● ● ● ●`).
+- **Landlord Review UI**: The landlord receives an action banner with the tenant's GCash reference number and receipt image.
+- **1-Click Key Release**: The landlord clicks **"Verify Payment & Grant Room Key Access"**. This instantly updates the cloud state and reveals the 4-digit Smart Lockbox PIN (**`5829`**) on the tenant's screen for contactless move-in.
+
+### 📜 5. Official Legal Standard (Kasulatan sa Pag-Abang)
+- **Compact Standard A4 Document**: Formatted cleanly to fit standard A4 paper with zero overflow.
+- **Dual-Signing Mode**: Supports digital on-screen stylus signatures as well as wet-ink physical signing under **Philippine Civil Code Art. 1356**.
+- **Notarial Acknowledgment**: Includes certified notarial block for Barangay Lupon or judicial proceedings.
 
 ---
 
-## Credits & AI Disclosure
+## 🏛️ Legal & Compliance Architecture
 
-* **Design & Prototyping:** Scaffolded with Figma Make.
-* **Development & Refactoring:** Pair-programmed and vibe-coded with Google DeepMind's **Antigravity**.
-* **Typography:**
-  * Inter: Rasmus Andersson (Licensed under SIL Open Font License v1.1).
-  * Arial: Universal system font for reliable cross-device physical document printing.
-* **Compliance Statement:** *"Template for review, not legal advice."*
+| Legal Framework | Implementation in Rent in Peace |
+|---|---|
+| **RA 386 (Civil Code Art. 1356)** | Customary residential lease format enforceable for barangay proceedings and informal dispute resolutions. |
+| **Civil Code Art. 1654 & 1687** | Prescribed statutory landlord maintenance covenants and 30-day move-out notification periods. |
+| **Rent Control Act of the Philippines** | Deposit caps (1 month advance, 1 to 2 months security deposit) automatically enforced in the wizard. |
+| **RA 8792 (E-Commerce Act)** | Electronic signatures recorded with cryptographic timestamps and PhilSys-verified legal name binding. |
+| **RA 10173 (Data Privacy Act)** | Strict isolation ensures co-tenants cannot view other tenants' balances, receipts, or contracts. |
+
+---
+
+## 🗄️ Database Collections (Cloud Firestore)
+
+- **`contracts/`**: Holds lease agreements, clause lists, room metadata, lockbox PINs, and verification flags (`paymentVerified: boolean`).
+- **`tenants/`**: Tenant credentials (username, password hash/pin), full legal names, and linked contract codes.
+- **`landlords/`**: Landlord profiles, registered phone numbers, property locations, and PINs.
+- **`payments/`**: Ledger entries with contract codes, cycle names, amounts, GCash reference numbers, and receipt image attachments.
+- **`checkins/`**: Audit trail of digital signatures, check-in timestamps, and tenant IDs.
+
+---
+
+## 🧪 Testing the Live Demo
+
+1. **Landlord Flow:**
+   - On the Splash Screen, click **Landlord Portal** -> **Create Account** or **Sign In**.
+   - Tap **"Create a new contract"**, fill out unit details (e.g. Unit 4, ₱3,500/mo), customize clauses with Gemini AI, and save.
+   - Share the room code (e.g. `RIP-XXXX`) or copy the invite link.
+2. **Tenant Flow:**
+   - Open the link with `?code=RIP-XXXX` or click **Tenant Portal** -> **Register**.
+   - Input your username and password.
+   - Land directly on your **Tenant Dashboard**: view your contract, pay rent via GCash, track your monthly schedule, and view lockbox status.
+3. **Verification Flow:**
+   - Tenant submits rent with a GCash ref.
+   - Landlord dashboard shows **"Action Required: Tenant Payment Pending"**.
+   - Landlord clicks **"Verify Payment & Grant Room Key Access"**.
+   - Tenant dashboard instantly unlocks Smart Keybox PIN `5829`!
+
+---
+
+## 👥 The Team Behind Rent in Peace (GDG CDO Buildathon 2026)
+
+| Member | Role | Responsibilities & Contributions |
+|---|---|---|
+| **Danlord Farell Soriano (Daf)** | **Team Lead & System Architect** | System prompts, stage pitch presenter, Phygital dual-signing architecture, feature orchestration |
+| **Pia Paña** (@pyuuh) | **Lead UI/UX Designer** | Figma 10-screen design system, branding, color palette, typography |
+| **Justine Roy Salva** (@jrsstuff) | **Lead Backend & AI Engineer** | Google Gemini Flash integration, Cloud Firestore schemas, in-app GCash logic |
+| **John Kurt** | **Co-Developer & DevOps** | Deployment, persistence validation, PWA caching |
+
+---
+
+## 📄 License
+Licensed under the [MIT License](LICENSE).

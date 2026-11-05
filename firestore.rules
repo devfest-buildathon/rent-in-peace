@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Landlord Profiles & Authentication
+    match /landlords/{landlordId} {
+      allow read, write: if true;
+    }
+
+    // Tenant Profiles & Registration
+    match /tenants/{tenantId} {
+      allow read, write: if true;
+    }
+
+    // Contracts (Lease Agreements)
+    match /contracts/{contractCode} {
+      allow read, write: if true;
+    }
+
+    // Tenant Check-in & Signatures
+    match /checkins/{checkinId} {
+      allow read, write: if true;
+    }
+
+    // Payments & Rent Ledger
+    match /payments/{paymentId} {
+      allow read, write: if true;
+    }
+  }
+}
