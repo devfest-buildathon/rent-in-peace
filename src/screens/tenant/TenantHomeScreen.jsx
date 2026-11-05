@@ -279,7 +279,7 @@ export default function TenantHomeScreen() {
             className="w-full py-3.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
           >
             <CreditCard className="w-4 h-4 text-amber-300" />
-            <span>Pay Rent (GCash / QR Ph)</span>
+            <span>Pay Rent (QR Ph, Cash, or Maya)</span>
             <ChevronRight className="w-4 h-4 ml-1" />
           </button>
         </div>
@@ -384,8 +384,8 @@ export default function TenantHomeScreen() {
                   <CreditCard className="w-4 h-4 text-amber-300" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">Pay Rent via GCash</h3>
-                  <p className="text-[10px] text-slate-500">Scan QR or send to Landlord mobile</p>
+                  <h3 className="text-sm font-black text-slate-900">Pay Rent Settlement</h3>
+                  <p className="text-[10px] text-slate-500">QR Ph, GCash, Maya, or Cash to Landlord</p>
                 </div>
               </div>
 

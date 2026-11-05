@@ -49,6 +49,7 @@ export default function TenantPortalScreen() {
   const [explainBisaya, setExplainBisaya] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [payChannel, setPayChannel] = useState('QRPH'); // 'QRPH' | 'CASH'
 
   const displayRent = Number(monthlyRent || 0);
   const displayAdvance = Number(advanceRent || displayRent);
@@ -380,54 +381,108 @@ export default function TenantPortalScreen() {
           )}
         </div>
 
-        {/* Step 4: Advance Rent GCash Upload */}
-        <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl mb-3 shadow-2xs space-y-2">
+        {/* Step 4: Advance Rent Payment (QR Ph / Maya / GCash vs Physical Cash) */}
+        <div className="p-3.5 bg-white border border-slate-200/90 rounded-2xl mb-3 shadow-2xs space-y-2.5">
           <div className="flex justify-between items-center">
             <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
               <QrCode className="w-3.5 h-3.5 text-[#14532D]" />
-              <span>4. Advance Rent (₱{displayAdvance.toLocaleString()})</span>
+              <span>4. Advance Rent Settlement (₱{displayAdvance.toLocaleString()})</span>
             </p>
-            <span className="text-[9px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">
-              GCash QR Ph
+            <span className="text-[9px] bg-emerald-100 text-[#14532D] font-bold px-2 py-0.5 rounded-full">
+              Flexible Payment
             </span>
           </div>
 
-          <FileUpload 
-            label="Upload GCash transfer screenshot receipt"
-            helperText="Showing Reference Number and Amount"
-            onFileSelect={(data) => setGcashFileData(data)}
-            initialPreview={gcashFileData?.dataUrl}
-          />
-
-          {/* Fast Demo GCash Button */}
-          <div className="pt-1 flex justify-end">
+          {/* Payment Method Selector: QR Ph (GCash/Maya/Banks) vs Physical Cash */}
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => {
-                setGcashFileData({ 
-                  name: 'gcash_receipt.png', 
-                  dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150"><rect width="300" height="150" fill="%23007dfe" rx="12"/><text x="150" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">GCash Express Send Verified</text><text x="150" y="85" font-family="monospace" font-size="12" fill="white" text-anchor="middle">Ref: 902837491028</text><text x="150" y="115" font-family="sans-serif" font-size="11" fill="%23a7f3d0" text-anchor="middle">Status: Completed</text></svg>' 
-                });
-                setGcashRefNumber('902837491028');
+                setPayChannel('QRPH');
+                if (gcashRefNumber === 'CASH-HANDOVER') setGcashRefNumber('');
               }}
-              className="text-[10px] bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg border border-blue-200 transition cursor-pointer flex items-center gap-1 shadow-2xs"
+              className={`p-2 rounded-xl border text-center transition cursor-pointer ${
+                payChannel === 'QRPH' 
+                  ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] font-bold shadow-2xs' 
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
             >
-              <span>⚡ Fast Demo GCash (Ref: 902837491028)</span>
+              <div className="text-xs font-black">QR Ph / E-Wallet</div>
+              <p className="text-[9px] text-slate-500">GCash, Maya, BDO, Banks</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setPayChannel('CASH');
+                setGcashRefNumber('CASH-HANDOVER');
+              }}
+              className={`p-2 rounded-xl border text-center transition cursor-pointer ${
+                payChannel === 'CASH' 
+                  ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] font-bold shadow-2xs' 
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <div className="text-xs font-black">Cash on Hand</div>
+              <p className="text-[9px] text-slate-500">Direct to Landlord / Caretaker</p>
             </button>
           </div>
 
-          <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-1">
-              GCash Reference No. (Optional)
-            </label>
-            <input 
-              type="text"
-              value={gcashRefNumber}
-              onChange={(e) => setGcashRefNumber(e.target.value)}
-              placeholder="e.g. 902837491028"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#14532D]"
-            />
-          </div>
+          {payChannel === 'QRPH' ? (
+            <div className="space-y-2 pt-1">
+              <FileUpload 
+                label="Upload QR Ph / Bank transfer screenshot receipt"
+                helperText="Accepted: GCash, Maya, GoTyme, SeaBank, BDO, BPI"
+                onFileSelect={(data) => setGcashFileData(data)}
+                initialPreview={gcashFileData?.dataUrl}
+              />
+
+              {/* Fast Demo GCash Button */}
+              <div className="pt-0.5 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGcashFileData({ 
+                      name: 'qrph_receipt.png', 
+                      dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150"><rect width="300" height="150" fill="%23007dfe" rx="12"/><text x="150" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">QR Ph Transfer Verified</text><text x="150" y="85" font-family="monospace" font-size="12" fill="white" text-anchor="middle">Ref: 902837491028</text><text x="150" y="115" font-family="sans-serif" font-size="11" fill="%23a7f3d0" text-anchor="middle">Status: Completed</text></svg>' 
+                    });
+                    setGcashRefNumber('902837491028');
+                  }}
+                  className="text-[10px] bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg border border-blue-200 transition cursor-pointer flex items-center gap-1 shadow-2xs"
+                >
+                  <span>⚡ Fast Demo QR Ph (Ref: 902837491028)</span>
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Transaction / Trace Reference No.
+                </label>
+                <input 
+                  type="text"
+                  value={gcashRefNumber}
+                  onChange={(e) => setGcashRefNumber(e.target.value)}
+                  placeholder="e.g. 902837491028 or InstaPay Trace"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#14532D]"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2 text-amber-950 text-xs">
+              <p className="font-bold text-[11px] flex items-center gap-1.5 text-amber-900">
+                <span>💵 Physical Cash Settlement (Customary Law):</span>
+              </p>
+              <p className="text-[10px] leading-relaxed text-amber-800">
+                You can hand physical banknotes directly to the landlord or designated property caretaker. Once received, the landlord will tap "Acknowledge Cash Received" on their dashboard to unlock your room PIN.
+              </p>
+              <div className="flex justify-between items-center pt-1 border-t border-amber-200">
+                <span className="text-[10px] text-amber-700 font-medium">Status: Marked for Cash Handover</span>
+                <span className="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">
+                  Cash on Hand
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
