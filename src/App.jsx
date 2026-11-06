@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 
 // Layout Components
-import PitchBar from './components/layout/PitchBar';
 import MobileFrame from './components/layout/MobileFrame';
 import PrintableContract from './components/shared/PrintableContract';
 
@@ -106,9 +105,6 @@ function RentInPeaceContent() {
 
   return (
     <div className="app-shell-root min-h-screen bg-[#E5EAE7] text-slate-800 flex flex-col items-center justify-start sm:justify-center p-0 sm:py-6 font-sans antialiased selection:bg-emerald-200 selection:text-emerald-900">
-      {/* Top Demo & Pitch Controller Bar */}
-      <PitchBar />
-
       {/* Responsive PWA Mobile App Container */}
       <MobileFrame>
         {renderScreen()}

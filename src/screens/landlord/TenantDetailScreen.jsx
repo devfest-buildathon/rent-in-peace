@@ -4,7 +4,8 @@ import {
   ChevronLeft, 
   CheckCircle2, 
   KeyRound, 
-  Lock 
+  Lock,
+  FileText
 } from 'lucide-react';
 
 export default function TenantDetailScreen() {
@@ -12,7 +13,8 @@ export default function TenantDetailScreen() {
     setCurrentScreen, 
     selectedTenant, 
     contracts, 
-    verifyTenantPayment 
+    verifyTenantPayment,
+    lookupContractByCode
   } = useApp();
 
   const [verificationToast, setVerificationToast] = useState('');
@@ -43,6 +45,14 @@ export default function TenantDetailScreen() {
       setVerificationToast('Payment verified! Door lockbox PIN is unlocked.');
       setTimeout(() => setVerificationToast(''), 4000);
     }
+  };
+
+  const handleOpenKasulatan = async () => {
+    const code = liveContract.code || liveContract.id;
+    if (code) {
+      await lookupContractByCode(code);
+    }
+    setCurrentScreen('WIZARD_CONTRACT');
   };
 
   return (
@@ -141,10 +151,34 @@ export default function TenantDetailScreen() {
             <span className="font-bold text-slate-900">{tenant.due}</span>
           </div>
 
+          <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-100">
+            <span className="text-slate-400">Room Code</span>
+            <span className="font-mono font-bold text-slate-900">{liveContract.code || tenant.code || '—'}</span>
+          </div>
+
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-400">Tenant Phone</span>
             <span className="font-mono font-bold text-slate-900">{tenant.phone || '—'}</span>
           </div>
+        </div>
+
+        {/* View Official Kasulatan */}
+        <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3 mb-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-900">Signed Kasulatan Agreement</h3>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              {liveContract.signingMode === 'WET_INK' ? 'Wet-Ink Signatory' : 'Digital E-Sign'}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleOpenKasulatan}
+            className="w-full py-3 px-3 bg-emerald-50 hover:bg-emerald-100 text-[#14532D] font-bold text-xs rounded-2xl flex items-center justify-center gap-1.5 transition cursor-pointer border border-emerald-200"
+          >
+            <FileText className="w-4 h-4" />
+            <span>View & Print Kasulatan (A4)</span>
+          </button>
         </div>
 
       </div>

@@ -5,7 +5,11 @@ import {
   ChevronRight, 
   Languages,
   AlertCircle,
-  Loader2
+  Loader2,
+  PenTool,
+  Printer,
+  Check,
+  Camera
 } from 'lucide-react';
 import SignaturePad from '../../components/shared/SignaturePad';
 
@@ -22,6 +26,7 @@ export default function TenantPortalScreen() {
     tenantHasReadContract,
     setTenantHasReadContract,
     signingMode,
+    setSigningMode,
     signatureData,
     setSignatureData,
     gcashRefNumber,
@@ -69,7 +74,7 @@ export default function TenantPortalScreen() {
       return;
     }
     if (signingMode === 'DIGITAL' && !signatureData) {
-      setError('Please provide your digital e-signature below or use Auto-Sign.');
+      setError('Please provide your digital e-signature below or tap Auto-Sign.');
       return;
     }
 
@@ -107,7 +112,7 @@ export default function TenantPortalScreen() {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-600 mb-4">
+          <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-600 mb-4 shadow-2xs">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -132,19 +137,19 @@ export default function TenantPortalScreen() {
             <button
               type="button"
               onClick={() => setExplainBisaya(!explainBisaya)}
-              className="text-[11px] text-[#14532D] font-bold flex items-center gap-1 cursor-pointer"
+              className="text-[11px] text-[#14532D] font-bold flex items-center gap-1 cursor-pointer bg-emerald-50 px-2.5 py-1 rounded-lg"
             >
               <Languages className="w-3.5 h-3.5" />
               <span>{explainBisaya ? 'English Terms' : 'Bisaya Translation'}</span>
             </button>
           </div>
 
-          <div className="max-h-48 overflow-y-auto space-y-2 pr-1 scrollbar-none text-xs text-slate-700">
+          <div className="max-h-52 overflow-y-auto space-y-2 pr-1 scrollbar-none text-xs text-slate-700">
             {contractClauses.map((c, i) => (
-              <div key={i} className="p-2.5 bg-slate-50 rounded-xl">
-                <span className="font-bold text-slate-900 block">{i + 1}. {c.title}</span>
-                <p className="mt-0.5 leading-relaxed text-slate-600">
-                  {explainBisaya ? (c.bisaya || c.english) : c.english}
+              <div key={i} className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <span className="font-bold text-slate-900 block">{i + 1}. {(c.title || '').replace(/^\d+\.\s*/, '')}</span>
+                <p className="mt-1 leading-relaxed text-slate-700">
+                  {explainBisaya ? (c.bisaya || c.text || c.english) : (c.text || c.english)}
                 </p>
               </div>
             ))}
@@ -155,31 +160,91 @@ export default function TenantPortalScreen() {
               type="checkbox" 
               checked={tenantHasReadContract} 
               onChange={(e) => setTenantHasReadContract(e.target.checked)} 
-              className="mt-0.5 rounded text-[#14532D] focus:ring-emerald-600"
+              className="mt-0.5 rounded text-[#14532D] focus:ring-emerald-600 w-4 h-4 cursor-pointer"
             />
-            <span className="text-[11px] font-medium text-slate-600 leading-snug">
-              I have read, understood, and voluntarily agree to all provisions of this Kasulatan.
+            <span className="text-[11px] font-medium text-slate-700 leading-snug">
+              I have read, understood, and voluntarily agree to all provisions of this Kasulatan sa Pag-abang.
             </span>
           </label>
         </div>
 
-        {/* E-Signature */}
+        {/* Tenant Signature & Execution Options */}
         <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3 mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-slate-900">Lessee E-Signature</h3>
-            <button 
+            <div>
+              <h3 className="text-xs font-bold text-slate-900">Lessee Signature Mode</h3>
+              <p className="text-[11px] text-slate-400">Sign digitally on screen or print physical wet-ink copy.</p>
+            </div>
+          </div>
+
+          {/* Dual Mode Selector */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
               type="button"
-              onClick={handleQuickNameSign}
-              className="px-2.5 py-1 bg-emerald-50 text-[#14532D] font-bold text-[10px] rounded-lg hover:bg-emerald-100 transition cursor-pointer"
+              onClick={() => setSigningMode('DIGITAL')}
+              className={`p-2.5 rounded-2xl border text-left transition cursor-pointer flex flex-col gap-0.5 ${
+                signingMode === 'DIGITAL'
+                  ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] shadow-2xs'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
             >
-              Auto-Sign
+              <span className="text-xs font-black flex items-center gap-1.5">
+                <PenTool className="w-3.5 h-3.5" />
+                <span>Digital E-Sign</span>
+              </span>
+              <span className="text-[9px] text-slate-500">Sign with finger or stylus</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSigningMode('WET_INK')}
+              className={`p-2.5 rounded-2xl border text-left transition cursor-pointer flex flex-col gap-0.5 ${
+                signingMode === 'WET_INK'
+                  ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span className="text-xs font-black flex items-center gap-1.5">
+                <Printer className={`w-3.5 h-3.5 ${signingMode === 'WET_INK' ? 'text-amber-400' : 'text-slate-600'}`} />
+                <span>Wet-Ink Physical</span>
+              </span>
+              <span className={`text-[9px] ${signingMode === 'WET_INK' ? 'text-slate-300' : 'text-slate-500'}`}>Print A4 & ballpen sign</span>
             </button>
           </div>
 
-          <SignaturePad 
-            value={signatureData}
-            onChange={setSignatureData}
-          />
+          {signingMode === 'DIGITAL' ? (
+            <div className="space-y-2 pt-1">
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-slate-500 font-medium">Draw your signature below:</span>
+                <button 
+                  type="button"
+                  onClick={handleQuickNameSign}
+                  className="px-2.5 py-1 bg-emerald-50 text-[#14532D] font-bold text-[10px] rounded-lg hover:bg-emerald-100 transition cursor-pointer"
+                >
+                  Auto-Sign
+                </button>
+              </div>
+
+              <SignaturePad 
+                value={signatureData}
+                onChange={setSignatureData}
+              />
+            </div>
+          ) : (
+            <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-2xl text-amber-950 space-y-2 mt-1">
+              <p className="text-[10px] text-amber-800 leading-snug">
+                Article 1356: You can print 2 copies of this Kasulatan to physically sign with ballpen together with the landlord.
+              </p>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="w-full py-2.5 px-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5 text-amber-300" />
+                <span>Print Document for Physical Wet-Ink Signing (A4)</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* GCash Advance Rent Submission Card */}

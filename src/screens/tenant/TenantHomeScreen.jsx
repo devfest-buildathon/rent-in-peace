@@ -12,8 +12,8 @@ import {
 
 export default function TenantHomeScreen() {
   const { 
-    setCurrentScreen, 
-    tenantProfile, 
+    setCurrentScreen,
+    tenantProfile,
     tenantName,
     roomNumber,
     propertyAddress,
@@ -31,6 +31,7 @@ export default function TenantHomeScreen() {
   const activeContract = contracts.find(c => c.code === currentCode || c.id === currentCode) || {};
 
   const isVerified = Boolean(activeContract.paymentVerified);
+  const hasSigned = Boolean(activeContract.isSigned);
 
   const displayRoom = roomNumber || activeContract.roomNumber || 'Room Unit';
   const displayAddress = propertyAddress || activeContract.propertyAddress || 'Cagayan de Oro City';
@@ -55,6 +56,7 @@ export default function TenantHomeScreen() {
     setIsSubmittingPay(true);
     await submitTenantPayment({
       amount: Number(payAmount),
+      cycleName: payCycle,
       cycle: payCycle,
       gcashRef: payGcashRef.trim(),
       contractCode: currentCode
@@ -137,6 +139,7 @@ export default function TenantHomeScreen() {
         {/* Quick Action Grid */}
         <div className="grid grid-cols-3 gap-2.5 mb-5">
           <button 
+            type="button"
             onClick={() => setShowPayModal(true)}
             className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center text-center gap-1.5 hover:bg-slate-50 transition cursor-pointer active:scale-95"
           >
@@ -147,7 +150,8 @@ export default function TenantHomeScreen() {
           </button>
 
           <button 
-            onClick={() => setCurrentScreen('TENANT_PORTAL')}
+            type="button"
+            onClick={() => setCurrentScreen(hasSigned ? 'WIZARD_CONTRACT' : 'TENANT_PORTAL')}
             className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center text-center gap-1.5 hover:bg-slate-50 transition cursor-pointer active:scale-95"
           >
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#047857] flex items-center justify-center">
@@ -157,6 +161,7 @@ export default function TenantHomeScreen() {
           </button>
 
           <button 
+            type="button"
             onClick={() => setCurrentScreen('SUCCESS_PIN')}
             className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center text-center gap-1.5 hover:bg-slate-50 transition cursor-pointer active:scale-95"
           >
@@ -183,7 +188,7 @@ export default function TenantHomeScreen() {
               <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
               <p className="text-xs font-bold text-slate-700">No payment logs yet</p>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Tap "Pay Rent" above to upload your GCash confirmation receipt.
+                Tap "Pay Rent" above to log your GCash confirmation receipt.
               </p>
             </div>
           ) : (
@@ -198,7 +203,7 @@ export default function TenantHomeScreen() {
                       <CreditCard className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-900">{p.cycle || 'Rent Payment'}</p>
+                      <p className="text-xs font-bold text-slate-900">{p.cycleName || p.cycle || 'Rent Payment'}</p>
                       <p className="text-[10px] text-slate-400">Ref: <span className="font-mono text-slate-700 font-bold">{p.gcashRef || '—'}</span></p>
                     </div>
                   </div>
@@ -237,6 +242,17 @@ export default function TenantHomeScreen() {
                   value={payAmount}
                   onChange={(e) => setPayAmount(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Payment Cycle</label>
+                <input 
+                  type="text"
+                  value={payCycle}
+                  onChange={(e) => setPayCycle(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
                   required
                 />
               </div>

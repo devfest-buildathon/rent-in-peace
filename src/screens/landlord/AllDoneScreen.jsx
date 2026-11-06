@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Check, Copy, KeyRound, Share2, Home } from 'lucide-react';
+import { Check, Copy, KeyRound, Share2, Home, FileText } from 'lucide-react';
 
 export default function AllDoneScreen() {
   const { 
@@ -91,7 +91,15 @@ export default function AllDoneScreen() {
       </div>
 
       {/* Done CTA */}
-      <div className="pt-2 pb-2">
+      <div className="space-y-2 pt-2 pb-2">
+        <button 
+          onClick={() => window.print()}
+          className="w-full py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+        >
+          <FileText className="w-4 h-4 text-[#14532D]" />
+          <span>Save PDF / Print A4 Copy</span>
+        </button>
+
         <button 
           onClick={() => setCurrentScreen('LANDLORD_HOME')}
           className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"

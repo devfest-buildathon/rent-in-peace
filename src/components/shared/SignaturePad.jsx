@@ -1,10 +1,16 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { RotateCcw, Check, PenTool } from 'lucide-react';
 
-export default function SignaturePad({ onSave, initialSignature = null }) {
+export default function SignaturePad({ onSave, onChange, initialSignature = null, value = null }) {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [hasDrawn, setHasDrawn] = useState(Boolean(initialSignature));
+  const effectiveSignature = value !== undefined && value !== null ? value : initialSignature;
+  const [hasDrawn, setHasDrawn] = useState(Boolean(effectiveSignature));
+
+  const notifyChange = (dataUrl) => {
+    if (onChange) onChange(dataUrl);
+    if (onSave) onSave(dataUrl);
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -13,23 +19,30 @@ export default function SignaturePad({ onSave, initialSignature = null }) {
 
     // Handle high DPI displays
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * 2;
-    canvas.height = rect.height * 2;
-    ctx.scale(2, 2);
+    if (rect.width > 0 && rect.height > 0) {
+      canvas.width = rect.width * 2;
+      canvas.height = rect.height * 2;
+      ctx.scale(2, 2);
+    }
 
     ctx.strokeStyle = '#14532D';
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    if (initialSignature) {
+    if (effectiveSignature) {
       const img = new Image();
       img.onload = () => {
+        ctx.clearRect(0, 0, rect.width, rect.height);
         ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        setHasDrawn(true);
       };
-      img.src = initialSignature;
+      img.src = effectiveSignature;
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      setHasDrawn(false);
     }
-  }, [initialSignature]);
+  }, [effectiveSignature]);
 
   const getCoordinates = (e) => {
     const canvas = canvasRef.current;
@@ -76,9 +89,9 @@ export default function SignaturePad({ onSave, initialSignature = null }) {
     if (!isDrawing) return;
     setIsDrawing(false);
     const canvas = canvasRef.current;
-    if (canvas && onSave) {
+    if (canvas) {
       const dataUrl = canvas.toDataURL('image/png');
-      onSave(dataUrl);
+      notifyChange(dataUrl);
     }
   };
 
@@ -89,12 +102,12 @@ export default function SignaturePad({ onSave, initialSignature = null }) {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setHasDrawn(false);
-    if (onSave) onSave(null);
+    notifyChange(null);
   };
 
   return (
     <div className="w-full">
-      <div className="relative border-2 border-dashed border-emerald-600/60 rounded-2xl bg-white overflow-hidden shadow-2xs touch-none">
+      <div className="relative border-2 border-dashed border-emerald-600/50 rounded-2xl bg-white overflow-hidden shadow-2xs touch-none">
         <canvas
           ref={canvasRef}
           onMouseDown={startDrawing}
@@ -110,7 +123,7 @@ export default function SignaturePad({ onSave, initialSignature = null }) {
         {!hasDrawn && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-slate-400 text-xs font-medium gap-1.5 select-none">
             <PenTool className="w-4 h-4 text-emerald-700" />
-            <span>Draw your signature with finger or mouse</span>
+            <span>Draw your signature with finger, stylus, or mouse</span>
           </div>
         )}
 

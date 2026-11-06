@@ -1,11 +1,9 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
-  Home,
-  Check, 
+  Home, 
   FileText, 
   ShieldCheck, 
-  Handshake, 
   ChevronRight, 
   KeyRound,
   LogOut,
@@ -20,16 +18,8 @@ export default function SplashScreen() {
     tenantProfile, 
     userRole, 
     logout,
-    contracts,
-    activeCode
+    resetAppData
   } = useApp();
-
-  const tenantContract = contracts.find(
-    c => (tenantProfile?.contractCode && (c.code === tenantProfile.contractCode || c.id === tenantProfile.contractCode)) ||
-         (c.tenantUsername && c.tenantUsername === tenantProfile?.username) ||
-         (c.tenantName && c.tenantName === tenantProfile?.name) ||
-         (activeCode && (c.code === activeCode || c.id === activeCode))
-  ) || null;
 
   return (
     <div className="flex-1 flex flex-col justify-between px-6 py-5 max-w-lg mx-auto w-full relative">
@@ -83,7 +73,7 @@ export default function SplashScreen() {
           </p>
         </div>
 
-        {/* 3 iOS Style Feature Pills with Original Forest Green / Amber */}
+        {/* 3 iOS Style Feature Pills */}
         <div className="grid grid-cols-3 gap-2.5 my-3.5">
           <div className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-[0_4px_16px_rgba(0,0,0,0.02)] flex flex-col items-center text-center">
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#14532D] flex items-center justify-center mb-1.5 shadow-2xs">
@@ -105,14 +95,14 @@ export default function SplashScreen() {
             <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mb-1.5 shadow-2xs">
               <KeyRound className="w-4 h-4" />
             </div>
-            <p className="text-[11px] font-bold text-slate-900">PIN Access</p>
-            <p className="text-[9px] text-slate-400 mt-0.5">Lockbox Ready</p>
+            <p className="text-[11px] font-bold text-slate-900">Dual-signing</p>
+            <p className="text-[9px] text-slate-400 mt-0.5">Wet-ink or e-sign</p>
           </div>
         </div>
       </div>
 
       {/* Role Selection / Direct Entry Button Group */}
-      <div className="space-y-3 pt-2 pb-1">
+      <div className="space-y-3 pt-2 pb-1 text-center">
         {landlordProfile?.name && userRole === 'LANDLORD' ? (
           <div className="p-4 bg-white rounded-3xl border border-emerald-200 shadow-md space-y-3">
             <div className="flex items-center justify-between">
@@ -120,9 +110,9 @@ export default function SplashScreen() {
                 <div className="w-9 h-9 rounded-2xl bg-[#14532D] text-white flex items-center justify-center text-sm font-bold shadow-xs">
                   {landlordProfile.name.charAt(0).toUpperCase()}
                 </div>
-                <div>
+                <div className="text-left">
                   <p className="text-xs font-bold text-slate-900">{landlordProfile.name}</p>
-                  <p className="text-[10px] text-emerald-800 font-semibold">Signed in as Lessor</p>
+                  <p className="text-[10px] text-emerald-800 font-semibold">Signed in as Landlord</p>
                 </div>
               </div>
               <button
@@ -136,6 +126,7 @@ export default function SplashScreen() {
             </div>
 
             <button 
+              type="button"
               onClick={() => setCurrentScreen('LANDLORD_HOME')}
               className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
             >
@@ -143,10 +134,42 @@ export default function SplashScreen() {
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
+        ) : tenantProfile?.name && userRole === 'TENANT' ? (
+          <div className="p-4 bg-white rounded-3xl border border-emerald-200 shadow-md space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-[#14532D] text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                  {tenantProfile.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-slate-900">{tenantProfile.name}</p>
+                  <p className="text-[10px] text-emerald-800 font-semibold">Signed in as Tenant</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={logout}
+                className="text-[10px] text-slate-400 hover:text-red-600 font-semibold flex items-center gap-1 cursor-pointer transition"
+              >
+                <LogOut className="w-3 h-3" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+
+            <button 
+              type="button"
+              onClick={() => setCurrentScreen('TENANT_HOME')}
+              className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+            >
+              <span>Go to Tenant Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         ) : (
           <div className="space-y-2.5">
-            {/* Primary Action Button (Original Forest Green) */}
+            {/* Primary Action Button (Landlord) */}
             <button 
+              type="button"
               onClick={() => setCurrentScreen('LANDLORD_AUTH')}
               className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 px-4 rounded-2xl text-xs shadow-[0_10px_25px_rgba(20,83,45,0.22)] transition-all flex items-center justify-between group cursor-pointer active:scale-[0.98]"
             >
@@ -159,8 +182,9 @@ export default function SplashScreen() {
               </div>
             </button>
 
-            {/* Secondary Action Button (Tenant Portal entry) */}
+            {/* Secondary Action Button (Tenant) */}
             <button 
+              type="button"
               onClick={() => setCurrentScreen('TENANT_AUTH')}
               className="w-full bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 font-bold py-3.5 px-4 rounded-2xl text-xs shadow-sm transition-all flex items-center justify-between group cursor-pointer active:scale-[0.98]"
             >
@@ -174,6 +198,16 @@ export default function SplashScreen() {
             </button>
           </div>
         )}
+
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={resetAppData}
+            className="text-[10px] text-slate-400 hover:text-slate-600 transition cursor-pointer underline underline-offset-2"
+          >
+            Clear Test Data (Start Fresh)
+          </button>
+        </div>
       </div>
 
     </div>
