@@ -69,7 +69,7 @@ export default function LandlordHomeScreen() {
           </div>
         </div>
 
-        {/* Total Rent Roll Balance Display (Exact match to Reference 1 Header) */}
+        {/* Total Rent Roll Balance Display */}
         <div className="mb-5">
           <span className="text-xs font-semibold text-slate-500 tracking-tight">Active Monthly Rent Roll</span>
           <div className="flex items-baseline gap-1 mt-0.5">
@@ -80,7 +80,7 @@ export default function LandlordHomeScreen() {
           </div>
         </div>
 
-        {/* CARDS Carousel in Original Emerald Forest / Amber Color Theme */}
+        {/* CARDS Carousel */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2.5">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">PROPERTIES & LEASES</span>
@@ -96,7 +96,7 @@ export default function LandlordHomeScreen() {
           {/* Horizontal scroll cards */}
           <div className="flex items-stretch gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
             
-            {/* Primary Featured Card (Original Forest Green Gradient) */}
+            {/* Primary Featured Card */}
             <div className="min-w-[240px] max-w-[260px] h-[135px] rounded-3xl bg-gradient-to-tr from-[#14532D] via-[#047857] to-[#10b981] p-4 text-white shadow-[0_12px_28px_rgba(20,83,45,0.25)] flex flex-col justify-between shrink-0 snap-start relative overflow-hidden">
               <div className="absolute right-0 bottom-0 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
               
@@ -220,13 +220,26 @@ export default function LandlordHomeScreen() {
               {pendingContracts.map(c => (
                 <div 
                   key={c.code || c.id}
-                  className="p-3 bg-white rounded-2xl flex items-center justify-between text-xs shadow-2xs border border-amber-200"
+                  className="p-3 bg-white rounded-2xl flex items-center justify-between text-xs shadow-2xs border border-amber-200 gap-2"
                 >
-                  <div>
-                    <p className="font-bold text-slate-900">{c.tenantName || 'Tenant'}</p>
-                    <p className="text-[10px] text-slate-500">
-                      {c.roomNumber} · ₱{(c.advancePaidAmount || c.advanceRent || c.monthlyRent || 0).toLocaleString()} · Ref: <span className="font-mono font-bold text-amber-900">{c.gcashRef || 'Submitted'}</span>
-                    </p>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {c.gcashReceiptData ? (
+                      <img 
+                        src={c.gcashReceiptData} 
+                        alt="Receipt" 
+                        className="w-12 h-12 rounded-xl object-cover border border-emerald-300 shrink-0 bg-white shadow-2xs" 
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs shrink-0">
+                        ₱
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-bold text-slate-900 truncate">{c.tenantName || 'Tenant'}</p>
+                      <p className="text-[10px] text-slate-500">
+                        {c.roomNumber} · ₱{(c.advancePaidAmount || c.advanceRent || c.monthlyRent || 0).toLocaleString()} · Ref: <span className="font-mono font-bold text-amber-900">{c.gcashRef || 'Submitted'}</span>
+                      </p>
+                    </div>
                   </div>
 
                   <button
@@ -239,13 +252,17 @@ export default function LandlordHomeScreen() {
                         due: c.dueDay || 'Every 5th',
                         isSigned: c.isSigned,
                         paymentVerified: c.paymentVerified,
+                        signingMode: c.signingMode || 'DIGITAL',
+                        code: c.code || c.id,
+                        gcashRef: c.gcashRef,
+                        gcashReceiptData: c.gcashReceiptData,
                         contract: c
                       });
                       setCurrentScreen('TENANT_DETAIL');
                     }}
-                    className="px-3 py-1.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-[11px] rounded-xl flex items-center gap-1 cursor-pointer transition shadow-xs"
+                    className="px-3 py-1.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-[11px] rounded-xl flex items-center gap-1 cursor-pointer transition shadow-xs shrink-0"
                   >
-                    <span>Verify</span>
+                    <span>Review & Verify</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -292,6 +309,10 @@ export default function LandlordHomeScreen() {
                       due: c.dueDay || 'Every 5th',
                       isSigned: c.isSigned,
                       paymentVerified: c.paymentVerified,
+                      signingMode: c.signingMode || 'DIGITAL',
+                      code: c.code || c.id,
+                      gcashRef: c.gcashRef,
+                      gcashReceiptData: c.gcashReceiptData,
                       contract: c
                     });
                     setCurrentScreen('TENANT_DETAIL');

@@ -53,7 +53,7 @@ export default function ReviewShareScreen() {
           </p>
         </div>
 
-        {/* Summary Card with iOS Card Architecture */}
+        {/* Summary Card */}
         <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3 mb-4">
           <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 text-xs">
             <span className="text-slate-400 font-medium">Lessor (Landlord)</span>
@@ -62,59 +62,64 @@ export default function ReviewShareScreen() {
 
           <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 text-xs">
             <span className="text-slate-400 font-medium">Lessee (Tenant)</span>
-            <span className="font-bold text-slate-900">{tenantName || 'Prospective Lessee'}</span>
+            <span className="font-bold text-slate-900">{tenantName || 'To be filled upon tenant link'}</span>
           </div>
 
           <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 text-xs">
-            <span className="text-slate-400 font-medium">Property & Unit</span>
+            <span className="text-slate-400 font-medium">Premises</span>
             <span className="font-bold text-slate-900">{roomNumber} · {propertyType}</span>
           </div>
 
           <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 text-xs">
-            <span className="text-slate-400 font-medium">Monthly Rent</span>
-            <span className="font-black text-[#14532D] text-sm">₱{Number(monthlyRent || 0).toLocaleString()}</span>
-          </div>
-
-          <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 text-xs">
-            <span className="text-slate-400 font-medium">Advance & Deposit</span>
-            <span className="font-bold text-slate-900">₱{Number(advanceRent || 0).toLocaleString()} adv / ₱{Number(deposit || 0).toLocaleString()} dep</span>
+            <span className="text-slate-400 font-medium">Lease Term</span>
+            <span className="font-bold text-slate-900">{leaseDuration}</span>
           </div>
 
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-400 font-medium">Lease Duration</span>
-            <span className="font-bold text-slate-900">{leaseDuration}</span>
+            <span className="text-slate-400 font-medium">Monthly Rent</span>
+            <span className="font-black text-sm text-[#14532D]">₱{Number(monthlyRent || 0).toLocaleString()}</span>
           </div>
+
+          {(deposit || advanceRent) && (
+            <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+              <span>Advance & Deposit</span>
+              <span className="font-medium text-slate-700">
+                Adv: ₱{Number(advanceRent || 0).toLocaleString()} · Dep: ₱{Number(deposit || 0).toLocaleString()}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Tenant Quick Invite Code Pill */}
-        <div className="p-4 bg-emerald-50 rounded-3xl border border-emerald-200/80 mb-2">
+        {/* Shareable Code Box for Tenant */}
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-3xl mb-4 shadow-2xs">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#14532D]">Generated Unit Code</span>
-              <p className="font-mono text-xl font-black text-slate-900 tracking-wider mt-0.5">
-                {activeCode}
-              </p>
+              <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Room Code</p>
+              <p className="font-mono text-xl font-black text-[#14532D] mt-0.5">{activeCode || 'RIP-4B92'}</p>
             </div>
-
             <button 
+              type="button"
               onClick={handleCopyLink}
-              className="px-3.5 py-2 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+              className="px-3 py-1.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs"
             >
               {copiedLink ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedLink ? 'Copied' : 'Copy'}</span>
+              <span>{copiedLink ? 'Copied' : 'Copy Link'}</span>
             </button>
           </div>
+          <p className="text-[11px] text-emerald-800/80 mt-2">
+            Tenant can register with this code to review terms, e-sign the lease, and submit their advance rent.
+          </p>
         </div>
 
       </div>
 
-      {/* Continue CTA */}
+      {/* Generate Kasulatan CTA */}
       <div className="pt-3 pb-2">
         <button 
           onClick={handleGenerateKasulatan}
           className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
         >
-          <span>Generate Kasulatan Agreement</span>
+          <span>Generate Kasulatan sa Abang</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

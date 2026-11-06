@@ -34,10 +34,6 @@ export default function BasicsFormScreen() {
       return;
     }
 
-    if (!tenantName.trim()) {
-      setTenantName('Prospective Lessee');
-    }
-
     setError('');
     refreshClausesFromDraft();
     setCurrentScreen('WIZARD_REVIEW');
@@ -72,13 +68,13 @@ export default function BasicsFormScreen() {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-600 mb-4">
+          <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-600 mb-4 shadow-2xs">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Form Fields grouped in iOS Card style */}
+        {/* Form Fields grouped in Card style */}
         <div className="space-y-4">
           
           {/* Card 1: Property & Room */}
@@ -193,12 +189,12 @@ export default function BasicsFormScreen() {
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-500 mb-1">Prospective Tenant Name</label>
+              <label className="block text-[11px] font-semibold text-slate-500 mb-1">Tenant Name (Optional - filled when tenant registers)</label>
               <input 
                 type="text" 
                 value={tenantName} 
                 onChange={(e) => setTenantName(e.target.value)} 
-                placeholder="Leave blank if sharing link to unknown applicant" 
+                placeholder="Leave blank or enter known tenant name" 
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
               />
             </div>
@@ -213,7 +209,7 @@ export default function BasicsFormScreen() {
           onClick={handleContinue}
           className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
         >
-          <span>Review Terms</span>
+          <span>Continue to Review</span>
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>

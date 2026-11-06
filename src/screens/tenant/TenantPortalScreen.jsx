@@ -9,9 +9,10 @@ import {
   PenTool,
   Printer,
   Check,
-  Camera
+  CreditCard
 } from 'lucide-react';
 import SignaturePad from '../../components/shared/SignaturePad';
+import FileUpload from '../../components/shared/FileUpload';
 
 export default function TenantPortalScreen() {
   const { 
@@ -29,6 +30,8 @@ export default function TenantPortalScreen() {
     setSigningMode,
     signatureData,
     setSignatureData,
+    gcashFileData,
+    setGcashFileData,
     gcashRefNumber,
     setGcashRefNumber,
     recordTenantCheckin
@@ -125,7 +128,7 @@ export default function TenantPortalScreen() {
             type="text" 
             value={tenantName} 
             onChange={(e) => setTenantName(e.target.value)} 
-            placeholder="e.g. Juan dela Cruz" 
+            placeholder="e.g. Elena P. Salvador" 
             className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
           />
         </div>
@@ -250,13 +253,30 @@ export default function TenantPortalScreen() {
         {/* GCash Advance Rent Submission Card */}
         <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3 mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-slate-900">GCash Advance Rent Payment</h3>
-            <span className="font-black text-[#14532D] text-xs">₱{displayAdvance.toLocaleString()}</span>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#14532D] flex items-center justify-center">
+                <CreditCard className="w-4 h-4" />
+              </div>
+              <h3 className="text-xs font-bold text-slate-900">GCash Advance Rent Payment</h3>
+            </div>
+            <span className="font-black text-[#14532D] text-sm">₱{displayAdvance.toLocaleString()}</span>
           </div>
 
           <p className="text-[11px] text-slate-500">
-            Submit your GCash reference number to notify the landlord for approval.
+            Attach your GCash payment screenshot receipt and reference number so the landlord can verify and release your door PIN.
           </p>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">
+              GCash Receipt Screenshot
+            </label>
+            <FileUpload
+              label="Upload GCash Screenshot Receipt"
+              helperText="Upload GCash transfer screenshot with reference number"
+              initialPreview={gcashFileData?.dataUrl || gcashFileData}
+              onFileSelect={(data) => setGcashFileData(data)}
+            />
+          </div>
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">GCash Reference No.</label>
@@ -281,7 +301,7 @@ export default function TenantPortalScreen() {
         >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (
             <>
-              <span>Sign Agreement & Request Key PIN</span>
+              <span>Sign Agreement & Submit Advance Payment</span>
               <ChevronRight className="w-4 h-4" />
             </>
           )}

@@ -5,7 +5,11 @@ import {
   CheckCircle2, 
   KeyRound, 
   Lock,
-  FileText
+  FileText,
+  CreditCard,
+  ZoomIn,
+  X,
+  Clock
 } from 'lucide-react';
 
 export default function TenantDetailScreen() {
@@ -13,22 +17,24 @@ export default function TenantDetailScreen() {
     setCurrentScreen, 
     selectedTenant, 
     contracts, 
+    payments,
     verifyTenantPayment,
     lookupContractByCode
   } = useApp();
 
   const [verificationToast, setVerificationToast] = useState('');
+  const [zoomReceiptUrl, setZoomReceiptUrl] = useState(null);
 
   const tenant = selectedTenant || {
     name: 'Tenant Resident',
-    unit: 'Room 3B · Bedspace',
+    unit: 'Room Unit',
     rent: 3500,
     due: 'Every 5th',
-    phone: '09455195525',
-    isSigned: true,
-    paymentVerified: true,
+    phone: '09XXXXXXXXX',
+    isSigned: false,
+    paymentVerified: false,
     signingMode: 'DIGITAL',
-    contract: contracts[0] || null
+    contract: null
   };
 
   const liveContract = contracts.find(c => 
@@ -39,11 +45,35 @@ export default function TenantDetailScreen() {
 
   const isVerified = Boolean(liveContract.paymentVerified || tenant.paymentVerified);
 
+  // Look for uploaded receipt screenshot in contract or recent payments
+  const tenantPayments = payments.filter(p => 
+    (liveContract.code && p.contractCode === liveContract.code) || 
+    (liveContract.id && p.contractCode === liveContract.id) ||
+    (tenant.name && p.tenantName === tenant.name)
+  );
+
+  const receiptImage = liveContract.gcashReceiptData || 
+    tenant.gcashReceiptData || 
+    tenantPayments.find(p => p.receiptData)?.receiptData || 
+    null;
+
+  const gcashRef = liveContract.gcashRef || 
+    tenant.gcashRef || 
+    tenantPayments.find(p => p.gcashRef)?.gcashRef || 
+    null;
+
+  const paymentAmount = liveContract.advancePaidAmount || 
+    liveContract.latestPaymentAmount || 
+    liveContract.advanceRent || 
+    tenant.rent || 
+    0;
+
   const handleVerify = async () => {
-    if (liveContract.code || liveContract.id) {
-      await verifyTenantPayment(liveContract.code || liveContract.id);
-      setVerificationToast('Payment verified! Door lockbox PIN is unlocked.');
-      setTimeout(() => setVerificationToast(''), 4000);
+    const code = liveContract.code || liveContract.id || tenant.contract?.code;
+    if (code) {
+      await verifyTenantPayment(code);
+      setVerificationToast('Payment verified! Door lockbox PIN (5829) is now released to tenant.');
+      setTimeout(() => setVerificationToast(''), 4500);
     }
   };
 
@@ -73,47 +103,101 @@ export default function TenantDetailScreen() {
         {/* Tenant Hero Card */}
         <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs mb-4 flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-[#14532D] text-white font-black text-base flex items-center justify-center shadow-xs">
-            {tenant.name.charAt(0).toUpperCase()}
+            {(tenant.name || 'T').charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-base font-bold text-slate-900 truncate">{tenant.name}</h1>
             <p className="text-[11px] text-slate-400 mt-0.5">{tenant.unit}</p>
           </div>
           <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-            isVerified ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+            isVerified ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
           }`}>
             {isVerified ? 'Active Resident' : 'Pending Verification'}
           </span>
         </div>
 
-        {/* Status verification alert banner if payment pending */}
-        {liveContract.gcashRef && !isVerified && (
-          <div className="p-4 bg-amber-50 border border-amber-300 rounded-3xl mb-4">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider">
-                GCash Payment Submission
-              </span>
-              <span className="font-mono text-xs font-bold text-slate-900">
-                Ref: {liveContract.gcashRef}
-              </span>
-            </div>
-            <p className="text-xs text-slate-700 leading-snug mb-3">
-              Tenant submitted proof of advance rent. Confirming will unlock their lockbox PIN.
-            </p>
-            <button 
-              onClick={handleVerify}
-              className="w-full py-2.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Verify GCash Payment & Release PIN</span>
-            </button>
+        {verificationToast && (
+          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 font-bold mb-4 flex items-center gap-2 shadow-xs">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{verificationToast}</span>
           </div>
         )}
 
-        {verificationToast && (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 font-bold mb-3 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>{verificationToast}</span>
+        {/* GCash Payment Submission & Screenshot Card */}
+        {(gcashRef || receiptImage) && (
+          <div className="p-4 bg-white border-2 border-emerald-600/30 rounded-3xl mb-4 shadow-xs space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#14532D] flex items-center justify-center">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Payment Submission</span>
+                  <p className="text-xs font-bold text-slate-900">₱{Number(paymentAmount).toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="text-[10px] text-slate-400 block font-medium">Reference No.</span>
+                <span className="font-mono text-xs font-black text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                  {gcashRef || 'Submitted'}
+                </span>
+              </div>
+            </div>
+
+            {/* Uploaded Screenshot Preview */}
+            <div>
+              <span className="block text-[11px] font-bold text-slate-700 mb-1.5">
+                GCash Screenshot Receipt
+              </span>
+              {receiptImage ? (
+                <div 
+                  onClick={() => setZoomReceiptUrl(receiptImage)}
+                  className="relative group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-2xs"
+                  title="Click to view full size"
+                >
+                  <img 
+                    src={receiptImage} 
+                    alt="GCash Payment Receipt Screenshot" 
+                    className="w-full max-h-72 object-contain mx-auto group-hover:scale-102 transition duration-200" 
+                  />
+                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-bold gap-1.5 backdrop-blur-2xs">
+                    <ZoomIn className="w-4 h-4" />
+                    <span>Tap to zoom receipt</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-2xl text-[11px] text-amber-800">
+                  Tenant provided reference number <span className="font-mono font-bold">{gcashRef}</span> without image attachment.
+                </div>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            {!isVerified ? (
+              <div className="pt-1">
+                <p className="text-[11px] text-slate-500 mb-2 leading-relaxed">
+                  Confirm receipt match to unlock the apartment key lockbox PIN for {tenant.name}.
+                </p>
+                <button 
+                  onClick={handleVerify}
+                  className="w-full py-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Verify GCash Payment & Release PIN</span>
+                </button>
+              </div>
+            ) : (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs text-[#14532D] font-bold">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Payment Verified · Lockbox PIN Released</span>
+                </div>
+                <span className="font-mono text-[11px] bg-white text-emerald-900 px-2 py-0.5 rounded-lg border border-emerald-200">
+                  PIN: 5829
+                </span>
+              </div>
+            )}
           </div>
         )}
 
@@ -128,11 +212,11 @@ export default function TenantDetailScreen() {
               5829
             </p>
             <p className="text-[10px] text-emerald-200/80 mt-0.5">
-              {isVerified ? 'Unlocked and visible to tenant' : 'Locked until payment verified'}
+              {isVerified ? 'Unlocked and visible on tenant dashboard' : 'Locked until payment verified above'}
             </p>
           </div>
 
-          <div className={`p-2 rounded-2xl ${isVerified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
+          <div className={`p-2.5 rounded-2xl ${isVerified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
             {isVerified ? <CheckCircle2 className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
           </div>
         </div>
@@ -143,7 +227,7 @@ export default function TenantDetailScreen() {
           
           <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-100">
             <span className="text-slate-400">Monthly Rent</span>
-            <span className="font-black text-[#14532D]">₱{Number(tenant.rent || 0).toLocaleString()}</span>
+            <span className="font-black text-[#14532D]">₱{Number(tenant.rent || liveContract.monthlyRent || 0).toLocaleString()}</span>
           </div>
 
           <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-100">
@@ -192,6 +276,31 @@ export default function TenantDetailScreen() {
           Back to Directory
         </button>
       </div>
+
+      {/* Image Zoom Modal */}
+      {zoomReceiptUrl && (
+        <div 
+          onClick={() => setZoomReceiptUrl(null)} 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in"
+        >
+          <div className="relative max-w-sm w-full bg-white rounded-3xl p-3 shadow-2xl space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span className="text-xs font-bold text-slate-800">GCash Screenshot Receipt</span>
+              <button 
+                onClick={() => setZoomReceiptUrl(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <img 
+              src={zoomReceiptUrl} 
+              alt="Receipt Preview" 
+              className="w-full max-h-[75vh] object-contain rounded-2xl bg-slate-50"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

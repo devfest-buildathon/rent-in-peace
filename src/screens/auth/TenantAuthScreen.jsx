@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
   ChevronLeft, 
   KeyRound, 
   ArrowRight, 
   AlertCircle,
-  Loader2
+  Loader2,
+  User,
+  Lock,
+  Building
 } from 'lucide-react';
 
 export default function TenantAuthScreen({ initialTab = 'register' }) {
@@ -16,10 +19,12 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
     roomCodeInput,
     setRoomCodeInput,
     activeCode,
-    tenantName
+    tenantName,
+    lookupContractByCode
   } = useApp();
 
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [regFullName, setRegFullName] = useState(tenantName || '');
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regCode, setRegCode] = useState(roomCodeInput || activeCode || '');
@@ -29,8 +34,24 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
 
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [detectedContract, setDetectedContract] = useState(null);
 
   const displayCode = regCode || roomCodeInput || activeCode || '';
+
+  // Auto-detect landlord contract details when room code is entered or loaded
+  useEffect(() => {
+    const code = (regCode || displayCode).trim().toUpperCase();
+    if (code.length >= 6) {
+      lookupContractByCode(code).then((found) => {
+        if (found) {
+          setDetectedContract(found);
+          if (found.tenantName && !regFullName) {
+            setRegFullName(found.tenantName);
+          }
+        }
+      });
+    }
+  }, [regCode]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -39,7 +60,16 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
     const cleanUser = regUsername.trim().toLowerCase().replace(/\s+/g, '');
     const cleanPass = regPassword.trim();
     const cleanCode = (regCode || displayCode).trim().toUpperCase();
+    const finalLegalName = (regFullName.trim() || detectedContract?.tenantName || tenantName || cleanUser);
 
+    if (!cleanCode) {
+      setError('Please enter your Landlord Invite / Room Code (e.g. RIP-4B92).');
+      return;
+    }
+    if (!finalLegalName) {
+      setError('Please enter your full legal name.');
+      return;
+    }
     if (!cleanUser) {
       setError('Please choose a username.');
       return;
@@ -48,21 +78,18 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
       setError('Please choose a password.');
       return;
     }
-    if (!cleanCode) {
-      setError('Please enter your Landlord Invite / Room Code (e.g. RIP-4B92).');
-      return;
-    }
 
     setIsLoading(true);
     const result = await registerTenant({
       username: cleanUser,
       password: cleanPass,
       code: cleanCode,
-      name: tenantName || cleanUser
+      name: finalLegalName
     });
     setIsLoading(false);
 
     if (result.success) {
+      // Go to portal to review Kasulatan, sign, and submit GCash advance payment
       setCurrentScreen('TENANT_PORTAL');
     } else {
       setError(result.error || 'Failed to link room code. Please check code.');
@@ -113,11 +140,11 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
             {activeTab === 'register' ? 'Join Rental Unit' : 'Tenant Sign In'}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Access your Kasulatan lease contract and smart door PIN.
+            Access your Kasulatan lease contract, pay rent, and view door PIN.
           </p>
         </div>
 
-        {/* iOS Segmented Tabs */}
+        {/* Segmented Tabs */}
         <div className="p-1 bg-slate-200/70 rounded-2xl flex items-center mb-5">
           <button
             type="button"
@@ -140,7 +167,7 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-600 mb-4">
+          <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-600 mb-4 shadow-2xs">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -171,13 +198,40 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
                 </div>
               </div>
 
+              {detectedContract && (
+                <div className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl text-[11px] text-emerald-900 flex items-center gap-2">
+                  <Building className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <div>
+                    <span className="font-bold">{detectedContract.roomNumber || 'Room Unit'}</span> · {detectedContract.propertyAddress || 'Cagayan de Oro'}
+                    <span className="block text-[10px] text-emerald-700">Lessor: {detectedContract.landlordName || 'Landlord'}</span>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+                  Full Legal Name (Lessee)
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-[#14532D] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input 
+                    type="text"
+                    value={regFullName}
+                    onChange={(e) => setRegFullName(e.target.value)}
+                    placeholder="e.g. Elena P. Salvador"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                    required
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[11px] font-semibold text-slate-500 mb-1">Choose Username</label>
                 <input 
                   type="text"
                   value={regUsername}
                   onChange={(e) => setRegUsername(e.target.value)}
-                  placeholder="e.g. juan_delacruz"
+                  placeholder="e.g. elena_salvador"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
                   required
                 />
@@ -185,14 +239,17 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-500 mb-1">Create Password</label>
-                <input 
-                  type="password"
-                  value={regPassword}
-                  onChange={(e) => setRegPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
-                  required
-                />
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input 
+                    type="password"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -219,7 +276,7 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
                   type="text"
                   value={loginUsername}
                   onChange={(e) => setLoginUsername(e.target.value)}
-                  placeholder="juan_delacruz"
+                  placeholder="e.g. elena_salvador"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
                   required
                 />
