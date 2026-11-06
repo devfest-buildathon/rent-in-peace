@@ -25,9 +25,9 @@ git clone https://github.com/devfest-buildathon/rent-in-peace.git
 cd rent-in-peace
 ```
 
-### 3. Switch to the Working Branch
+### 3. Verify Stable Production Branch (main)
 ```bash
-git checkout database-ai-stuff-yeah
+git checkout main
 ```
 
 ### 4. Install Dependencies
@@ -82,8 +82,9 @@ npm run preview
 - **No Complex Forms for Tenants**: The landlord pre-fills the tenant's legal name, unit number, and rent amount. The tenant only needs to set up a **Username** and **Password** to register.
 - **Direct Login to Dashboard**: Logging in takes the tenant straight to their **Tenant Dashboard** (`TENANT_HOME`) without forcing them through repetitive onboarding or setup flows.
 
-### 💳 3. In-App Rent Payments & Ledger
-- **GCash QR Ph Integration**: Tenants can view the landlord's GCash number, attach transfer receipt screenshots, and enter their GCash reference number directly in-app.
+### 💳 3. Universal Hybrid Payment Ledger (QR Ph & Physical Cash)
+- **BSP QR Ph Standard**: Accepts all Philippine e-wallets and banks (GCash, Maya, SeaBank, BDO, GoTyme).
+- **Physical Cash-on-Hand Mode**: Tenants paying in paper bills submit a cash receipt confirmation; landlords verify with a single tap to generate a digital acknowledgment receipt.
 - **Rent Schedule & Countdown Progress Tracker**: 
   - Clear visual tracking of total payments (e.g., `6-month schedule: 1 of 6 payments completed · 5 remaining`).
   - Next due date indicator (`Due every 5th of each month`).
