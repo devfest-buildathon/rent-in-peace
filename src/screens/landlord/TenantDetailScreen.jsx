@@ -4,12 +4,13 @@ import {
   ChevronLeft, 
   CheckCircle2, 
   KeyRound, 
-  Lock,
-  FileText,
-  CreditCard,
-  ZoomIn,
-  X,
-  Clock
+  Lock, 
+  FileText, 
+  CreditCard, 
+  ZoomIn, 
+  X, 
+  HelpCircle, 
+  Loader2 
 } from 'lucide-react';
 
 export default function TenantDetailScreen() {
@@ -24,6 +25,9 @@ export default function TenantDetailScreen() {
 
   const [verificationToast, setVerificationToast] = useState('');
   const [zoomReceiptUrl, setZoomReceiptUrl] = useState(null);
+  const [confirmVerifyModal, setConfirmVerifyModal] = useState(false);
+  const [pendingTargetPayment, setPendingTargetPayment] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const tenant = selectedTenant || {
     name: 'Tenant Resident',
@@ -45,11 +49,13 @@ export default function TenantDetailScreen() {
 
   const isVerified = Boolean(liveContract.paymentVerified || tenant.paymentVerified);
 
-  // Look for uploaded receipt screenshot in contract or recent payments
+  // Filter every payment recorded for this resident / contract
   const tenantPayments = payments.filter(p => 
     (liveContract.code && p.contractCode === liveContract.code) || 
     (liveContract.id && p.contractCode === liveContract.id) ||
-    (tenant.name && p.tenantName === tenant.name)
+    (tenant.contract?.code && p.contractCode === tenant.contract?.code) ||
+    (tenant.code && p.contractCode === tenant.code) ||
+    (tenant.name && p.tenantName && p.tenantName.toLowerCase() === tenant.name.toLowerCase())
   );
 
   const receiptImage = liveContract.gcashReceiptData || 
@@ -68,13 +74,22 @@ export default function TenantDetailScreen() {
     tenant.rent || 
     0;
 
-  const handleVerify = async () => {
+  const triggerVerifyConfirmation = (payment = null) => {
+    setPendingTargetPayment(payment);
+    setConfirmVerifyModal(true);
+  };
+
+  const confirmAndExecuteVerification = async () => {
+    setIsVerifying(true);
     const code = liveContract.code || liveContract.id || tenant.contract?.code;
+    const paymentId = pendingTargetPayment?.id || null;
     if (code) {
-      await verifyTenantPayment(code);
+      await verifyTenantPayment(code, paymentId);
       setVerificationToast('Payment verified! Door lockbox PIN (5829) is now released to tenant.');
       setTimeout(() => setVerificationToast(''), 4500);
     }
+    setIsVerifying(false);
+    setConfirmVerifyModal(false);
   };
 
   const handleOpenKasulatan = async () => {
@@ -123,7 +138,7 @@ export default function TenantDetailScreen() {
           </div>
         )}
 
-        {/* GCash Payment Submission & Screenshot Card */}
+        {/* GCash Latest Payment Submission Card */}
         {(gcashRef || receiptImage) && (
           <div className="p-4 bg-white border-2 border-emerald-600/30 rounded-3xl mb-4 shadow-xs space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -132,7 +147,7 @@ export default function TenantDetailScreen() {
                   <CreditCard className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Payment Submission</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Latest Payment Proof</span>
                   <p className="text-xs font-bold text-slate-900">₱{Number(paymentAmount).toLocaleString()}</p>
                 </div>
               </div>
@@ -168,19 +183,20 @@ export default function TenantDetailScreen() {
                 </div>
               ) : (
                 <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-2xl text-[11px] text-amber-800">
-                  Tenant provided reference number <span className="font-mono font-bold">{gcashRef}</span> without image attachment.
+                  Tenant provided reference number <span className="font-mono font-bold">{gcashRef}</span> without screenshot attachment.
                 </div>
               )}
             </div>
 
-            {/* Action buttons */}
+            {/* Verification trigger */}
             {!isVerified ? (
               <div className="pt-1">
                 <p className="text-[11px] text-slate-500 mb-2 leading-relaxed">
                   Confirm receipt match to unlock the apartment key lockbox PIN for {tenant.name}.
                 </p>
                 <button 
-                  onClick={handleVerify}
+                  type="button"
+                  onClick={() => triggerVerifyConfirmation(null)}
                   className="w-full py-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
                   <CheckCircle2 className="w-4 h-4" />
@@ -212,13 +228,92 @@ export default function TenantDetailScreen() {
               5829
             </p>
             <p className="text-[10px] text-emerald-200/80 mt-0.5">
-              {isVerified ? 'Unlocked and visible on tenant dashboard' : 'Locked until payment verified above'}
+              {isVerified ? 'Unlocked and visible on tenant dashboard' : 'Locked until payment verified'}
             </p>
           </div>
 
           <div className={`p-2.5 rounded-2xl ${isVerified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
             {isVerified ? <CheckCircle2 className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
           </div>
+        </div>
+
+        {/* All Payments Ledger & Audit Trail for this Resident */}
+        <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3 mb-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div>
+              <h3 className="text-xs font-bold text-slate-900">Resident Payment History</h3>
+              <p className="text-[10px] text-slate-400">All payments logged for {tenant.name}</p>
+            </div>
+            <span className="text-xs font-bold text-[#14532D] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              {tenantPayments.length} recorded
+            </span>
+          </div>
+
+          {tenantPayments.length === 0 ? (
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+              <p className="text-xs text-slate-500 font-medium">No individual payment logs recorded yet.</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Payments submitted by this resident will appear here with GCash receipt proofs.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {tenantPayments.map((p, idx) => {
+                const itemReceipt = p.receiptData || (p.cycleName?.includes('Advance') ? liveContract.gcashReceiptData : null);
+                const isItemVerified = p.status === 'Verified';
+
+                return (
+                  <div key={p.id || idx} className="p-3 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {itemReceipt ? (
+                        <div 
+                          onClick={() => setZoomReceiptUrl(itemReceipt)}
+                          className="w-11 h-11 rounded-xl overflow-hidden border border-emerald-300 shrink-0 cursor-pointer relative group bg-white shadow-2xs"
+                          title="Click to view full receipt"
+                        >
+                          <img src={itemReceipt} alt="Receipt Thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition" />
+                          <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white">
+                            <ZoomIn className="w-3.5 h-3.5" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-11 h-11 rounded-xl bg-emerald-100/70 text-[#14532D] flex items-center justify-center font-bold text-xs shrink-0">
+                          <CreditCard className="w-5 h-5" />
+                        </div>
+                      )}
+
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 truncate">{p.cycleName || p.cycle || 'Rent Payment'}</p>
+                        <p className="text-[10px] text-slate-500">
+                          Ref: <span className="font-mono font-bold text-slate-800">{p.gcashRef || '—'}</span>
+                          {p.date && <span className="ml-1.5 text-slate-400">· {p.date}</span>}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0 flex items-center gap-2">
+                      <div>
+                        <p className="text-xs font-black text-slate-900">₱{Number(p.amount || 0).toLocaleString()}</p>
+                        <span className={`text-[10px] font-bold ${
+                          isItemVerified ? 'text-emerald-700' : 'text-amber-600'
+                        }`}>
+                          {p.status || 'Pending Verification'}
+                        </span>
+                      </div>
+
+                      {!isItemVerified && (
+                        <button
+                          type="button"
+                          onClick={() => triggerVerifyConfirmation(p)}
+                          className="px-2.5 py-1 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-[10px] rounded-lg shadow-xs transition cursor-pointer"
+                        >
+                          Verify
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Financial & Schedule Overview */}
@@ -276,6 +371,79 @@ export default function TenantDetailScreen() {
           Back to Directory
         </button>
       </div>
+
+      {/* Confirmation Modal: Are You Sure? */}
+      {confirmVerifyModal && (
+        <div 
+          onClick={() => setConfirmVerifyModal(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                <HelpCircle className="w-6 h-6 stroke-[2.5]" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900">Confirm Payment Verification?</h3>
+                <p className="text-[11px] text-slate-500">Please review before approving</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                <span className="text-slate-500">Resident</span>
+                <span className="font-bold text-slate-900">{tenant.name}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                <span className="text-slate-500">Unit</span>
+                <span className="font-bold text-slate-900">{tenant.unit}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                <span className="text-slate-500">Reference No.</span>
+                <span className="font-mono font-bold text-emerald-800">{pendingTargetPayment?.gcashRef || gcashRef || 'Submitted'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Amount</span>
+                <span className="font-black text-[#14532D] text-sm">
+                  ₱{Number(pendingTargetPayment?.amount || paymentAmount || 0).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 leading-snug">
+              Approving will mark this payment as <strong>Verified</strong> and immediately unlock the physical master lockbox PIN (<strong>5829</strong>) on the resident's app.
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmVerifyModal(false)}
+                className="py-3 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isVerifying}
+                onClick={confirmAndExecuteVerification}
+                className="py-3 px-3 rounded-xl bg-[#14532D] hover:bg-[#0f4022] text-xs font-bold text-white shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                {isVerifying ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Yes, Verify</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Image Zoom Modal */}
       {zoomReceiptUrl && (

@@ -16,10 +16,16 @@ export default function MyTenantsScreen() {
     setSearchQuery,
     tenantFilter,
     setTenantFilter,
+    tenantsList,
     filteredTenants,
     setSelectedTenant,
     startNewContract
   } = useApp();
+
+  const totalCount = tenantsList.length;
+  const verifiedCount = tenantsList.filter(t => t.paymentVerified).length;
+  const pendingCount = tenantsList.filter(t => !t.paymentVerified || t.status === 'Pending Verification' || Boolean(t.gcashRef && !t.paymentVerified)).length;
+  const dueCount = tenantsList.filter(t => !t.paymentVerified || (t.due && t.due.includes('5th'))).length;
 
   return (
     <div className="flex-1 flex flex-col justify-between min-h-0 bg-[#F4F8F5]">
@@ -68,13 +74,13 @@ export default function MyTenantsScreen() {
           />
         </div>
 
-        {/* Filter Pills */}
+        {/* Filter Pills with Real Counts */}
         <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1 scrollbar-none">
           {[
-            { id: 'ALL', label: 'All Residents' },
-            { id: 'ACTIVE', label: 'Verified' },
-            { id: 'DUE', label: 'Due Soon' },
-            { id: 'PENDING', label: 'Pending Verify' },
+            { id: 'ALL', label: `All (${totalCount})` },
+            { id: 'ACTIVE', label: `Verified (${verifiedCount})` },
+            { id: 'PENDING', label: `Pending Verify (${pendingCount})` },
+            { id: 'DUE', label: `Due Soon (${dueCount})` },
           ].map((f) => (
             <button
               key={f.id}
@@ -97,7 +103,7 @@ export default function MyTenantsScreen() {
               <Users className="w-10 h-10 text-slate-300 mx-auto mb-2" />
               <p className="text-xs font-bold text-slate-700">No tenants found</p>
               <p className="text-[11px] text-slate-400 mt-1 max-w-[200px] mx-auto">
-                No records match your search filter.
+                No records match your selected filter.
               </p>
             </div>
           ) : (

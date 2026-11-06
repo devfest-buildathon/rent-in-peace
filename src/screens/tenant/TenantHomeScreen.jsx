@@ -29,6 +29,7 @@ export default function TenantHomeScreen() {
     contracts,
     payments,
     submitTenantPayment,
+    lookupContractByCode,
     logout
   } = useApp();
 
@@ -184,7 +185,12 @@ export default function TenantHomeScreen() {
 
           <button 
             type="button"
-            onClick={() => setCurrentScreen(hasSigned ? 'WIZARD_CONTRACT' : 'TENANT_PORTAL')}
+            onClick={async () => {
+              if (currentCode) {
+                await lookupContractByCode(currentCode);
+              }
+              setCurrentScreen('WIZARD_CONTRACT');
+            }}
             className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col items-center text-center gap-1.5 hover:bg-slate-50 transition cursor-pointer active:scale-95"
           >
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#047857] flex items-center justify-center">

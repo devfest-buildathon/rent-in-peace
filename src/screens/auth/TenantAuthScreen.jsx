@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../context/AppContext';
+import { useApp, isGenericTenantName } from '../../context/AppContext';
 import { 
   ChevronLeft, 
   KeyRound, 
@@ -24,7 +24,9 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [regFullName, setRegFullName] = useState(tenantName || '');
+  const [regFullName, setRegFullName] = useState(() => {
+    return isGenericTenantName(tenantName) ? '' : (tenantName || '');
+  });
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regCode, setRegCode] = useState(roomCodeInput || activeCode || '');
@@ -45,8 +47,11 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
       lookupContractByCode(code).then((found) => {
         if (found) {
           setDetectedContract(found);
-          if (found.tenantName && !regFullName) {
+          // Only auto-fill if it's a real person's name, NEVER a generic string like 'Prospective Lessee'
+          if (found.tenantName && !isGenericTenantName(found.tenantName)) {
             setRegFullName(found.tenantName);
+          } else {
+            setRegFullName('');
           }
         }
       });
@@ -60,7 +65,14 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
     const cleanUser = regUsername.trim().toLowerCase().replace(/\s+/g, '');
     const cleanPass = regPassword.trim();
     const cleanCode = (regCode || displayCode).trim().toUpperCase();
-    const finalLegalName = (regFullName.trim() || detectedContract?.tenantName || tenantName || cleanUser);
+    
+    // Fallback order: Explicit input > Real detected contract name > clean username
+    let finalLegalName = regFullName.trim();
+    if (isGenericTenantName(finalLegalName)) {
+      finalLegalName = (!isGenericTenantName(detectedContract?.tenantName) ? detectedContract.tenantName : '') || 
+                       (!isGenericTenantName(tenantName) ? tenantName : '') || 
+                       cleanUser;
+    }
 
     if (!cleanCode) {
       setError('Please enter your Landlord Invite / Room Code (e.g. RIP-4B92).');
@@ -89,7 +101,7 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
     setIsLoading(false);
 
     if (result.success) {
-      // Go to portal to review Kasulatan, sign, and submit GCash advance payment
+      // Go directly to portal to review Kasulatan and submit GCash advance payment
       setCurrentScreen('TENANT_PORTAL');
     } else {
       setError(result.error || 'Failed to link room code. Please check code.');

@@ -94,7 +94,7 @@ export default function TenantPortalScreen() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <button 
-            onClick={() => setCurrentScreen('TENANT_AUTH')} 
+            onClick={() => setCurrentScreen(tenantName || signingMode ? 'TENANT_HOME' : 'SPLASH')} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />

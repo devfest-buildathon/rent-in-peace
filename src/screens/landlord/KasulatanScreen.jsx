@@ -12,7 +12,6 @@ import {
   Printer,
   PenTool,
   FileText,
-  Edit3,
   ShieldCheck
 } from 'lucide-react';
 import StepIndicator from '../../components/shared/StepIndicator';
@@ -33,6 +32,7 @@ export default function KasulatanScreen() {
     setLandlordSignature,
     landlordSigningMode,
     setLandlordSigningMode,
+    selectedTenant,
     userRole
   } = useApp();
 
@@ -78,7 +78,7 @@ export default function KasulatanScreen() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <button 
-            onClick={() => setCurrentScreen(userRole === 'TENANT' ? 'TENANT_HOME' : 'WIZARD_REVIEW')} 
+            onClick={() => setCurrentScreen(userRole === 'TENANT' ? 'TENANT_HOME' : (selectedTenant ? 'TENANT_DETAIL' : 'LANDLORD_HOME'))} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
@@ -92,6 +92,11 @@ export default function KasulatanScreen() {
           <div className="flex items-center justify-between px-3 py-1.5 mb-3 text-[11px] font-bold text-[#14532D] bg-[#ECFDF5] border border-emerald-200 rounded-2xl">
             <span>Official Rental Lease Agreement (Kasulatan)</span>
             <span className="font-mono text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full">Certified</span>
+          </div>
+        ) : selectedTenant ? (
+          <div className="flex items-center justify-between px-3 py-1.5 mb-3 text-[11px] font-bold text-[#14532D] bg-emerald-50 border border-emerald-200 rounded-2xl">
+            <span>Viewing Signed Kasulatan sa Abang</span>
+            <span className="font-mono text-[10px] bg-emerald-800 text-white px-2 py-0.5 rounded-full">Archived</span>
           </div>
         ) : (
           <StepIndicator currentStep={3} />
@@ -107,8 +112,8 @@ export default function KasulatanScreen() {
           </p>
         </div>
 
-        {/* AI Customization Prompt Card (Landlord Only) */}
-        {userRole !== 'TENANT' && (
+        {/* AI Customization Prompt Card (Landlord Only, when drafting) */}
+        {userRole !== 'TENANT' && !selectedTenant && (
           <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-3xl mb-4 shadow-2xs">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-lg bg-[#14532D] text-white flex items-center justify-center">
@@ -156,7 +161,7 @@ export default function KasulatanScreen() {
                 <span className="text-xs font-bold text-slate-900">
                   {idx + 1}. {(clause.title || '').replace(/^\d+\.\s*/, '')}
                 </span>
-                {clause.custom && userRole !== 'TENANT' && (
+                {clause.custom && userRole !== 'TENANT' && !selectedTenant && (
                   <button 
                     onClick={() => handleRemoveClause(idx)}
                     className="text-slate-300 hover:text-red-500 transition cursor-pointer"
@@ -182,8 +187,8 @@ export default function KasulatanScreen() {
           <div ref={clausesEndRef} />
         </div>
 
-        {/* Landlord Signature & Execution Mode Section (Landlord View) */}
-        {userRole !== 'TENANT' ? (
+        {/* Landlord Signature & Execution Mode Section (Landlord View, when drafting) */}
+        {userRole !== 'TENANT' && !selectedTenant ? (
           <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3 mb-4">
             <div className="flex items-center justify-between">
               <div>
@@ -286,7 +291,7 @@ export default function KasulatanScreen() {
             )}
           </div>
         ) : (
-          /* Tenant View: Execution Status */
+          /* Execution Status */
           <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#14532D] flex items-center justify-center">
@@ -327,6 +332,24 @@ export default function KasulatanScreen() {
               className="py-3.5 px-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-md transition cursor-pointer"
             >
               <span>Back to Dashboard</span>
+            </button>
+          </div>
+        ) : selectedTenant ? (
+          <div className="grid grid-cols-2 gap-2">
+            <button 
+              type="button"
+              onClick={() => window.print()}
+              className="py-3.5 px-3 bg-white border border-slate-200 text-slate-800 font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 hover:bg-slate-50 transition cursor-pointer shadow-xs"
+            >
+              <FileText className="w-4 h-4 text-[#14532D]" />
+              <span>Save / Print PDF</span>
+            </button>
+            <button 
+              type="button"
+              onClick={() => setCurrentScreen('TENANT_DETAIL')}
+              className="py-3.5 px-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-2xl text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+            >
+              <span>Back to Tenant</span>
             </button>
           </div>
         ) : (

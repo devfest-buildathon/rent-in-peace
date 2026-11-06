@@ -15,6 +15,13 @@ import {
 
 const AppContext = createContext();
 
+// Helper to filter out legacy or mock generic placeholder names
+export const isGenericTenantName = (name) => {
+  if (!name || typeof name !== 'string') return true;
+  const lower = name.trim().toLowerCase();
+  return lower.includes('prospective') || lower.includes('lessee') || lower === 'tenant' || lower === 'unnamed' || lower === 'new resident';
+};
+
 // Helper to generate realistic legal clauses from entered data
 export function generateDefaultClauses({
   landlord = '',
@@ -33,12 +40,13 @@ export function generateDefaultClauses({
   const rentFormatted = rent ? `₱${Number(rent).toLocaleString()}` : '₱[Amount]';
   const depFormatted = dep ? `₱${Number(dep).toLocaleString()}` : '₱[Amount]';
   const advanceFormatted = advance ? `₱${Number(advance).toLocaleString()}` : '₱[Amount]';
+  const cleanTenant = isGenericTenantName(tenant) ? '' : tenant;
 
   return [
     {
       num: 1,
       title: '1. Parties to the Agreement',
-      text: `This residential lease agreement is entered into by ${landlord || '[Landlord Name]'} (Lessor) and ${tenant || '[Tenant Name]'} (Lessee).`
+      text: `This residential lease agreement is entered into by ${landlord || '[Landlord Name]'} (Lessor) and ${cleanTenant || '[Tenant Name]'} (Lessee).`
     },
     {
       num: 2,
@@ -219,11 +227,16 @@ export function AppProvider({ children }) {
   };
 
   const [tenantName, setTenantNameState] = useState(() => {
-    return localStorage.getItem('rip_draft_tenantName') || '';
+    const saved = localStorage.getItem('rip_draft_tenantName') || '';
+    return isGenericTenantName(saved) ? '' : saved;
   });
   const setTenantName = (val) => {
-    setTenantNameState(val);
-    try { localStorage.setItem('rip_draft_tenantName', val); } catch (e) {}
+    const clean = isGenericTenantName(val) ? '' : val;
+    setTenantNameState(clean);
+    try { 
+      if (clean) localStorage.setItem('rip_draft_tenantName', clean);
+      else localStorage.removeItem('rip_draft_tenantName');
+    } catch (e) {}
   };
 
   // Landlord Signing State: 'DIGITAL' | 'WET_INK'
@@ -544,7 +557,7 @@ export function AppProvider({ children }) {
   const refreshClausesFromDraft = () => {
     setContractClauses(generateDefaultClauses({
       landlord: landlordName,
-      tenant: tenantName,
+      tenant: isGenericTenantName(tenantName) ? '' : tenantName,
       room: roomNumber,
       address: propertyAddress,
       propType: propertyType,
@@ -606,6 +619,8 @@ export function AppProvider({ children }) {
     }
     setActiveCode(codeToUse);
 
+    const cleanTenant = isGenericTenantName(tenantName) ? '' : tenantName;
+
     const newContract = {
       id: codeToUse,
       code: codeToUse,
@@ -614,7 +629,7 @@ export function AppProvider({ children }) {
       landlordId: landlordProfile?.phone || contactNumber || 'LANDLORD-DEFAULT',
       landlordName: landlordName || landlordProfile?.name || 'Landlord',
       contactNumber: contactNumber || landlordProfile?.phone || '',
-      tenantName: tenantName || '',
+      tenantName: cleanTenant,
       roomNumber: roomNumber || 'Unit 1',
       propertyAddress: propertyAddress || 'Cagayan de Oro City',
       propertyType,
@@ -729,7 +744,9 @@ export function AppProvider({ children }) {
     setActiveTenantContract(contractData);
     setLandlordName(contractData.landlordName || '');
     setContactNumber(contractData.contactNumber || '');
-    setTenantName(contractData.tenantName || '');
+    
+    const cleanTenant = isGenericTenantName(contractData.tenantName) ? '' : contractData.tenantName;
+    setTenantName(cleanTenant);
     setRoomNumber(contractData.roomNumber || '');
     setPropertyAddress(contractData.propertyAddress || '');
     setPropertyType(contractData.propertyType || 'Boarding House / Bedspace');
@@ -742,7 +759,7 @@ export function AppProvider({ children }) {
 
     const currentClauses = contractData.contractClauses || generateDefaultClauses({
       landlord: contractData.landlordName,
-      tenant: contractData.tenantName,
+      tenant: cleanTenant,
       room: contractData.roomNumber,
       address: contractData.propertyAddress,
       propType: contractData.propertyType,
@@ -757,7 +774,7 @@ export function AppProvider({ children }) {
         return {
           ...c,
           title: '1. Parties to the Agreement',
-          text: `This residential lease agreement is entered into by ${contractData.landlordName || '[Landlord Name]'} (Lessor) and ${contractData.tenantName || '[Tenant Name]'} (Lessee).`
+          text: `This residential lease agreement is entered into by ${contractData.landlordName || '[Landlord Name]'} (Lessor) and ${cleanTenant || '[Tenant Name]'} (Lessee).`
         };
       }
       return c;
@@ -816,8 +833,13 @@ export function AppProvider({ children }) {
         }
       }
 
-      // Prioritize: Explicit Name typed by Tenant > Landlord's input in contract > existing state > username
-      const finalTenantName = (name || '').trim() || linkedContract?.tenantName || tenantName || cleanUsername;
+      // Prioritize: Explicit typed name > Landlord's input (if not generic) > username
+      let finalTenantName = (name || '').trim();
+      if (isGenericTenantName(finalTenantName)) {
+        finalTenantName = (!isGenericTenantName(linkedContract?.tenantName) ? linkedContract.tenantName : '') || 
+                          (!isGenericTenantName(tenantName) ? tenantName : '') || 
+                          cleanUsername;
+      }
       const finalPhone = (phone || '').trim() || linkedContract?.tenantPhone || contactNumber || '';
 
       const tenantRecord = {
@@ -941,7 +963,7 @@ export function AppProvider({ children }) {
           tenantData = {
             id: cleanIdent,
             username: local.tenantUsername || cleanIdent,
-            name: local.tenantName,
+            name: isGenericTenantName(local.tenantName) ? cleanIdent : local.tenantName,
             phone: local.tenantPhone || '',
             contractCode: local.code
           };
@@ -989,10 +1011,11 @@ export function AppProvider({ children }) {
     const contractCode = activeCode || roomCodeInput || 'RIP-KEY';
     const amountVal = Number(advanceRent || monthlyRent || 0);
     const receiptImage = gcashFileData?.dataUrl || gcashFileData?.preview || (typeof gcashFileData === 'string' ? gcashFileData : null);
+    const cleanTenant = (!isGenericTenantName(tenantName) ? tenantName : null) || tenantProfile?.name || 'Resident';
 
     const checkinPayload = {
       contractCode,
-      tenantName: tenantName || tenantProfile?.name || 'Tenant',
+      tenantName: cleanTenant,
       signingMode,
       isIdVerified: Boolean(idFileData),
       idFileName: idFileData?.meta?.name || 'ID Photo Uploaded',
@@ -1008,7 +1031,7 @@ export function AppProvider({ children }) {
       isSigned: true,
       paymentVerified: false,
       tenantSignedAt: new Date().toISOString(),
-      tenantName: checkinPayload.tenantName,
+      tenantName: cleanTenant,
       signingMode: signingMode || checkinPayload.signingMode,
       signatureData: signatureData || null,
       idFileData: idFileData || null,
@@ -1049,7 +1072,7 @@ export function AppProvider({ children }) {
     const initialPayment = {
       id: `pay-${Date.now()}`,
       contractCode,
-      tenantName: checkinPayload.tenantName,
+      tenantName: cleanTenant,
       cycleName: 'Advance / Move-in Deposit',
       amount: amountVal,
       gcashRef: checkinPayload.gcashRef,
@@ -1086,7 +1109,7 @@ export function AppProvider({ children }) {
   };
 
   // Landlord verification of tenant payment & unlocking room PIN
-  const verifyTenantPayment = async (contractCode) => {
+  const verifyTenantPayment = async (contractCode, paymentId = null) => {
     if (!contractCode) return;
     const cleanCode = contractCode.trim().toUpperCase();
 
@@ -1105,7 +1128,7 @@ export function AppProvider({ children }) {
 
     // 2. Update payments ledger
     setPayments(prev => prev.map(p => {
-      if (p.contractCode === cleanCode) {
+      if (p.contractCode === cleanCode && (!paymentId || p.id === paymentId)) {
         return {
           ...p,
           status: 'Verified',
@@ -1115,7 +1138,7 @@ export function AppProvider({ children }) {
       return p;
     }));
 
-    // 3. Write to Firestore
+    // 3. Write to Firestore contracts
     try {
       await setDoc(doc(db, 'contracts', cleanCode), {
         status: 'Active',
@@ -1123,10 +1146,16 @@ export function AppProvider({ children }) {
         verifiedAt: new Date().toISOString()
       }, { merge: true });
 
+      // 4. Update matching payments in Firestore
       const q = query(collection(db, 'payments'), where('contractCode', '==', cleanCode));
       const pSnap = await getDocs(q);
       for (const pDoc of pSnap.docs) {
-        await setDoc(doc(db, 'payments', pDoc.id), { status: 'Verified', verifiedAt: new Date().toISOString() }, { merge: true });
+        if (!paymentId || pDoc.id === paymentId) {
+          await setDoc(doc(db, 'payments', pDoc.id), { 
+            status: 'Verified', 
+            verifiedAt: new Date().toISOString() 
+          }, { merge: true });
+        }
       }
     } catch (err) {
       console.warn('[Firebase] Verify payment notice:', err.message);
@@ -1165,11 +1194,12 @@ export function AppProvider({ children }) {
   const submitTenantPayment = async ({ contractCode, amount, cycleName, gcashRef, receiptData }) => {
     const cleanCode = (contractCode || activeCode || '').trim().toUpperCase();
     const receiptImage = receiptData?.dataUrl || receiptData?.preview || (typeof receiptData === 'string' ? receiptData : null);
+    const cleanTenant = (!isGenericTenantName(tenantName) ? tenantName : null) || tenantProfile?.name || 'Resident';
 
     const newPayment = {
       id: `pay-${Date.now()}`,
       contractCode: cleanCode,
-      tenantName: tenantName || tenantProfile?.name || 'Tenant',
+      tenantName: cleanTenant,
       cycleName: cycleName || 'Monthly Rent Payment',
       amount: Number(amount) || 0,
       gcashRef: gcashRef || '',
@@ -1238,30 +1268,51 @@ export function AppProvider({ children }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Tenants derived from live contracts
-  const tenantsList = contracts.map((c, idx) => ({
-    id: c.id || c.code || idx + 1,
-    avatar: (c.tenantName || 'T').substring(0, 2).toUpperCase(),
-    name: c.tenantName || 'Unnamed Tenant',
-    unit: `${c.roomNumber} · ${c.propertyType || 'Bedspace'}`,
-    rent: c.monthlyRent || 0,
-    status: c.status || 'Active',
-    isSigned: Boolean(c.isSigned),
-    paymentVerified: Boolean(c.paymentVerified),
-    signingMode: c.signingMode || 'DIGITAL',
-    signatureData: c.signatureData || null,
-    idFileData: c.idFileData || null,
-    gcashRef: c.gcashRef || c.latestGcashRef || '',
-    gcashReceiptData: c.gcashReceiptData || null,
-    due: c.dueDay || 'Every 5th',
-    phone: c.tenantPhone || c.contactNumber || '09XXXXXXXXX',
-    contract: c
-  }));
+  const tenantsList = contracts.map((c, idx) => {
+    const rawName = c.tenantName || '';
+    const cleanName = isGenericTenantName(rawName) ? (c.tenantUsername || 'Resident') : rawName;
+    return {
+      id: c.id || c.code || idx + 1,
+      avatar: cleanName.substring(0, 2).toUpperCase(),
+      name: cleanName,
+      unit: `${c.roomNumber} · ${c.propertyType || 'Bedspace'}`,
+      rent: c.monthlyRent || 0,
+      status: c.status || 'Active',
+      isSigned: Boolean(c.isSigned),
+      paymentVerified: Boolean(c.paymentVerified),
+      signingMode: c.signingMode || 'DIGITAL',
+      signatureData: c.signatureData || null,
+      idFileData: c.idFileData || null,
+      gcashRef: c.gcashRef || c.latestGcashRef || '',
+      gcashReceiptData: c.gcashReceiptData || null,
+      due: c.dueDay || 'Every 5th',
+      phone: c.tenantPhone || c.contactNumber || '09XXXXXXXXX',
+      contract: c
+    };
+  });
 
   const filteredTenants = tenantsList.filter(t => {
-    if (tenantFilter === 'ACTIVE' && t.status !== 'Active') return false;
-    if (tenantFilter === 'DUE' && !t.due.includes('5th')) return false;
-    if (searchQuery && !t.name.toLowerCase().includes(searchQuery.toLowerCase()) && !t.unit.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
+    // 1. Search filter
+    if (searchQuery && searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      const matchName = t.name && t.name.toLowerCase().includes(q);
+      const matchUnit = t.unit && t.unit.toLowerCase().includes(q);
+      const matchCode = t.contract?.code && t.contract.code.toLowerCase().includes(q);
+      if (!matchName && !matchUnit && !matchCode) return false;
+    }
+
+    // 2. Tab filter
+    if (tenantFilter === 'ACTIVE') {
+      return Boolean(t.paymentVerified);
+    }
+    if (tenantFilter === 'PENDING') {
+      return !t.paymentVerified || t.status === 'Pending Verification' || Boolean(t.gcashRef && !t.paymentVerified);
+    }
+    if (tenantFilter === 'DUE') {
+      return !t.paymentVerified || (t.due && t.due.includes('5th'));
+    }
+
+    return true; // 'ALL'
   });
 
   const handleCopyLink = () => {
