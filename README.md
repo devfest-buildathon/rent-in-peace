@@ -147,9 +147,8 @@ npm run preview
 | Member | Role | Responsibilities & Contributions |
 |---|---|---|
 | **Danlord Farell Soriano (Daf)** ([@Daffy-Ducky](https://github.com/Daffy-Ducky)) | **Team Lead & System Architect** | System prompts, stage pitch presenter, Phygital dual-signing architecture, feature orchestration |
-| **Pia Paña** (@pyuuh) | **Lead UI/UX Designer** | Figma 10-screen design system, branding, color palette, typography |
-| **Justine Roy Salva** ([@JRSstuff](https://github.com/JRSstuff)) | **Lead Backend & AI Engineer** | Google Gemini Flash integration, Cloud Firestore schemas, in-app GCash logic |
-| **John Kurt** | **Co-Developer & DevOps** | Deployment, persistence validation, PWA caching |
+| **Justine Roy Salva** ([@JRSstuff](https://github.com/JRSstuff)) | **Lead Backend & AI Engineer** | Google Gemini Flash integration, Cloud Firestore schemas, in-app QR Ph/Cash logic |
+| **John Kurt** | **Co-Developer, UI/UX & DevOps** | Modern UI redesign across 26 screens, deployment, persistence validation, PWA caching |
 
 ---
 
