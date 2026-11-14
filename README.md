@@ -7,7 +7,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Zero--Hardware%20PWA-14532D?style=for-the-badge&logo=pwa" alt="Zero-Hardware PWA" />
-  <img src="https://img.shields.io/badge/AI%20Engine-Gemini%202.0%20Flash-4285F4?style=for-the-badge&logo=google" alt="Gemini 2.0 Flash" />
+  <img src="https://img.shields.io/badge/AI%20Engine-Gemini%203.5%20Flash%20Lite-4285F4?style=for-the-badge&logo=google" alt="Gemini 3.5 Flash Lite" />
   <img src="https://img.shields.io/badge/Target-4.8M%20Bedspaces%20(PH)-16A34A?style=for-the-badge" alt="4.8M Bedspaces" />
   <img src="https://img.shields.io/badge/Stack-React%2019%20%7C%20Vite%208.3%20%7C%20Firebase-F1AE17?style=for-the-badge" alt="React Vite Firebase" />
 </p>
@@ -17,7 +17,7 @@
 ## 🌟 Executive Pitch & The 30-Second Stage Hook
 
 > **The Stage Hook:**
-> *"In the Philippines, 4.8 million students and workers live in informal boarding houses, bedspaces, and dorms transacting over \$1.2 Billion annually. Yet, 90% of these rentals run on verbal promises, scrap paper notebooks, lost keys, and fake GCash screenshots. Existing property management tech requires expensive US smart locks and \$200 monthly fees. **Rent in Peace** is the world's first **100% software-only, zero-hardware lease and rental ledger platform** built for Philippine reality. Powered by **Google Gemini 2.0 Flash AI**, it turns plain house rules into single-page bilingual A4 Kasulatan agreements, audits GCash payments, and releases digital door keypad PINs—working seamlessly with ₱800 Shopee keypad locks without a single wire or IoT hub."*
+> *"In the Philippines, 4.8 million students and workers live in informal boarding houses, bedspaces, and dorms transacting over \$1.2 Billion annually. Yet, 90% of these rentals run on verbal promises, scrap paper notebooks, lost keys, and fake GCash screenshots. Existing property management tech requires expensive US smart locks and \$200 monthly fees. **Rent in Peace** is the world's first **100% software-only, zero-hardware lease and rental ledger platform** built for Philippine reality. Powered by **Google Gemini 3 (Gemini 3.5 Flash Lite / 3.1 Flash Lite)**, it turns plain house rules into single-page bilingual A4 Kasulatan agreements, audits GCash payments, and releases digital door keypad PINs—working seamlessly with ₱800 Shopee keypad locks without a single wire or IoT hub."*
 
 ---
 
@@ -56,7 +56,7 @@ Instead of requiring expensive IoT locks connected to cloud servers, Rent in Pea
 
 The software platform acts as the **cryptographic access gatekeeper**:
 1. **Bilingual A4 Kasulatan Generator**: Landlord creates a legally grounded agreement in English and Bisaya in under 2 minutes.
-2. **Gemini 2.0 Flash AI Customizer**: Landlord enters plain house rules; Gemini drafts single-page A4 clauses.
+2. **Gemini 3.5 Flash Lite AI Customizer**: Landlord enters plain house rules; Gemini drafts single-page A4 clauses.
 3. **Frictionless Mobile E-Signing**: Tenant joins via 8-character Room Code (`RIP-OPEN`) and signs on their phone.
 4. **Anti-Duplicate GCash Audit**: Tenant submits payment proof; landlord verifies the reference against their bank statement.
 5. **Keypad Access PIN Release**: Once verified, the system generates a unique 5-digit door PIN (`48291`) revealed to the tenant for keyless move-in. Landlord can revoke or regenerate the PIN at any time.
@@ -92,13 +92,19 @@ The software platform acts as the **cryptographic access gatekeeper**:
 
 ---
 
-### 🤖 Slide 6: The AI Legal Moat — Google Gemini 2.0 Flash
+### 🤖 Slide 6: The AI Legal Moat — Google Gemini 3.5 Flash Lite
 
 ```
 [Landlord Input] ➔ "Curfew at 10 PM. Visitors allowed until 8 PM only. No overnight guests."
                            │
                            ▼
-[Gemini 2.0 Flash System Prompt: Strict A4 Bond Paper Budget & Dual English/Bisaya Translation]
+[Model 1: Gemini 3.5 Flash Lite (500 RPD, 15 RPM)] ➔ Fast Primary Engine
+   │ (Transient error or 429)
+   ▼
+[Model 2: Gemini 3.1 Flash Lite (500 RPD, 15 RPM)] ➔ Automated Secondary Failover
+   │ (Transient error or 429)
+   ▼
+[Model 3: Gemini 3 Flash Preview (20 RPD, 5 RPM)]  ➔ Tertiary Failover
                            │
                            ▼
 [Editable Bilingual Clause Pair]
@@ -136,54 +142,54 @@ The software platform acts as the **cryptographic access gatekeeper**:
 | **Hardware Required** | **₱0 (Software-Only)** | \$250+ IoT Smart Lock per door | None | None |
 | **Monthly Pricing** | **Free / ₱199/mo** | \$200+/month | Free | Free |
 | **Bilingual A4 Kasulatan** | **✅ English + Bisaya** | ❌ English only | ❌ Hand-written | ❌ None |
-| **AI Clause Assistant** | **✅ Gemini 2.0 Flash** | ❌ None | ❌ None | ❌ None |
+| **AI Clause Assistant** | **✅ Gemini 3.5 Flash Lite** | ❌ None | ❌ None | ❌ None |
 | **Door Access Keypad Gating**| **✅ Cryptographic PIN** | ❌ Requires Cloud IoT Hub | ❌ Physical keys | ❌ None |
 | **Offline PWA Support** | **✅ Works on 3G / Offline**| ❌ Heavy Cloud App | ❌ Vulnerable paper | ❌ Needs Internet |
 | **Philippine Rent Control Cap**| **✅ Built-in Alert** | ❌ US Law Only | ❌ None | ❌ None |
 
 ---
 
-## 📱 Complete Presentation Gallery (High-Resolution Cards)
+## 📱 Complete Presentation Gallery (High-Resolution Widescreen Slides)
 
-All screens have been captured at **390 × 844 mobile viewport (DPR 2.0)** and framed with brand-tinted presentation cards located in `docs/pitch/`:
+All 18 slides have been captured with side-by-side pitch explanations and large, crisp mobile app mockups (`docs/pitch/*-framed.png`):
 
 ### 👑 Landlord Operational Flow
 
-| Step & Screen | Framed Presentation Card | Operational Description |
+| Step & Slide | Widescreen Presentation Slide | Key Takeaways & Actions |
 |---|:---:|---|
-| **01. Welcome Splash** | <img src="docs/pitch/01-welcome-splash-framed.png" width="280"/> | Mobile splash with brand identity, Philippine Civil Code legal basis, and separate entry buttons for Landlords and Tenants. |
-| **02. Landlord Auth** | <img src="docs/pitch/02-landlord-auth-framed.png" width="280"/> | Landlord portal authentication with zxcvbn password entropy strength meter and password reset flow. |
-| **03. Landlord Dashboard** | <img src="docs/pitch/03-landlord-dashboard-framed.png" width="280"/> | Operational command center displaying active monthly rent roll (₱13,000/mo), Action Required verification alerts, and lease list. |
-| **04. Property Type** | <img src="docs/pitch/04-lease-property-type-framed.png" width="280"/> | Step 1 of lease wizard: select between Bedspace, Private Room with Bath, or Studio Apartment. |
-| **05. Contract Basics** | <img src="docs/pitch/05-lease-basics-form-framed.png" width="280"/> | Step 2: enter unit identifier, property address, monthly rent, and security deposit with automated advance calculations. |
-| **06. Review Summary** | <img src="docs/pitch/06-lease-review-summary-framed.png" width="280"/> | Step 3: pre-flight validation summarizing total move-in balance, rent schedule, and Philippine Rent Control Act caps. |
-| **07. A4 Kasulatan** | <img src="docs/pitch/07-kasulatan-bilingual-preview-framed.png" width="280"/> | 7 bilingual clauses in English and Bisaya, inline clause editor, A4 page fit indicator, and digital e-signing. |
-| **08. Preset Customizer** | <img src="docs/pitch/08-customize-lease-presets-framed.png" width="280"/> | Landlord preset library: Bedspace, Room with CR, and Studio Apartment with dynamic placeholders (`{{rent}}`, `{{unit}}`). |
-| **09. Room Code Ready** | <img src="docs/pitch/09-all-done-share-room-code-framed.png" width="280"/> | Published lease showing unique 8-character Room Code (`RIP-OPEN`) and one-click Share/Copy Link button. |
+| **01. Welcome Splash** | <img src="docs/pitch/01-welcome-splash-framed.png" width="100%"/> | Civil Code Art. 1356 legal foundation, distinct role portals, and offline PWA capability. |
+| **02. Landlord Auth** | <img src="docs/pitch/02-landlord-auth-framed.png" width="100%"/> | Live password entropy scoring (zxcvbn), self-serve password reset, and secure session management. |
+| **03. Landlord Dashboard** | <img src="docs/pitch/03-landlord-dashboard-framed.png" width="100%"/> | Live monthly rent roll (₱13,000/mo), Action Required verification alert banner, and room code sharing. |
+| **04. Property Type** | <img src="docs/pitch/04-lease-property-type-framed.png" width="100%"/> | Step 1 of lease wizard: select between Bedspace, Private Room with Bath, or Studio Apartment. |
+| **05. Contract Basics** | <img src="docs/pitch/05-lease-basics-form-framed.png" width="100%"/> | Step 2: enter unit identifier, property address, monthly rent, and automated advance/deposit calculation. |
+| **06. Review Summary** | <img src="docs/pitch/06-lease-review-summary-framed.png" width="100%"/> | Step 3: pre-flight validation summarizing total move-in balance, rent schedule, and Rent Control Act caps. |
+| **07. A4 Kasulatan** | <img src="docs/pitch/07-kasulatan-bilingual-preview-framed.png" width="100%"/> | 7 bilingual clauses in English and Bisaya, A4 single-page fit budget, and Gemini 3.5 Flash Lite drafting. |
+| **08. Preset Customizer** | <img src="docs/pitch/08-customize-lease-presets-framed.png" width="100%"/> | Landlord preset library: Bedspace, Room with CR, and Studio Apartment with dynamic placeholders (`{{rent}}`, `{{unit}}`). |
+| **09. Room Code Ready** | <img src="docs/pitch/09-all-done-share-room-code-framed.png" width="100%"/> | Published lease showing unique 8-character Room Code (`RIP-OPEN`) and one-click Share/Copy Link button. |
 
 ### 👤 Tenant Resident Flow
 
-| Step & Screen | Framed Presentation Card | Operational Description |
+| Step & Slide | Widescreen Presentation Slide | Key Takeaways & Actions |
 |---|:---:|---|
-| **10. Tenant Join** | <img src="docs/pitch/10-tenant-join-room-code-framed.png" width="280"/> | Tenant registration screen where room code automatically pre-fills unit and landlord parameters. |
-| **11. Tenant E-Sign** | <img src="docs/pitch/11-tenant-kasulatan-sign-framed.png" width="280"/> | Tenant portal with one-tap Bisaya language toggle, legal checklist, and touchscreen signature pad. |
-| **12. GCash Upload** | <img src="docs/pitch/12-tenant-gcash-proof-upload-framed.png" width="280"/> | Payment submission interface with screenshot attachment and 12-digit GCash reference number input. |
-| **13. PIN Locked State** | <img src="docs/pitch/13-tenant-waiting-verification-framed.png" width="280"/> | Protected security gate: access PIN is masked while landlord verifies GCash receipt against bank records. |
+| **10. Tenant Join** | <img src="docs/pitch/10-tenant-join-room-code-framed.png" width="100%"/> | Tenant registration screen where room code automatically pre-fills unit and landlord parameters. |
+| **11. Tenant E-Sign** | <img src="docs/pitch/11-tenant-kasulatan-sign-framed.png" width="100%"/> | Tenant portal with one-tap Bisaya language toggle, legal checklist, and touchscreen signature pad. |
+| **12. GCash Upload** | <img src="docs/pitch/12-tenant-gcash-proof-upload-framed.png" width="100%"/> | Payment submission interface with screenshot attachment and 12-digit GCash reference number input. |
+| **13. PIN Locked State** | <img src="docs/pitch/13-tenant-waiting-verification-framed.png" width="100%"/> | Protected security gate: access PIN is masked while landlord verifies GCash receipt against bank records. |
 
 ### 🔒 Payment Verification & Keypad Access Release
 
-| Step & Screen | Framed Presentation Card | Operational Description |
+| Step & Slide | Widescreen Presentation Slide | Key Takeaways & Actions |
 |---|:---:|---|
-| **14. Payment Audit** | <img src="docs/pitch/14-landlord-payment-verification-framed.png" width="280"/> | Landlord audit desk: receipt zoom, reference comparison, Verify & Issue Code button, and Reject with reason. |
-| **15. Door PIN Issued** | <img src="docs/pitch/15-landlord-access-code-issued-framed.png" width="280"/> | Verified lease view displaying active 5-digit door access code (`48291`) with regenerate and revoke controls. |
-| **16. Tenant Hub** | <img src="docs/pitch/16-tenant-resident-hub-framed.png" width="280"/> | Verified Active home view: Maria Santos sees assigned unit, door PIN (`48291`), agreement copy, and rent logger. |
+| **14. Payment Audit** | <img src="docs/pitch/14-landlord-payment-verification-framed.png" width="100%"/> | Landlord audit desk: receipt zoom, reference comparison, Verify & Issue Code button, and Reject with reason. |
+| **15. Door PIN Issued** | <img src="docs/pitch/15-landlord-access-code-issued-framed.png" width="100%"/> | Verified lease view displaying active 5-digit door access code (`48291`) with regenerate and revoke controls. |
+| **16. Tenant Hub** | <img src="docs/pitch/16-tenant-resident-hub-framed.png" width="100%"/> | Verified Active home view: Maria Santos sees assigned unit, door PIN (`48291`), agreement copy, and rent logger. |
 
 ### 📊 Management & Accounting Ledger
 
-| Step & Screen | Framed Presentation Card | Operational Description |
+| Step & Slide | Widescreen Presentation Slide | Key Takeaways & Actions |
 |---|:---:|---|
-| **17. Unified Search** | <img src="docs/pitch/17-landlord-search-filter-framed.png" width="280"/> | Instant search filtering across room codes, access PINs, tenant names, and GCash reference numbers. |
-| **18. Payment Ledger** | <img src="docs/pitch/18-landlord-payment-ledger-framed.png" width="280"/> | Multi-month transaction ledger tracking advance rent, security deposit, and subsequent monthly rent cycles. |
+| **17. Unified Search** | <img src="docs/pitch/17-landlord-search-filter-framed.png" width="100%"/> | Instant search filtering across room codes, access PINs, tenant names, and GCash reference numbers. |
+| **18. Payment Ledger** | <img src="docs/pitch/18-landlord-payment-ledger-framed.png" width="100%"/> | Multi-month transaction ledger tracking advance rent, security deposit, and subsequent monthly rent cycles. |
 
 ---
 
@@ -214,7 +220,7 @@ Extracted directly from the official logo files (`public/assets/logo-full.png` a
   - **Firebase Auth**: User account management with password strength scoring.
   - **Cloud Firestore**: Real-time lease status, preset library, and payment ledger sync.
   - **Firebase Storage**: Secure storage for GCash transaction receipts and ID cards.
-- **Artificial Intelligence**: Google Gemini 2.0 Flash / 1.5 Flash via `@google/genai` REST SDK.
+- **Artificial Intelligence**: Google Gemini 3 (Gemini 3.5 Flash Lite / 3.1 Flash Lite) via REST API.
 - **Automated Tooling**: Puppeteer Core (high-res screenshot capture), Oxlint.
 
 ---

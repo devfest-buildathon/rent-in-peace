@@ -1,7 +1,7 @@
 # 🎤 Rent in Peace — Official Stage Pitch Deck & Narrative
 
 <p align="center">
-  <img src="../public/assets/logo-full.png" alt="Rent in Peace" width="380"/>
+  <img src="../public/assets/logo-full.png" alt="Rent in Peace" width="400"/>
 </p>
 
 <p align="center">
@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Stage%20Pitch-DevFest%202026-F1AE17?style=for-the-badge&logo=google" alt="DevFest"/>
   <img src="https://img.shields.io/badge/Platform-Zero--Hardware%20PWA-14532D?style=for-the-badge" alt="Zero-Hardware"/>
-  <img src="https://img.shields.io/badge/AI%20Engine-Gemini%202.0%20Flash-4285F4?style=for-the-badge&logo=google" alt="Gemini"/>
+  <img src="https://img.shields.io/badge/AI%20Engine-Gemini%203.5%20Flash%20Lite-4285F4?style=for-the-badge&logo=google" alt="Gemini"/>
   <img src="https://img.shields.io/badge/Target-4.8M%20Bedspaces%20(PH)-16A34A?style=for-the-badge" alt="Market"/>
 </p>
 
@@ -21,14 +21,14 @@
 ## 🌟 Executive Pitch Summary
 
 > **The 30-Second Stage Hook:**
-> *"In the Philippines, 4.8 million students and workers live in informal boarding houses and bedspaces transacting over $1.2 Billion annually. Yet, 90% of these rentals run on verbal promises, scrap paper notebooks, lost keys, and fake GCash screenshots. Existing property tech requires expensive US smart locks and \$200 monthly fees. **Rent in Peace** is the world's first **100% software-only, zero-hardware lease and rental ledger platform** built for Philippine reality. Powered by **Google Gemini 2.0 Flash AI**, it turns plain house rules into single-page bilingual A4 Kasulatan agreements, verifies GCash payments, and releases digital door keypad PINs—working seamlessly with ₱800 Shopee keypad locks without a single wire or IoT hub."*
+> *"In the Philippines, 4.8 million students and workers live in informal boarding houses and bedspaces transacting over $1.2 Billion annually. Yet, 90% of these rentals run on verbal promises, scrap paper notebooks, lost keys, and fake GCash screenshots. Existing property tech requires expensive US smart locks and \$200 monthly fees. **Rent in Peace** is the world's first **100% software-only, zero-hardware lease and rental ledger platform** built for Philippine reality. Powered by **Google Gemini 3 (Gemini 3.5 Flash Lite / 3.1 Flash Lite)**, it turns plain house rules into single-page bilingual A4 Kasulatan agreements, audits GCash payments, and releases digital door keypad PINs—working seamlessly with ₱800 Shopee keypad locks without a single wire or IoT hub."*
 
 ---
 
 ## 📑 Slide 1: The Invisible Housing Giant of the Philippines
 
 <div align="center">
-  <img src="pitch/01-welcome-splash-framed.png" width="460" alt="Welcome & Legal Basis"/>
+  <img src="pitch/01-welcome-splash-framed.png" width="100%" alt="Welcome & Legal Basis"/>
 </div>
 
 ### The Reality on the Ground:
@@ -77,7 +77,7 @@ Instead of requiring expensive IoT locks connected to cloud servers, Rent in Pea
 
 The software platform acts as the **cryptographic access gatekeeper**:
 1. **Bilingual A4 Kasulatan Generator**: Landlord creates a legally grounded agreement in English and Bisaya in under 2 minutes.
-2. **Gemini 2.0 Flash AI Customizer**: Landlord enters plain house rules; Gemini drafts single-page A4 clauses.
+2. **Gemini 3.5 Flash Lite AI Customizer**: Landlord enters plain house rules; Gemini drafts single-page A4 clauses.
 3. **Frictionless Mobile E-Signing**: Tenant joins via 8-character Room Code (`RIP-OPEN`) and signs on their phone.
 4. **Anti-Duplicate GCash Audit**: Tenant submits payment proof; landlord verifies the reference against their bank statement.
 5. **Keypad Access PIN Release**: Once verified, the system generates a unique 5-digit door PIN (`48291`) revealed to the tenant for keyless move-in. Landlord can revoke or regenerate the PIN at any time.
@@ -87,8 +87,11 @@ The software platform acts as the **cryptographic access gatekeeper**:
 ## 👑 Slide 4: Landlord Operational Hub & Rent Roll Automation
 
 <div align="center">
-  <img src="pitch/03-landlord-dashboard-framed.png" width="380" alt="Landlord Dashboard"/>
-  <img src="pitch/07-kasulatan-bilingual-preview-framed.png" width="380" alt="Bilingual A4 Kasulatan"/>
+  <img src="pitch/03-landlord-dashboard-framed.png" width="100%" alt="Landlord Dashboard"/>
+</div>
+
+<div align="center">
+  <img src="pitch/07-kasulatan-bilingual-preview-framed.png" width="100%" alt="Bilingual A4 Kasulatan"/>
 </div>
 
 ### Key Landlord Capabilities:
@@ -106,9 +109,15 @@ The software platform acts as the **cryptographic access gatekeeper**:
 </div>
 
 <div align="center">
-  <img src="pitch/11-tenant-kasulatan-sign-framed.png" width="360" alt="Tenant E-Sign"/>
-  <img src="pitch/12-tenant-gcash-proof-upload-framed.png" width="360" alt="GCash Upload"/>
-  <img src="pitch/16-tenant-resident-hub-framed.png" width="360" alt="Resident Hub"/>
+  <img src="pitch/11-tenant-kasulatan-sign-framed.png" width="100%" alt="Tenant E-Sign"/>
+</div>
+
+<div align="center">
+  <img src="pitch/12-tenant-gcash-proof-upload-framed.png" width="100%" alt="GCash Upload"/>
+</div>
+
+<div align="center">
+  <img src="pitch/16-tenant-resident-hub-framed.png" width="100%" alt="Resident Hub"/>
 </div>
 
 ### The Frictionless 4-Step Move-In:
@@ -119,18 +128,24 @@ The software platform acts as the **cryptographic access gatekeeper**:
 
 ---
 
-## 🤖 Slide 6: The AI Legal Moat — Google Gemini 2.0 Flash
+## 🤖 Slide 6: The AI Legal Moat — Google Gemini 3.5 Flash Lite
 
 <div align="center">
-  <img src="pitch/08-customize-lease-presets-framed.png" width="460" alt="Preset Customizer"/>
+  <img src="pitch/08-customize-lease-presets-framed.png" width="100%" alt="Preset Customizer"/>
 </div>
 
-### The Gemini 2.0 Flash Prompt Engineering Pipeline:
+### The Gemini 3 Model Cascade Architecture:
 ```
 [Landlord Input] ➔ "Curfew at 10 PM. Visitors allowed until 8 PM only. No overnight guests."
                            │
                            ▼
-[Gemini 2.0 Flash System Prompt: Strict A4 Bond Paper Budget & Dual English/Bisaya Translation]
+[Model 1: Gemini 3.5 Flash Lite (500 RPD, 15 RPM)] ➔ Fast Primary Engine
+   │ (Transient error or 429)
+   ▼
+[Model 2: Gemini 3.1 Flash Lite (500 RPD, 15 RPM)] ➔ Automated Secondary Failover
+   │ (Transient error or 429)
+   ▼
+[Model 3: Gemini 3 Flash Preview (20 RPD, 5 RPM)]  ➔ Tertiary Failover
                            │
                            ▼
 [Editable Bilingual Clause Pair]
@@ -141,8 +156,8 @@ The software platform acts as the **cryptographic access gatekeeper**:
 [Landlord Explicit Review & Confirmation] (Never auto-inserted without review)
 ```
 
-### Why Gemini 2.0 Flash?
-- **Sub-Second Latency**: Generates bilingual clauses in under 800ms directly on the client.
+### Why Gemini 3.5 Flash Lite?
+- **Ultra-Fast Generation**: Generates bilingual clauses in under 800ms directly on the client.
 - **Native Bisaya Understanding**: Correctly translates nuanced regional terminology (*"Umuupa"*, *"Nagpaabang"*, *"Abang"*, *"Pahibalo"*).
 - **Strict Single-Page A4 Guarantee**: The system prompt budgets clause length to ensure printed contracts never spill onto a second sheet of bond paper.
 - **Responsible AI Disclaimer**: Never makes false claims of statutory enforceability or legal representation; clearly advises the landlord to review all terms.
@@ -152,8 +167,11 @@ The software platform acts as the **cryptographic access gatekeeper**:
 ## 🔒 Slide 7: The Security & Anti-Fraud Architecture
 
 <div align="center">
-  <img src="pitch/14-landlord-payment-verification-framed.png" width="380" alt="Payment Verification"/>
-  <img src="pitch/15-landlord-access-code-issued-framed.png" width="380" alt="Access Code Issued"/>
+  <img src="pitch/14-landlord-payment-verification-framed.png" width="100%" alt="Payment Verification"/>
+</div>
+
+<div align="center">
+  <img src="pitch/15-landlord-access-code-issued-framed.png" width="100%" alt="Access Code Issued"/>
 </div>
 
 ### 1. Cryptographic Gating:
@@ -213,7 +231,7 @@ If a tenant moves out or an unauthorized person obtains the door code, the landl
 | **Hardware Required** | **₱0 (Software-Only)** | \$250+ IoT Smart Lock per door | None | None |
 | **Monthly Pricing** | **Free / ₱199/mo** | \$200+/month | Free | Free |
 | **Bilingual A4 Kasulatan** | **✅ English + Bisaya** | ❌ English only | ❌ Hand-written | ❌ None |
-| **AI Clause Assistant** | **✅ Gemini 2.0 Flash** | ❌ None | ❌ None | ❌ None |
+| **AI Clause Assistant** | **✅ Gemini 3.5 Flash Lite** | ❌ None | ❌ None | ❌ None |
 | **Door Access Keypad Gating**| **✅ Cryptographic PIN** | ❌ Requires Cloud IoT Hub | ❌ Physical keys | ❌ None |
 | **Offline PWA Support** | **✅ Works on 3G / Offline**| ❌ Heavy Cloud App | ❌ Vulnerable paper | ❌ Needs Internet |
 | **Philippine Rent Control Cap**| **✅ Built-in Alert** | ❌ US Law Only | ❌ None | ❌ None |
@@ -224,7 +242,7 @@ If a tenant moves out or an unauthorized person obtains the door code, the landl
 
 ### 3-Minute Live Stage Presentation Script:
 - **0:00 - 0:30 (The Hook):** Introduce Roberto, a 62-year-old landlord in Carmen, CDO with 6 bedspaces. Show his notebook. Introduce Maria, a USTP engineering student who lost her ₱3,500 deposit last semester.
-- **0:30 - 1:15 (The Kasulatan):** Roberto opens Rent in Peace on his phone. Types: *"Curfew 10pm, electric split per head"*. Gemini 2.0 Flash instantly produces a clean, bilingual A4 Kasulatan. Room Code `RIP-OPEN` is shared to Maria via SMS.
+- **0:30 - 1:15 (The Kasulatan):** Roberto opens Rent in Peace on his phone. Types: *"Curfew 10pm, electric split per head"*. Gemini 3.5 Flash Lite instantly produces a clean, bilingual A4 Kasulatan. Room Code `RIP-OPEN` is shared to Maria via SMS.
 - **1:15 - 2:00 (The Handshake):** Maria opens the link on her phone, toggles Bisaya translation to verify her rights, draws her signature, and uploads her GCash receipt. Her door PIN is locked.
 - **2:00 - 2:30 (The Release):** Roberto receives the amber notification, zooms into the GCash receipt, verifies reference `881245091010`, and taps "Verify". Instantly, Maria's screen unlocks with PIN `48291`!
 - **2:30 - 3:00 (The Business):** Reveal the $1.2B informal rental economy, our ₱199/mo subscription, and 31.8x LTV/CAC. End with: *"Rent in Peace: Peace of mind for landlords, dignity for tenants."*
