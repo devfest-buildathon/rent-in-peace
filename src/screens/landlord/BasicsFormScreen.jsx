@@ -5,6 +5,7 @@ import StepIndicator from '../../components/shared/StepIndicator';
 
 export default function BasicsFormScreen() {
   const { 
+    navigateBack,
     setCurrentScreen,
     landlordName, setLandlordName,
     contactNumber, setContactNumber,
@@ -29,6 +30,10 @@ export default function BasicsFormScreen() {
       setError('Please specify the room or unit identifier (e.g. Room 3B).');
       return;
     }
+    if (!propertyAddress.trim()) {
+      setError('Please specify the property address / city location.');
+      return;
+    }
     if (!monthlyRent || Number(monthlyRent) <= 0) {
       setError('Please enter a valid monthly rent amount.');
       return;
@@ -45,7 +50,8 @@ export default function BasicsFormScreen() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <button 
-            onClick={() => setCurrentScreen('WIZARD_PROPERTY')} 
+            type="button"
+            onClick={navigateBack} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
@@ -98,7 +104,7 @@ export default function BasicsFormScreen() {
                 type="text" 
                 value={propertyAddress} 
                 onChange={(e) => setPropertyAddress(e.target.value)} 
-                placeholder="e.g. Nazareth, Cagayan de Oro City" 
+                placeholder="e.g. 123 Rizal Street, Manila" 
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
               />
             </div>

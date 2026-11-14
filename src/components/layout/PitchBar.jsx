@@ -13,11 +13,11 @@ const SCREENS = [
   { id: 'WIZARD_CHECK', label: '8. Smart Check AI' },
   { id: 'ALL_DONE', label: '9. Check-In Ready' },
   { id: 'LANDLORD_TENANTS', label: '10. Resident Directory' },
-  { id: 'TENANT_DETAIL', label: '11. Verify GCash & PIN' },
+  { id: 'TENANT_DETAIL', label: '11. Verify GCash & Access' },
   { id: 'SETTINGS', label: '12. Settings' },
   { id: 'TENANT_AUTH', label: '13. Tenant Code Entry' },
   { id: 'TENANT_PORTAL', label: '14. Tenant Sign & Pay' },
-  { id: 'SUCCESS_PIN', label: '15. Key PIN View' },
+  { id: 'SUCCESS_PIN', label: '15. Key Access View' },
   { id: 'TENANT_HOME', label: '16. Tenant Resident Hub' },
 ];
 
@@ -35,7 +35,7 @@ export default function PitchBar() {
             <span className="text-emerald-400">RENT IN </span>PEACE
           </span>
           <span className="hidden sm:inline-block ml-2 text-[10px] text-slate-400">
-            GDG Cagayan de Oro Buildathon 2026
+            DevFest Buildathon 2026
           </span>
         </div>
       </div>

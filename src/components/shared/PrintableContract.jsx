@@ -17,14 +17,15 @@ export default function PrintableContract() {
     signatureData,
     landlordSigningMode,
     landlordSignature,
-    signingMode
+    signingMode,
+    landlordProfile
   } = useApp();
 
   const lessor = (landlordName || 'NAGPAPAUPA (LESSOR)').trim();
   const lessee = (tenantName || 'UMUUPA (LESSEE)').trim();
   const phone = contactNumber ? contactNumber.trim() : '';
   const unit = roomNumber || 'Paupahan / Room';
-  const address = propertyAddress || 'Cagayan de Oro City, Misamis Oriental';
+  const address = propertyAddress || (landlordProfile?.city ? `${landlordProfile?.propertyName || ''}, ${landlordProfile.city}` : 'Pilipinas');
   const pType = propertyType || 'Residential Boarding House / Apartment';
   const rentFormatted = monthlyRent ? `₱${Number(monthlyRent).toLocaleString()}` : '₱3,500';
   const depFormatted = deposit ? `₱${Number(deposit).toLocaleString()}` : '₱3,500';
@@ -279,7 +280,7 @@ export default function PrintableContract() {
           {/* Formal Legal Caption */}
           <div className="text-center pb-1 mb-1.5 border-b-2 border-black">
             <p className={`uppercase font-sans font-semibold text-black ${scale.caption}`}>
-              Republika ng Pilipinas · Lalawigan ng Misamis Oriental · Lungsod ng Cagayan de Oro
+              Republika ng Pilipinas · {address}
             </p>
             <h1 className={`uppercase tracking-tight text-black mt-0.5 font-serif ${scale.title}`}>
               KASULATAN SA PAG-ABANG NG PAUPAHAN
@@ -298,7 +299,7 @@ export default function PrintableContract() {
               ALAMIN NG LAHAT SA PAMAMAGITAN NITO (KNOW ALL MEN BY THESE PRESENTS):
             </p>
             <p className="mt-0.5 text-justify indent-3 text-black">
-              Ang Kasulatang ito ng Pag-upa ay pinagkasunduan ngayong ika-<strong>{dateFormatted}</strong> sa Lungsod ng Cagayan de Oro sa pagitan nina <strong>{lessor}</strong> bilang <strong>NAGPAPAUPA (LESSOR)</strong> na matatagpuan sa <em>{address}</em>{phone ? `, may kontak blg. ${phone}` : ''}; at <strong>{lessee}</strong> bilang <strong>UMUUPA (LESSEE)</strong> para sa <strong>{unit}</strong>.
+              Ang Kasulatang ito ng Pag-upa ay pinagkasunduan ngayong ika-<strong>{dateFormatted}</strong> sa <strong>{address}</strong> sa pagitan nina <strong>{lessor}</strong> bilang <strong>NAGPAPAUPA (LESSOR)</strong> na matatagpuan sa <em>{address}</em>{phone ? `, may kontak blg. ${phone}` : ''}; at <strong>{lessee}</strong> bilang <strong>UMUUPA (LESSEE)</strong> para sa <strong>{unit}</strong>.
             </p>
             <p className="mt-0.5 text-justify indent-3 text-black">
               <strong>NAGPAPATUNAY:</strong> Na pinapaupahan ng Nagpapaupa ang nasabing unit sa Umuupa sa ilalim ng mga sumusunod na alituntunin at pinansyal na kasunduan:
@@ -367,7 +368,7 @@ export default function PrintableContract() {
           {/* Legal Signatures Section */}
           <div className={`border-t border-black text-black ${scale.sigSectionMargin}`}>
             <p className={`font-serif text-center text-black uppercase tracking-wider ${scale.sigPrompt}`}>
-              SA KATUNAYAN NG LAHAT, ang mga partido ay lumagda at nagpatibay nito ngayong araw sa Lungsod ng Cagayan de Oro:
+              SA KATUNAYAN NG LAHAT, ang mga partido ay lumagda at nagpatibay nito ngayong araw sa {address}:
             </p>
 
             {/* Side-by-side Dual Signatures */}
@@ -449,7 +450,7 @@ export default function PrintableContract() {
                 PAGPAPATUNAY (NOTARIAL ACKNOWLEDGMENT)
               </p>
               <p className="text-justify indent-3">
-                REPUBLIKA NG PILIPINAS, LUNGSOD NG CAGAYAN DE ORO ) S.S. — SA HARAP KO, isang Notaryo Publiko sa Lungsod ng Cagayan de Oro ngayong ika-{dateFormatted}, personal na humarap ang mga partido na nagpakita ng kani-kanilang katibayan ng pagkakakilanlan at pinatunayang ang Kasulatang ito ay kanilang kusang-loob na pagpapasiya.
+                REPUBLIKA NG PILIPINAS ) S.S. — SA HARAP KO, isang Notaryo Publiko sa nasabing hurisdiksyon ngayong ika-{dateFormatted}, personal na humarap ang mga partido na nagpakita ng kani-kanilang katibayan ng pagkakakilanlan at pinatunayang ang Kasulatang ito ay kanilang kusang-loob na pagpapasiya.
               </p>
               <div className="flex justify-between items-center text-[6pt] font-mono mt-0.5 font-bold">
                 <span>Doc. No. ______;</span>
@@ -464,10 +465,10 @@ export default function PrintableContract() {
         {/* Bottom Certification Line */}
         <div className={`border-t-2 border-black text-center text-black ${scale.footerMargin}`}>
           <p className="text-[7pt] font-sans font-bold uppercase tracking-wider">
-            CERTIFIED OFFICIAL RESIDENTIAL LEASE CONTRACT · RENT IN PEACE (RIP) · CAGAYAN DE ORO CITY
+            CERTIFIED OFFICIAL RESIDENTIAL LEASE CONTRACT · RENT IN PEACE (RIP)
           </p>
           <p className={`italic text-black mt-0.5 ${scale.footerText}`}>
-            Bisa at may karapatang ipatupad alinsunod sa Artikulo 1356 ng Kodigo Sibil ng Pilipinas para sa Barangay Lupon o Hukuman.
+            Pinagkasunduan at kusang-loob na nilagdaan ng mga partido alinsunod sa umiiral na batas ng Pilipinas.
           </p>
         </div>
       </div>

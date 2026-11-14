@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
   Bell, 
@@ -9,7 +9,9 @@ import {
   Clock, 
   CreditCard,
   ShieldCheck,
-  Home
+  Copy,
+  Check,
+  Share2
 } from 'lucide-react';
 import BottomNav from '../../components/layout/BottomNav';
 
@@ -22,6 +24,8 @@ export default function LandlordHomeScreen() {
     setSelectedTenant
   } = useApp();
 
+  const [copiedCode, setCopiedCode] = useState('');
+
   const landlordDisplayName = landlordProfile?.name 
     ? landlordProfile.name.split(' ')[0] 
     : 'Landlord';
@@ -32,6 +36,15 @@ export default function LandlordHomeScreen() {
 
   // Total collected or active monthly volume
   const totalMonthlyRoll = contracts.reduce((sum, c) => sum + (Number(c.monthlyRent) || 0), 0);
+
+  const handleCopyShareLink = (code, e) => {
+    e.stopPropagation();
+    if (!code) return;
+    const url = `${window.location.origin}?code=${code}`;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(''), 2500);
+  };
 
   return (
     <div className="flex-1 flex flex-col justify-between min-h-0 bg-[#F4F8F5]">
@@ -101,10 +114,12 @@ export default function LandlordHomeScreen() {
               <div className="absolute right-0 bottom-0 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
               
               <div className="flex items-center justify-between z-10">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 truncate max-w-[150px]">
                   {landlordProfile?.propertyName || 'Main Property'}
                 </span>
-                <span className="text-[10px] bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full font-black">CDO</span>
+                <span className="text-[10px] bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full font-black truncate max-w-[80px]">
+                  {landlordProfile?.city || 'Verified'}
+                </span>
               </div>
 
               <div className="z-10">
@@ -121,15 +136,15 @@ export default function LandlordHomeScreen() {
             {/* Secondary Deep Forest Card */}
             <div className="min-w-[200px] h-[135px] rounded-3xl bg-[#052e16] p-4 text-white shadow-md flex flex-col justify-between shrink-0 snap-start border border-emerald-900/60">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">GCash Verified</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Access Control</span>
                 <CreditCard className="w-4 h-4 text-amber-400" />
               </div>
               <div>
-                <p className="text-[10px] text-emerald-300/80">Lockbox PIN Status</p>
-                <p className="text-base font-black text-white tracking-tight">Protected: 5829</p>
+                <p className="text-[10px] text-emerald-300/80">Per-Tenant Lockbox Code</p>
+                <p className="text-sm font-black text-white tracking-tight mt-0.5">Secure Random Generator</p>
               </div>
-              <div className="text-[10px] text-amber-400 font-bold">
-                Auto-releases on pay
+              <div className="text-[10px] text-emerald-300 font-bold">
+                Released after payment verification
               </div>
             </div>
 
@@ -147,7 +162,7 @@ export default function LandlordHomeScreen() {
           </div>
         </div>
 
-        {/* QUICK ACTIONS 4-GRID with Emerald / Amber tones */}
+        {/* QUICK ACTIONS 4-GRID */}
         <div className="mb-5">
           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2.5">QUICK ACTIONS</span>
           
@@ -198,6 +213,36 @@ export default function LandlordHomeScreen() {
           </div>
         </div>
 
+        {/* --- [Agent C] Start: Customize Lease Presets Banner --- */}
+        <div className="mb-5">
+          <button
+            type="button"
+            onClick={() => setCurrentScreen('CUSTOMIZE_LEASE')}
+            className="w-full p-3.5 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/60 rounded-3xl border border-emerald-200/90 shadow-2xs flex items-center justify-between text-left hover:border-emerald-600 transition cursor-pointer group active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#14532D] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h4 className="text-xs font-black text-slate-900">Customize Lease (Kasulatan)</h4>
+                  <span className="text-[9px] bg-emerald-100 text-[#14532D] font-bold px-1.5 py-0.2 rounded-full">
+                    Presets
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Design reusable clauses, placeholders &amp; bilingual papers
+                </p>
+              </div>
+            </div>
+            <div className="w-7 h-7 rounded-xl bg-emerald-100/70 text-[#14532D] flex items-center justify-center shrink-0">
+              <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+            </div>
+          </button>
+        </div>
+        {/* --- [Agent C] End --- */}
+
         {/* PENDING ACTIONS BANNER */}
         {pendingContracts.length > 0 && (
           <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-3xl mb-5 shadow-xs">
@@ -213,7 +258,7 @@ export default function LandlordHomeScreen() {
               Tenant submitted payment proof
             </p>
             <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-              Verify GCash receipts to approve check-in and release door lockbox PIN 5829.
+              Verify GCash receipts to approve check-in and issue secure door access code.
             </p>
 
             <div className="mt-3 space-y-2">
@@ -256,6 +301,7 @@ export default function LandlordHomeScreen() {
                         code: c.code || c.id,
                         gcashRef: c.gcashRef,
                         gcashReceiptData: c.gcashReceiptData,
+                        accessCode: c.accessCode || null,
                         contract: c
                       });
                       setCurrentScreen('TENANT_DETAIL');
@@ -271,11 +317,11 @@ export default function LandlordHomeScreen() {
           </div>
         )}
 
-        {/* RECENT AGREEMENTS FEED */}
+        {/* RECENT AGREEMENTS FEED - Showing Room Code & Share / Copy Link button */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              RECENT AGREEMENTS
+              YOUR LEASES & ROOM CODES
             </span>
             {activeContractsCount > 0 && (
               <button 
@@ -296,8 +342,8 @@ export default function LandlordHomeScreen() {
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {contracts.slice(0, 4).map((c) => (
+            <div className="space-y-2.5">
+              {contracts.map((c) => (
                 <div 
                   key={c.code || c.id}
                   onClick={() => {
@@ -313,40 +359,67 @@ export default function LandlordHomeScreen() {
                       code: c.code || c.id,
                       gcashRef: c.gcashRef,
                       gcashReceiptData: c.gcashReceiptData,
+                      accessCode: c.accessCode || null,
                       contract: c
                     });
                     setCurrentScreen('TENANT_DETAIL');
                   }}
-                  className="p-3.5 bg-white rounded-2xl border border-slate-200/80 flex items-center justify-between shadow-2xs hover:border-emerald-300 transition cursor-pointer group"
+                  className="p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-2xs hover:border-emerald-300 transition cursor-pointer group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-[#DCFCE7] text-[#14532D] font-black text-xs flex items-center justify-center group-hover:bg-[#14532D] group-hover:text-white transition-all">
-                      {c.tenantName ? c.tenantName.charAt(0).toUpperCase() : 'T'}
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-2xl bg-[#DCFCE7] text-[#14532D] font-black text-xs flex items-center justify-center group-hover:bg-[#14532D] group-hover:text-white transition-all shrink-0">
+                        {c.tenantName ? c.tenantName.charAt(0).toUpperCase() : 'U'}
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 group-hover:text-[#14532D] transition truncate">
+                          {c.tenantName || 'Pending Tenant Join'}
+                        </p>
+                        <p className="text-[11px] text-slate-400 truncate">
+                          {c.roomNumber} · ₱{Number(c.monthlyRent || 0).toLocaleString()}/mo
+                        </p>
+                      </div>
                     </div>
 
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 group-hover:text-[#14532D] transition">
-                        {c.tenantName || 'Tenant'}
-                      </p>
-                      <p className="text-[11px] text-slate-400">
-                        {c.roomNumber} · Code: <span className="font-mono text-slate-600 font-bold">{c.code}</span>
-                      </p>
-                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                      c.paymentVerified 
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                        : c.isSigned 
+                        ? 'bg-amber-50 text-amber-700 border border-amber-200' 
+                        : 'bg-slate-100 text-slate-600'
+                    }`}>
+                      {c.paymentVerified ? 'Verified Active' : c.isSigned ? 'Pending Approval' : 'Ready to Join'}
+                    </span>
                   </div>
 
-                  <div className="text-right">
-                    <p className="text-xs font-black text-slate-900">
-                      ₱{Number(c.monthlyRent || 0).toLocaleString()}
-                    </p>
-                    <span className={`text-[10px] font-bold ${
-                      c.paymentVerified 
-                        ? 'text-emerald-700' 
-                        : c.isSigned 
-                        ? 'text-amber-600' 
-                        : 'text-slate-400'
-                    }`}>
-                      {c.paymentVerified ? 'Verified' : c.isSigned ? 'Pending' : 'Draft'}
-                    </span>
+                  {/* Room Code & Copy Share Link Bar */}
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Room Code:</span>
+                      <span className="font-mono font-extrabold text-[#14532D] bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                        {c.code}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleCopyShareLink(c.code, e)}
+                      className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-[#14532D] font-bold text-[11px] rounded-xl flex items-center gap-1 transition cursor-pointer border border-emerald-200 active:scale-95"
+                      title="Copy invite link to send to tenant"
+                    >
+                      {copiedCode === c.code ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                          <span className="text-emerald-700">Link Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-3 h-3" />
+                          <span>Share Link</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               ))}

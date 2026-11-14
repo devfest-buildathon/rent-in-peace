@@ -7,11 +7,15 @@ import {
   LogOut, 
   KeyRound,
   Building,
-  ShieldCheck
+  ShieldCheck,
+  // --- [Agent C] Start ---
+  FileText
+  // --- [Agent C] End ---
 } from 'lucide-react';
 
 export default function SettingsScreen() {
   const { 
+    navigateBack,
     setCurrentScreen, 
     landlordProfile, 
     resetAppData, 
@@ -30,7 +34,8 @@ export default function SettingsScreen() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <button 
-            onClick={() => setCurrentScreen('LANDLORD_HOME')} 
+            type="button"
+            onClick={navigateBack} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
@@ -77,17 +82,37 @@ export default function SettingsScreen() {
               <Building className="w-4 h-4 text-[#14532D]" />
               <span className="font-semibold text-slate-700">Municipality Jurisdiction</span>
             </div>
-            <span className="text-[11px] text-slate-500 font-medium">Cagayan de Oro City</span>
+            <span className="text-[11px] text-slate-500 font-medium">{landlordProfile?.city || landlordProfile?.propertyAddress || 'Configured on lease'}</span>
           </div>
 
           <div className="flex items-center justify-between py-2 text-xs">
             <div className="flex items-center gap-2.5">
-              <KeyRound className="w-4 h-4 text-amber-600" />
-              <span className="font-semibold text-slate-700">Default Lockbox Code</span>
+              <KeyRound className="w-4 h-4 text-emerald-700" />
+              <span className="font-semibold text-slate-700">Door Access Codes</span>
             </div>
-            <span className="text-[11px] font-mono font-bold text-slate-800">5829</span>
+            <span className="text-[11px] font-medium text-emerald-700">Dynamic (per verified tenant)</span>
           </div>
         </div>
+
+        {/* --- [Agent C] Start: Customize Lease Presets Link --- */}
+        <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-2 mb-4">
+          <h4 className="text-xs font-bold text-slate-900 mb-1">Kasulatan Lease Agreements</h4>
+          <button
+            type="button"
+            onClick={() => setCurrentScreen('CUSTOMIZE_LEASE')}
+            className="w-full py-2.5 px-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 hover:bg-emerald-100 flex items-center justify-between text-xs text-[#14532D] font-bold transition cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <FileText className="w-4 h-4 text-[#14532D]" />
+              <div className="text-left">
+                <span className="block leading-tight">Customize Lease Presets</span>
+                <span className="text-[10px] text-slate-500 font-normal">Design clauses, placeholders, &amp; languages</span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#14532D]" />
+          </button>
+        </div>
+        {/* --- [Agent C] End --- */}
 
         {/* Data & Session Actions */}
         <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-2 mb-4">
@@ -117,7 +142,7 @@ export default function SettingsScreen() {
       </div>
 
       <div className="pt-2 text-center">
-        <p className="text-[10px] text-slate-400">Rent in Peace v2.0 · Buildathon CDO</p>
+        <p className="text-[10px] text-slate-400">Rent in Peace v2.0</p>
       </div>
     </div>
   );

@@ -11,7 +11,8 @@ import {
   Eye,
   Clock,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Copy
 } from 'lucide-react';
 import FileUpload from '../../components/shared/FileUpload';
 
@@ -37,10 +38,10 @@ export default function TenantHomeScreen() {
   const activeContract = contracts.find(c => c.code === currentCode || c.id === currentCode) || {};
 
   const isVerified = Boolean(activeContract.paymentVerified);
-  const hasSigned = Boolean(activeContract.isSigned);
+  const activeAccessCode = activeContract.accessCode || null;
 
   const displayRoom = roomNumber || activeContract.roomNumber || 'Room Unit';
-  const displayAddress = propertyAddress || activeContract.propertyAddress || 'Cagayan de Oro City';
+  const displayAddress = propertyAddress || activeContract.propertyAddress || 'Specified Rental Property';
   const displayLandlord = landlordName || activeContract.landlordName || 'Landlord';
   const displayRent = Number(monthlyRent || activeContract.monthlyRent || 0);
 
@@ -53,6 +54,7 @@ export default function TenantHomeScreen() {
   const [paySuccess, setPaySuccess] = useState(false);
   const [isSubmittingPay, setIsSubmittingPay] = useState(false);
   const [payError, setPayError] = useState('');
+  const [copiedCode, setCopiedCode] = useState(false);
 
   // Receipt image zoom modal
   const [zoomReceiptUrl, setZoomReceiptUrl] = useState(null);
@@ -91,6 +93,13 @@ export default function TenantHomeScreen() {
     }, 1800);
   };
 
+  const handleCopyCode = () => {
+    if (!activeAccessCode) return;
+    navigator.clipboard?.writeText(activeAccessCode).catch(() => {});
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
   return (
     <div className="flex-1 flex flex-col justify-between min-h-0 bg-[#F4F8F5]">
       <div className="px-5 pt-3 overflow-y-auto scrollbar-none pb-4">
@@ -110,6 +119,7 @@ export default function TenantHomeScreen() {
           </div>
 
           <button 
+            type="button"
             onClick={logout}
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-400 hover:text-red-600 shadow-2xs transition cursor-pointer"
             title="Sign Out"
@@ -141,25 +151,30 @@ export default function TenantHomeScreen() {
               isVerified ? 'bg-emerald-400/20 text-emerald-200 border border-emerald-300/30' : 'bg-amber-400/20 text-amber-200 border border-amber-300/30'
             }`}>
               {isVerified ? <ShieldCheck className="w-3 h-3 text-emerald-300" /> : <Clock className="w-3 h-3 text-amber-300" />}
-              <span>{isVerified ? 'Verified Active' : 'Pending Landlord Verification'}</span>
+              <span>{isVerified ? 'Verified Active' : 'Waiting for landlord to verify your payment'}</span>
             </span>
           </div>
 
           <div className="z-10 py-1">
-            <p className="text-[10px] text-emerald-100 font-medium">Master Lockbox Key PIN</p>
+            <p className="text-[10px] text-emerald-100 font-medium">Door Keypad Access Code</p>
             <div className="flex items-center gap-2 mt-0.5">
-              <p className="font-mono text-2xl font-black text-white tracking-widest">
-                {isVerified ? '5829' : '•••• (Locked)'}
+              <p className="font-mono text-3xl font-black text-white tracking-widest">
+                {isVerified && activeAccessCode ? activeAccessCode : '•••• (Locked)'}
               </p>
-              {isVerified && (
-                <span className="text-[9px] bg-white/20 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                  Door PIN Ready
-                </span>
+              {isVerified && activeAccessCode && (
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="text-[9px] bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition"
+                >
+                  {copiedCode ? <Check className="w-3 h-3 text-emerald-300" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedCode ? 'Copied' : 'Copy'}</span>
+                </button>
               )}
             </div>
             {!isVerified && (
               <p className="text-[10px] text-amber-200/90 mt-0.5">
-                Unlocked automatically once landlord confirms your payment proof.
+                Waiting for landlord to verify your payment before releasing the door code.
               </p>
             )}
           </div>
@@ -207,7 +222,7 @@ export default function TenantHomeScreen() {
             <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center">
               <KeyRound className="w-5 h-5 stroke-[2.2]" />
             </div>
-            <span className="text-[11px] font-bold text-slate-800">Lockbox PIN</span>
+            <span className="text-[11px] font-bold text-slate-800">Access Code</span>
           </button>
         </div>
 
@@ -258,15 +273,20 @@ export default function TenantHomeScreen() {
                       )}
 
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-slate-900 truncate">{p.cycleName || p.cycle || 'Rent Payment'}</p>
-                        <p className="text-[10px] text-slate-400">
-                          Ref: <span className="font-mono text-slate-700 font-bold">{p.gcashRef || 'Direct'}</span>
+                        <p className="text-xs font-bold text-slate-900 truncate">
+                          {p.cycleName || p.cycle || 'Rent Payment'}
+                        </p>
+                        <p className="text-[10px] text-slate-500">
+                          Ref: <span className="font-mono font-bold text-slate-800">{p.gcashRef || '—'}</span>
+                          {p.date && <span className="ml-1.5 text-slate-400">· {p.date}</span>}
                         </p>
                       </div>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-black text-slate-900">₱{Number(p.amount || 0).toLocaleString()}</p>
+                      <p className="text-xs font-black text-slate-900">
+                        ₱{Number(p.amount || 0).toLocaleString()}
+                      </p>
                       <span className={`text-[10px] font-bold ${
                         p.status === 'Verified' ? 'text-emerald-700' : 'text-amber-600'
                       }`}>
@@ -284,87 +304,104 @@ export default function TenantHomeScreen() {
 
       {/* Pay Rent Modal */}
       {showPayModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-sm bg-white rounded-t-[32px] sm:rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div 
+          onClick={() => setShowPayModal(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto"
+          >
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900">Submit GCash Payment</h3>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#14532D] flex items-center justify-center">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Pay Monthly Rent</h3>
+                  <p className="text-[10px] text-slate-400">Submit GCash transfer proof</p>
+                </div>
+              </div>
               <button 
+                type="button"
                 onClick={() => setShowPayModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition cursor-pointer"
+                className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {payError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-xs text-red-600">
-                <AlertCircle className="w-4 h-4 shrink-0" />
+              <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{payError}</span>
               </div>
             )}
 
-            <form onSubmit={handlePaySubmit} className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Amount (₱)</label>
-                <input 
-                  type="number"
-                  value={payAmount}
-                  onChange={(e) => setPayAmount(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Payment Cycle / Purpose</label>
-                <input 
-                  type="text"
-                  value={payCycle}
-                  onChange={(e) => setPayCycle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">GCash Reference No.</label>
-                <input 
-                  type="text"
-                  value={payGcashRef}
-                  onChange={(e) => setPayGcashRef(e.target.value)}
-                  placeholder="e.g. 1029482910"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                  Upload GCash Receipt Screenshot
-                </label>
-                <FileUpload 
-                  label="Attach GCash Screenshot"
-                  helperText="Screenshot of payment confirmation"
-                  initialPreview={payReceiptData?.dataUrl || payReceiptData}
-                  onFileSelect={(data) => setPayReceiptData(data)}
-                />
-              </div>
-
-              {paySuccess && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-bold flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                  <span>Payment logged! Landlord will be notified.</span>
+            {paySuccess ? (
+              <div className="py-6 text-center space-y-2">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 text-[#14532D] flex items-center justify-center mx-auto">
+                  <Check className="w-6 h-6 stroke-[3]" />
                 </div>
-              )}
+                <h4 className="text-sm font-bold text-slate-900">Payment Submitted!</h4>
+                <p className="text-xs text-slate-500">Your landlord has been notified to verify your payment.</p>
+              </div>
+            ) : (
+              <form onSubmit={handlePaySubmit} className="space-y-3 text-xs">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-500 mb-1">Billing Period / Cycle</label>
+                  <input 
+                    type="text" 
+                    value={payCycle} 
+                    onChange={(e) => setPayCycle(e.target.value)} 
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                    required
+                  />
+                </div>
 
-              <button
-                type="submit"
-                disabled={isSubmittingPay}
-                className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition cursor-pointer active:scale-[0.98]"
-              >
-                {isSubmittingPay ? 'Submitting to Landlord...' : 'Confirm Payment Submission'}
-              </button>
-            </form>
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-500 mb-1">Payment Amount (₱)</label>
+                  <input 
+                    type="number" 
+                    value={payAmount} 
+                    onChange={(e) => setPayAmount(e.target.value)} 
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-500 mb-1">GCash Reference Number</label>
+                  <input 
+                    type="text" 
+                    value={payGcashRef} 
+                    onChange={(e) => setPayGcashRef(e.target.value)} 
+                    placeholder="e.g. 9021481928"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-500 mb-1">Upload GCash Screenshot</label>
+                  <FileUpload 
+                    label="Attach GCash Screenshot"
+                    helperText="Upload payment screenshot"
+                    onFileSelect={(data) => setPayReceiptData(data)}
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button 
+                    type="submit"
+                    disabled={isSubmittingPay}
+                    className="w-full py-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-2xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                  >
+                    <span>Submit Payment Proof</span>
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -377,8 +414,9 @@ export default function TenantHomeScreen() {
         >
           <div className="relative max-w-sm w-full bg-white rounded-3xl p-3 shadow-2xl space-y-3" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-xs font-bold text-slate-800">GCash Receipt Screenshot</span>
+              <span className="text-xs font-bold text-slate-800">GCash Screenshot Receipt</span>
               <button 
+                type="button"
                 onClick={() => setZoomReceiptUrl(null)}
                 className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition"
               >
@@ -387,13 +425,12 @@ export default function TenantHomeScreen() {
             </div>
             <img 
               src={zoomReceiptUrl} 
-              alt="GCash Receipt" 
-              className="w-full max-h-[70vh] object-contain rounded-2xl bg-slate-50"
+              alt="Receipt Preview" 
+              className="w-full max-h-[75vh] object-contain rounded-2xl bg-slate-50"
             />
           </div>
         </div>
       )}
-
     </div>
   );
 }

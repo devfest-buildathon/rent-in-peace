@@ -17,9 +17,10 @@ export default function SuccessPinScreen() {
   const currentCode = activeCode || roomCodeInput || tenantProfile?.contractCode;
   const activeContract = contracts.find(c => c.code === currentCode || c.id === currentCode) || {};
   const isVerified = Boolean(activeContract.paymentVerified);
+  const accessCode = activeContract.accessCode || null;
 
-  const displayRoom = roomNumber || activeContract.roomNumber || 'Unit 1';
-  const displayAddress = propertyAddress || activeContract.propertyAddress || 'Cagayan de Oro City';
+  const displayRoom = roomNumber || activeContract.roomNumber || 'Room Unit';
+  const displayAddress = propertyAddress || activeContract.propertyAddress || 'Specified Rental Property';
   const displayRent = Number(monthlyRent || activeContract.monthlyRent || 0);
 
   return (
@@ -42,34 +43,34 @@ export default function SuccessPinScreen() {
           <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
             isVerified ? 'bg-emerald-100 text-[#14532D]' : 'bg-amber-100 text-amber-800'
           }`}>
-            {isVerified ? 'Payment Verified · Ready to Move-In' : 'Lease Signed · Awaiting Landlord Approval'}
+            {isVerified ? 'Payment Verified · Ready to Move-In' : 'Waiting for landlord to verify your payment'}
           </span>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-2">
             {isVerified ? `Welcome to ${displayRoom}!` : 'Check-In Received!'}
           </h1>
           <p className="text-xs text-slate-500 mt-1 max-w-[290px] mx-auto leading-relaxed">
             {isVerified 
-              ? 'Your payment is approved. Use your PIN to retrieve keys from the physical lockbox.' 
-              : 'Your signed Kasulatan and payment reference have been sent to your landlord for confirmation.'}
+              ? 'Your payment is approved. Use your door keypad code below to access your room.' 
+              : 'Waiting for landlord to verify your payment. Your signed Kasulatan and payment reference have been sent to your landlord for confirmation.'}
           </p>
         </div>
 
-        {/* Lockbox Access Card */}
-        {isVerified ? (
+        {/* Door Access Card */}
+        {isVerified && accessCode ? (
           <div className="p-5 rounded-3xl bg-[#052e16] text-white shadow-lg border border-emerald-900/60 text-center mb-4 relative overflow-hidden">
             <div className="absolute right-0 top-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
 
             <p className="text-[10px] text-amber-300 uppercase tracking-widest font-bold flex items-center justify-center gap-1.5">
               <KeyRound className="w-3.5 h-3.5" />
-              <span>Smart Lockbox Master PIN</span>
+              <span>Door Keypad Access Code</span>
             </p>
             <div className="my-2">
               <span className="font-mono text-4xl font-black tracking-widest text-emerald-400">
-                5829
+                {accessCode}
               </span>
             </div>
             <p className="text-[11px] text-emerald-200/80 leading-snug">
-              Punch 5829 into the lockbox on {displayRoom}'s door to retrieve your physical keys.
+              Punch {accessCode} into the lockbox on {displayRoom}'s door to retrieve your physical keys.
             </p>
           </div>
         ) : (
@@ -77,9 +78,9 @@ export default function SuccessPinScreen() {
             <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-2">
               <Lock className="w-5 h-5" />
             </div>
-            <p className="text-xs font-bold text-slate-900">Lockbox PIN is Protected</p>
-            <p className="text-[11px] text-slate-400 mt-1 max-w-[240px] mx-auto leading-relaxed">
-              Once your lessor confirms your advance rent payment on their dashboard, PIN 5829 will unlock here.
+            <p className="text-xs font-bold text-slate-900">Door Code is Protected</p>
+            <p className="text-[11px] text-slate-400 mt-1 max-w-[260px] mx-auto leading-relaxed">
+              Waiting for landlord to verify your payment. Once your lessor confirms your advance rent payment on their dashboard, your random access code will appear here.
             </p>
           </div>
         )}

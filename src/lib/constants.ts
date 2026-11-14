@@ -37,7 +37,7 @@ export const PROPERTY_TYPES = [
   },
   {
     type: "Commercial Space",
-    desc: "Storefront, food stall, or small office space in Cagayan de Oro.",
+    desc: "Storefront, food stall, or small office space.",
     icon: "handshake" as const,
   },
   {
@@ -106,7 +106,7 @@ export function getContractSections(c: ContractData): ContractSection[] {
     ],
     [
       "2. Leased Premises",
-      `The Lessor leases ${c.roomUnit || "the designated room"} situated at ${c.propertyAddress || "Cagayan de Oro City"} (${c.propertyType || "Residential Accommodation"}) strictly for residential dwelling.`,
+      `The Lessor leases ${c.roomUnit || "the designated room"} situated at ${c.propertyAddress || "the agreed property address"} (${c.propertyType || "Residential Accommodation"}) strictly for residential dwelling.`,
     ],
     [
       "3. Rent and Security Deposit",

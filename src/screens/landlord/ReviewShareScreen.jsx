@@ -1,22 +1,21 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ChevronLeft, ChevronRight, Copy, Check, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ArrowRight, ShieldCheck } from 'lucide-react';
 import StepIndicator from '../../components/shared/StepIndicator';
 
 export default function ReviewShareScreen() {
   const { 
+    navigateBack,
     setCurrentScreen,
     landlordName,
     tenantName,
     roomNumber,
+    propertyAddress,
     propertyType,
     monthlyRent,
     deposit,
     advanceRent,
     leaseDuration,
-    activeCode,
-    copiedLink,
-    handleCopyLink,
     refreshClausesFromDraft
   } = useApp();
 
@@ -31,7 +30,8 @@ export default function ReviewShareScreen() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <button 
-            onClick={() => setCurrentScreen('WIZARD_DETAILS')} 
+            type="button"
+            onClick={navigateBack} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
@@ -71,6 +71,11 @@ export default function ReviewShareScreen() {
           </div>
 
           <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 text-xs">
+            <span className="text-slate-400 font-medium">Address / City</span>
+            <span className="font-bold text-slate-900 truncate max-w-[200px]">{propertyAddress || '—'}</span>
+          </div>
+
+          <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 text-xs">
             <span className="text-slate-400 font-medium">Lease Term</span>
             <span className="font-bold text-slate-900">{leaseDuration}</span>
           </div>
@@ -90,25 +95,15 @@ export default function ReviewShareScreen() {
           )}
         </div>
 
-        {/* Shareable Code Box for Tenant */}
-        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-3xl mb-4 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Room Code</p>
-              <p className="font-mono text-xl font-black text-[#14532D] mt-0.5">{activeCode || 'RIP-4B92'}</p>
-            </div>
-            <button 
-              type="button"
-              onClick={handleCopyLink}
-              className="px-3 py-1.5 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-xs"
-            >
-              {copiedLink ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedLink ? 'Copied' : 'Copy Link'}</span>
-            </button>
+        {/* Informational Box: Room Code only after saving Kasulatan */}
+        <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-3xl mb-4 text-xs text-emerald-900 flex items-start gap-3 shadow-2xs">
+          <ShieldCheck className="w-5 h-5 text-[#14532D] shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-slate-900">Room Code Generation</p>
+            <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+              Your unique Room Access Code (RIP-XXXX) will be generated only after you review and finalize the signed Kasulatan agreement in the next step.
+            </p>
           </div>
-          <p className="text-[11px] text-emerald-800/80 mt-2">
-            Tenant can register with this code to review terms, e-sign the lease, and submit their advance rent.
-          </p>
         </div>
 
       </div>
@@ -119,7 +114,7 @@ export default function ReviewShareScreen() {
           onClick={handleGenerateKasulatan}
           className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
         >
-          <span>Generate Kasulatan sa Abang</span>
+          <span>Review Kasulatan sa Abang</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

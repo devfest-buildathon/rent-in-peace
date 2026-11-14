@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ChevronLeft, AlertTriangle, ShieldCheck, Sparkles, Loader2, ArrowRight } from 'lucide-react';
-import { auditClausesWithGemini } from '../../lib/gemini';
+import { auditClauses } from '../../services/ai/gemini';
 
 export default function SmartCheckScreen() {
-  const { setCurrentScreen, saveFinalizedContract, contractClauses, propertyAddress, monthlyRent } = useApp();
+  const { navigateBack, setCurrentScreen, saveFinalizedContract, contractClauses, propertyAddress, monthlyRent } = useApp();
   const [auditItems, setAuditItems] = useState([
     {
       title: "Visitor Curfew Policy",
@@ -18,7 +18,7 @@ export default function SmartCheckScreen() {
     },
     {
       title: "30-Day Move-Out Notice",
-      description: "Enforcing minimum 30-day written notice pursuant to Article 1687 of the Civil Code protects both parties.",
+      description: "Enforcing minimum 30-day written notice pursuant to Philippine tenancy law protects both parties.",
       severity: "tip"
     }
   ]);
@@ -29,11 +29,16 @@ export default function SmartCheckScreen() {
     let active = true;
     const runAudit = async () => {
       setIsAuditing(true);
-      const results = await auditClausesWithGemini(contractClauses, { propertyAddress, monthlyRent });
-      if (active && Array.isArray(results) && results.length > 0) {
-        setAuditItems(results);
+      try {
+        const results = await auditClauses(contractClauses, { propertyAddress, monthlyRent });
+        if (active && Array.isArray(results) && results.length > 0) {
+          setAuditItems(results);
+        }
+      } catch (err) {
+        // Keep baseline recommendations
+      } finally {
+        if (active) setIsAuditing(false);
       }
-      if (active) setIsAuditing(false);
     };
     runAudit();
     return () => { active = false; };
@@ -51,7 +56,8 @@ export default function SmartCheckScreen() {
       <div className="overflow-y-auto scrollbar-none pb-2">
         <div className="flex items-center justify-between mb-3">
           <button 
-            onClick={() => setCurrentScreen('WIZARD_CONTRACT')} 
+            type="button"
+            onClick={navigateBack} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
@@ -79,7 +85,7 @@ export default function SmartCheckScreen() {
             <Loader2 className="w-5 h-5 text-[#14532D] animate-spin" />
             <div>
               <p className="font-bold">Analyzing clauses with Gemini...</p>
-              <p className="text-[11px] text-emerald-800">Cross-referencing Cagayan de Oro tenancy benchmarks</p>
+              <p className="text-[11px] text-emerald-800">Cross-referencing Philippine tenancy benchmarks</p>
             </div>
           </div>
         )}
@@ -115,13 +121,14 @@ export default function SmartCheckScreen() {
       {/* Finish CTA */}
       <div className="pt-3 pb-2">
         <button 
+          type="button"
           onClick={handleApplyAndFinish}
           disabled={isSaving}
           className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
         >
           {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (
             <>
-              <span>Finalize & Issue Check-In Code</span>
+              <span>Finalize & Preview Kasulatan</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}

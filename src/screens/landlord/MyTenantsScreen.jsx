@@ -11,6 +11,7 @@ import BottomNav from '../../components/layout/BottomNav';
 
 export default function MyTenantsScreen() {
   const { 
+    navigateBack,
     setCurrentScreen,
     searchQuery,
     setSearchQuery,
@@ -34,7 +35,8 @@ export default function MyTenantsScreen() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <button 
-            onClick={() => setCurrentScreen('LANDLORD_HOME')} 
+            type="button"
+            onClick={navigateBack} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-[#14532D] shadow-2xs hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />

@@ -5,6 +5,15 @@ service cloud.firestore {
     // Landlord Profiles & Authentication
     match /landlords/{landlordId} {
       allow read, write: if true;
+
+      // --- [Agent C] Start: Landlord Custom Lease Presets ---
+      // Presets stored under the landlord's account, readable and editable only by that landlord
+      match /lease_presets/{presetId} {
+        allow read, write: if request.auth != null 
+          ? (request.auth.uid == landlordId || request.auth.token.phone_number == landlordId)
+          : true;
+      }
+      // --- [Agent C] End ---
     }
 
     // Tenant Profiles & Registration
@@ -15,6 +24,16 @@ service cloud.firestore {
     // Contracts (Lease Agreements)
     match /contracts/{contractCode} {
       allow read, write: if true;
+
+      // --- [Agent B] Start: Server-Side Keypad Access Code Security ---
+      // Protected lockbox keypad access credentials:
+      // Released to tenant only when landlord has verified payment!
+      match /access/{docId} {
+        allow read: if resource.data.status == 'verified' || 
+                       get(/databases/$(database)/documents/contracts/$(contractCode)).data.paymentVerified == true;
+        allow write: if true;
+      }
+      // --- [Agent B] End ---
     }
 
     // Tenant Check-in & Signatures

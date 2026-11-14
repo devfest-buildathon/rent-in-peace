@@ -58,7 +58,7 @@ export default function SplashScreen() {
 
             <div className="flex items-center justify-between text-[11px] text-emerald-100/90 pt-2 border-t border-white/15 z-10">
               <span>Civil Code & Rent Control Act</span>
-              <span className="font-bold text-amber-300">CDO Verified</span>
+              <span className="font-bold text-amber-300">Philippine Law</span>
             </div>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function SplashScreen() {
             Make a clear rental contract in minutes.
           </h1>
           <p className="text-xs text-slate-500 mt-1.5 leading-relaxed max-w-[280px] mx-auto">
-            Friendly, legally grounded lease agreements for landlords and boarding houses in Cagayan de Oro.
+            Friendly, legally grounded lease agreements for residential rental properties.
           </p>
         </div>
 

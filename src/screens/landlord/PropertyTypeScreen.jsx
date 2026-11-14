@@ -31,7 +31,7 @@ const PROPERTY_TYPES = [
 ];
 
 export default function PropertyTypeScreen() {
-  const { setCurrentScreen, propertyType, setPropertyType } = useApp();
+  const { navigateBack, setCurrentScreen, propertyType, setPropertyType } = useApp();
 
   return (
     <div className="flex-1 flex flex-col justify-between px-5 py-4 max-w-lg mx-auto w-full bg-[#F4F8F5]">
@@ -39,7 +39,8 @@ export default function PropertyTypeScreen() {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <button 
-            onClick={() => setCurrentScreen('LANDLORD_HOME')} 
+            type="button"
+            onClick={navigateBack} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />

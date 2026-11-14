@@ -22,6 +22,10 @@ import MyTenantsScreen from './screens/landlord/MyTenantsScreen';
 import TenantDetailScreen from './screens/landlord/TenantDetailScreen';
 import SettingsScreen from './screens/landlord/SettingsScreen';
 
+// --- [Agent C] Start: Customize Lease Screen Import ---
+import CustomizeLeaseScreen from './features/lease-templates/CustomizeLeaseScreen';
+// --- [Agent C] End ---
+
 // Tenant Screens
 import TenantHomeScreen from './screens/tenant/TenantHomeScreen';
 import TenantPortalScreen from './screens/tenant/TenantPortalScreen';
@@ -51,6 +55,13 @@ function RentInPeaceContent() {
         // Safe fallback
       }
     }
+
+    // --- [Agent C] Start: Direct Hash / Query Route Support ---
+    const screenParam = params.get('screen');
+    if (screenParam === 'customize' || screenParam === 'CUSTOMIZE_LEASE' || window.location.hash.includes('customize')) {
+      setCurrentScreen('CUSTOMIZE_LEASE');
+    }
+    // --- [Agent C] End ---
   }, []);
 
   const renderScreen = () => {
@@ -89,6 +100,10 @@ function RentInPeaceContent() {
         return <TenantDetailScreen />;
       case 'SETTINGS':
         return <SettingsScreen />;
+      // --- [Agent C] Start: Customize Lease Route ---
+      case 'CUSTOMIZE_LEASE':
+        return <CustomizeLeaseScreen />;
+      // --- [Agent C] End ---
 
       // Tenant Flow
       case 'TENANT_HOME':

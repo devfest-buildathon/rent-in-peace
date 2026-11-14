@@ -1,6 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
-import { generateClauseWithGemini } from '../lib/gemini';
+import { generateClause } from '../services/ai/gemini';
+import { 
+  registerLandlordUser, 
+  loginLandlordUser, 
+  registerTenantUser, 
+  loginTenantUser, 
+  requestPasswordReset, 
+  signOutUser 
+} from '../auth/authService';
+import { createUniqueRoomCode } from '../features/lease/roomCode';
+import { verifyPaymentAndIssueCode, regenerateAccessCode } from '../features/verification/accessCode';
+import { getLogicalPreviousScreen, initHistoryRouter, pushScreenHistory } from '../router/navigation';
 import { 
   doc, 
   setDoc, 
@@ -19,7 +30,16 @@ const AppContext = createContext();
 export const isGenericTenantName = (name) => {
   if (!name || typeof name !== 'string') return true;
   const lower = name.trim().toLowerCase();
-  return lower.includes('prospective') || lower.includes('lessee') || lower === 'tenant' || lower === 'unnamed' || lower === 'new resident';
+  return (
+    lower.includes('prospective') || 
+    lower.includes('lessee') || 
+    lower === 'tenant' || 
+    lower === 'unnamed' || 
+    lower === 'new resident' || 
+    lower === 'resident' || 
+    lower === 'occupant' || 
+    lower === 'user'
+  );
 };
 
 // Helper to generate realistic legal clauses from entered data
@@ -76,19 +96,18 @@ export function generateDefaultClauses({
     {
       num: 7,
       title: '7. Maintenance & Care of Premises',
-      text: 'The Lessee shall maintain the room in tenantable, sanitary condition and promptly notify the Lessor of any required structural or plumbing repairs (Civil Code Art. 1654).'
+      text: 'The Lessee shall maintain the room in tenantable, sanitary condition and promptly notify the Lessor of any required structural or plumbing repairs.'
     },
     {
       num: 8,
       title: '8. Move-Out Notice & Termination',
-      text: 'Either party may terminate this lease by providing at least 30 days prior written notice in accordance with Article 1687 of the Philippine Civil Code.'
+      text: 'Either party may terminate this lease by providing at least 30 days prior written notice in accordance with Philippine law.'
     }
   ];
 }
 
 export function AppProvider({ children }) {
-  // Navigation Screens: 'SPLASH' | 'LANDLORD_AUTH' | 'TENANT_AUTH' | 'LANDLORD_HOME' | 'TENANT_HOME' ...
-  // Persisted to localStorage so browser reload preserves exact active screen
+  // Navigation Screens: Persisted to localStorage & synchronized with browser history
   const [currentScreen, setCurrentScreenState] = useState(() => {
     try {
       const savedScreen = localStorage.getItem('rip_current_screen');
@@ -100,16 +119,33 @@ export function AppProvider({ children }) {
     return 'SPLASH';
   });
 
-  const setCurrentScreen = (screen) => {
+  const setCurrentScreen = (screen, pushHistory = true) => {
     setCurrentScreenState(screen);
     try {
       if (screen) {
         localStorage.setItem('rip_current_screen', screen);
+        if (pushHistory) {
+          pushScreenHistory(screen);
+        }
       } else {
         localStorage.removeItem('rip_current_screen');
       }
     } catch (e) {}
   };
+
+  // Logical Back Button Navigation
+  const navigateBack = () => {
+    const prev = getLogicalPreviousScreen(currentScreen, { userRole, selectedTenant });
+    setCurrentScreen(prev);
+  };
+
+  // Wire browser popstate listener for back gesture/button
+  useEffect(() => {
+    const cleanup = initHistoryRouter((poppedScreen) => {
+      setCurrentScreen(poppedScreen, false);
+    });
+    return cleanup;
+  }, []);
 
   // Active Role: 'LANDLORD' | 'TENANT' | null
   const [userRole, setUserRole] = useState(() => {
@@ -148,7 +184,7 @@ export function AppProvider({ children }) {
     }
   };
 
-  // Active Draft Contract State (persisted to prevent state loss on page refresh)
+  // Active Draft Contract State (persisted to prevent state loss on back/forward/refresh)
   const [propertyType, setPropertyTypeState] = useState(() => {
     return localStorage.getItem('rip_draft_propertyType') || 'Boarding House / Bedspace';
   });
@@ -170,7 +206,8 @@ export function AppProvider({ children }) {
 
   const [propertyAddress, setPropertyAddressState] = useState(() => {
     return localStorage.getItem('rip_draft_propertyAddress') || 
-      (landlordProfile?.propertyName ? `${landlordProfile.propertyName}, ${landlordProfile.city}` : '');
+      landlordProfile?.propertyAddress || 
+      (landlordProfile?.propertyName ? `${landlordProfile.propertyName}, ${landlordProfile.city || ''}` : '');
   });
   const setPropertyAddress = (val) => {
     setPropertyAddressState(val);
@@ -211,7 +248,7 @@ export function AppProvider({ children }) {
 
   const [rentReminderEnabled, setRentReminderEnabled] = useState(true);
   
-  // Persistent Room / Invite Code - locked to contract and never randomly reset on edits
+  // Persistent Room / Invite Code - ONLY generated after Kasulatan is finalized and saved
   const [activeCode, setActiveCodeState] = useState(() => {
     return localStorage.getItem('rip_active_code') || '';
   });
@@ -306,12 +343,13 @@ export function AppProvider({ children }) {
 
   // Real-time Firestore Subscription for Landlord Contracts
   useEffect(() => {
-    if (!landlordProfile?.phone) return;
+    if (!landlordProfile?.phone && !landlordProfile?.id) return;
+    const landlordId = landlordProfile.phone || landlordProfile.id;
 
     try {
       const q = query(
         collection(db, 'contracts'),
-        where('landlordId', '==', landlordProfile.phone)
+        where('landlordId', '==', landlordId)
       );
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -333,7 +371,7 @@ export function AppProvider({ children }) {
 
       return () => unsubscribe();
     } catch (e) {}
-  }, [landlordProfile?.phone]);
+  }, [landlordProfile?.phone, landlordProfile?.id]);
 
   // Real-time Firestore Subscription for Active Tenant Contract
   useEffect(() => {
@@ -364,7 +402,7 @@ export function AppProvider({ children }) {
     } catch (e) {}
   }, [activeCode, tenantProfile?.contractCode]);
 
-  // Real-time Firestore Subscription for Global Payments
+  // Real-time Firestore Subscription for Payments Ledger
   useEffect(() => {
     try {
       const paymentsCol = collection(db, 'payments');
@@ -398,83 +436,34 @@ export function AppProvider({ children }) {
       localStorage.setItem('rip_landlord_profile', JSON.stringify(profile));
       setLandlordName(profile.name || '');
       setContactNumber(profile.phone || '');
-      if (profile.propertyName) {
-        setPropertyAddress(`${profile.propertyName}, ${profile.city}`);
-      }
-
-      // Save to Cloud Firestore
-      try {
-        await setDoc(doc(db, 'landlords', profile.phone), {
-          id: profile.phone,
-          name: profile.name,
-          phone: profile.phone,
-          propertyName: profile.propertyName || '',
-          city: profile.city || 'Cagayan de Oro City',
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-        setDbStatus('connected');
-      } catch (err) {
-        if (err.code === 'permission-denied') setDbStatus('rules_needed');
-        console.warn('[Firebase] Profile save notice:', err.message);
+      if (profile.propertyAddress) {
+        setPropertyAddress(profile.propertyAddress);
       }
     } else {
       localStorage.removeItem('rip_landlord_profile');
     }
   };
 
-  // Landlord Login against Cloud Firestore
-  const loginLandlord = async (phone, pin) => {
+  // Landlord Login via Firebase Auth
+  const loginLandlord = async (phoneOrEmail, password) => {
     try {
-      const cleanPhone = phone.trim();
-      const landlordRef = doc(db, 'landlords', cleanPhone);
-      const landlordSnap = await getDoc(landlordRef);
-
-      if (!landlordSnap.exists()) {
-        const local = landlordProfile;
-        if (local && local.phone === cleanPhone) {
-          setUserRole('LANDLORD');
-          localStorage.setItem('rip_user_role', 'LANDLORD');
-          return { success: true, profile: local };
-        }
-        return {
-          success: false,
-          error: `No landlord account found with mobile number "${cleanPhone}". Please click Create Account.`
-        };
-      }
-
-      const data = landlordSnap.data();
-      if (data.pin && pin && data.pin !== pin) {
-        return {
-          success: false,
-          error: 'Incorrect security PIN. Please check your PIN and try again.'
-        };
-      }
-
-      const profile = {
-        id: cleanPhone,
-        name: data.name,
-        phone: cleanPhone,
-        propertyName: data.propertyName || '',
-        city: data.city || 'Cagayan de Oro City',
-        pin: data.pin || ''
-      };
-
+      const profile = await loginLandlordUser({ identifier: phoneOrEmail, password });
       setLandlordProfileState(profile);
       localStorage.setItem('rip_landlord_profile', JSON.stringify(profile));
       setUserRole('LANDLORD');
       localStorage.setItem('rip_user_role', 'LANDLORD');
 
-      setLandlordName(profile.name);
-      setContactNumber(profile.phone);
-      if (profile.propertyName) {
-        setPropertyAddress(`${profile.propertyName}, ${profile.city}`);
+      setLandlordName(profile.name || '');
+      setContactNumber(profile.phone || '');
+      if (profile.propertyAddress) {
+        setPropertyAddress(profile.propertyAddress);
       }
 
-      // Fetch landlord contracts from Cloud Firestore
+      // Fetch landlord contracts
       try {
         const q = query(
           collection(db, 'contracts'),
-          where('landlordId', '==', cleanPhone)
+          where('landlordId', '==', profile.phone || profile.id)
         );
         const querySnap = await getDocs(q);
         const liveContracts = querySnap.docs.map(d => ({
@@ -484,59 +473,51 @@ export function AppProvider({ children }) {
         }));
         setContractsState(liveContracts);
         localStorage.setItem('rip_contracts', JSON.stringify(liveContracts));
-      } catch (qErr) {
-        console.warn('[Firebase] Query contracts warning:', qErr.message);
-      }
+      } catch (qErr) {}
 
       return { success: true, profile };
     } catch (err) {
-      console.warn('[Firebase] Landlord login error:', err.message);
-      return { success: false, error: 'Database network error. Please check your internet connection.' };
+      return { success: false, error: err.message };
     }
   };
 
-  // Landlord Register into Cloud Firestore
-  const registerLandlord = async ({ name, phone, pin, propertyName, city }) => {
+  // Landlord Registration via Firebase Auth
+  const registerLandlord = async ({ name, phone, email, password, propertyName, propertyAddress, city }) => {
     try {
-      const cleanPhone = phone.trim();
-      const landlordRef = doc(db, 'landlords', cleanPhone);
-      const existing = await getDoc(landlordRef);
-
-      if (existing.exists()) {
-        return {
-          success: false,
-          error: `A landlord profile with mobile number "${cleanPhone}" already exists. Please Sign In.`
-        };
-      }
-
-      const profileData = {
-        id: cleanPhone,
+      const profile = await registerLandlordUser({
         name,
-        phone: cleanPhone,
-        pin: pin || '',
-        propertyName: propertyName || 'Residential Rental Unit',
-        city: city || 'Cagayan de Oro City',
-        role: 'landlord',
-        createdAt: new Date().toISOString()
-      };
+        phone,
+        email,
+        password,
+        propertyName,
+        propertyAddress,
+        city
+      });
 
-      await setDoc(landlordRef, profileData);
-
-      setLandlordProfileState(profileData);
-      localStorage.setItem('rip_landlord_profile', JSON.stringify(profileData));
+      setLandlordProfileState(profile);
+      localStorage.setItem('rip_landlord_profile', JSON.stringify(profile));
       setUserRole('LANDLORD');
       localStorage.setItem('rip_user_role', 'LANDLORD');
 
-      setLandlordName(name);
-      setContactNumber(cleanPhone);
-      setPropertyAddress(`${profileData.propertyName}, ${profileData.city}`);
+      setLandlordName(profile.name);
+      setContactNumber(profile.phone);
+      setPropertyAddress(profile.propertyAddress || `${profile.propertyName}, ${profile.city}`);
       setContractsState([]);
       localStorage.setItem('rip_contracts', JSON.stringify([]));
 
-      return { success: true, profile: profileData };
+      return { success: true, profile };
     } catch (err) {
-      console.warn('[Firebase] Landlord register warning:', err.message);
-      return { success: false, error: 'Failed to create account. Check your internet connection.' };
+      return { success: false, error: err.message };
+    }
+  };
+
+  // Password reset request
+  const resetPasswordWithEmail = async (email) => {
+    try {
+      await requestPasswordReset(email);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
     }
   };
 
@@ -546,7 +527,7 @@ export function AppProvider({ children }) {
       landlord: landlordProfile?.name || '',
       tenant: '',
       room: '',
-      address: '',
+      address: landlordProfile?.propertyAddress || '',
       propType: 'Boarding House / Bedspace',
       rent: '',
       dep: '',
@@ -568,21 +549,17 @@ export function AppProvider({ children }) {
     }));
   };
 
-  // Reset Draft to start a new contract wizard
+  // Start a new contract wizard: NO room code generated yet (per Requirement 3)
   const startNewContract = () => {
-    const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const newCode = `RIP-${randomHex}`;
-
-    setActiveCode(newCode);
+    setActiveCode(''); // Do NOT generate room code until Kasulatan is saved!
     setPropertyType('Boarding House / Bedspace');
     setLandlordName(landlordProfile?.name || '');
     setContactNumber(landlordProfile?.phone || '');
     setTenantName('');
     setRoomNumber('');
     setPropertyAddress(
-      landlordProfile?.propertyName 
-        ? `${landlordProfile.propertyName}, ${landlordProfile.city}` 
-        : ''
+      landlordProfile?.propertyAddress || 
+      (landlordProfile?.propertyName ? `${landlordProfile.propertyName}, ${landlordProfile.city || ''}` : '')
     );
     setMonthlyRent('');
     setDeposit('');
@@ -591,6 +568,7 @@ export function AppProvider({ children }) {
     setRentReminderEnabled(true);
 
     // Clear draft storage keys
+    localStorage.removeItem('rip_active_code');
     localStorage.removeItem('rip_draft_tenantName');
     localStorage.removeItem('rip_draft_roomNumber');
     localStorage.removeItem('rip_draft_monthlyRent');
@@ -601,7 +579,7 @@ export function AppProvider({ children }) {
       landlord: landlordProfile?.name || '',
       tenant: '',
       room: '',
-      address: landlordProfile?.propertyName || '',
+      address: landlordProfile?.propertyAddress || '',
       propType: 'Boarding House / Bedspace',
       rent: '',
       dep: '',
@@ -611,11 +589,11 @@ export function AppProvider({ children }) {
     setCurrentScreen('WIZARD_PROPERTY');
   };
 
-  // Save finalized contract into Cloud Firestore & localStorage
+  // Save finalized contract into Cloud Firestore: Room code generated ONLY here (Requirement 3)
   const saveFinalizedContract = async () => {
-    let codeToUse = (activeCode && activeCode.trim()) || localStorage.getItem('rip_active_code');
+    let codeToUse = (activeCode && activeCode.trim()) || null;
     if (!codeToUse) {
-      codeToUse = `RIP-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      codeToUse = await createUniqueRoomCode(db);
     }
     setActiveCode(codeToUse);
 
@@ -624,14 +602,14 @@ export function AppProvider({ children }) {
     const newContract = {
       id: codeToUse,
       code: codeToUse,
-      lockboxPin: '5829',
+      accessCode: null, // No access code before landlord payment verification!
       createdAt: new Date().toISOString(),
-      landlordId: landlordProfile?.phone || contactNumber || 'LANDLORD-DEFAULT',
+      landlordId: landlordProfile?.phone || landlordProfile?.id || contactNumber || 'LANDLORD-DEFAULT',
       landlordName: landlordName || landlordProfile?.name || 'Landlord',
       contactNumber: contactNumber || landlordProfile?.phone || '',
       tenantName: cleanTenant,
       roomNumber: roomNumber || 'Unit 1',
-      propertyAddress: propertyAddress || 'Cagayan de Oro City',
+      propertyAddress: propertyAddress || landlordProfile?.propertyAddress || 'Specified Rental Unit',
       propertyType,
       monthlyRent: Number(monthlyRent) || 0,
       deposit: Number(deposit) || 0,
@@ -643,6 +621,7 @@ export function AppProvider({ children }) {
       landlordSignature,
       status: 'Active',
       isSigned: false,
+      paymentVerified: false,
       dueDay: 'Every 5th',
       paymentHistory: [
         { cycle: 'Advance / Move-in Deposit', status: 'Pending Verification', date: new Date().toLocaleDateString() }
@@ -676,18 +655,20 @@ export function AppProvider({ children }) {
     return newContract;
   };
 
-  // AI Contract Customizer powered by Google Gemini API
+  // AI Contract Customizer powered by Google Gemini API (Agent D)
   const [aiCustomPrompt, setAiCustomPrompt] = useState('');
   const [aiIsCustomizing, setAiIsCustomizing] = useState(false);
   const [aiUpdateToast, setAiUpdateToast] = useState('');
+  const [aiError, setAiError] = useState('');
 
   const handleApplyAiCustomization = async (promptText) => {
-    const queryText = promptText || aiCustomPrompt;
-    if (!queryText.trim()) return;
+    const queryText = (promptText || aiCustomPrompt).trim();
+    if (!queryText) return;
 
     setAiIsCustomizing(true);
+    setAiError('');
     try {
-      const generated = await generateClauseWithGemini(queryText, contractClauses, {
+      const generated = await generateClause(queryText, contractClauses, {
         propertyAddress,
         monthlyRent,
         deposit,
@@ -697,7 +678,7 @@ export function AppProvider({ children }) {
       let updated = [...contractClauses];
       if (generated.action === 'update' && generated.targetClauseNum) {
         const idx = updated.findIndex(c => c.num === generated.targetClauseNum);
-        const cleanTitle = generated.title.replace(/^\d+\.\s*/, '');
+        const cleanTitle = (generated.title || 'Clause').replace(/^\d+\.\s*/, '');
         const clauseData = {
           num: generated.targetClauseNum,
           title: `${generated.targetClauseNum}. ${cleanTitle}`,
@@ -707,7 +688,7 @@ export function AppProvider({ children }) {
         else updated.push(clauseData);
       } else {
         const nextNum = updated.length + 1;
-        const cleanTitle = generated.title.replace(/^\d+\.\s*/, '');
+        const cleanTitle = (generated.title || 'Special Clause').replace(/^\d+\.\s*/, '');
         updated.push({
           num: nextNum,
           title: `${nextNum}. ${cleanTitle}`,
@@ -720,12 +701,35 @@ export function AppProvider({ children }) {
       setAiCustomPrompt('');
       setTimeout(() => setAiUpdateToast(''), 4500);
     } catch (err) {
-      console.warn('[Gemini AI] Error customizing clause:', err);
-      setAiUpdateToast('Gemini customization completed.');
-      setTimeout(() => setAiUpdateToast(''), 3000);
+      console.warn('[Gemini AI] Clause generation exception:', err.message);
+      setAiError(err.message || 'Gemini AI failed to generate clause. Please check your API key and retry.');
     } finally {
       setAiIsCustomizing(false);
     }
+  };
+
+  // Directly add custom clause as written by the landlord (Requirement 7)
+  const handleAddDirectCustomClause = (customText) => {
+    const textToAdd = (customText || aiCustomPrompt).trim();
+    if (!textToAdd) return;
+
+    const nextNum = contractClauses.length + 1;
+    const updated = [
+      ...contractClauses,
+      {
+        num: nextNum,
+        title: `${nextNum}. Special Landlord Condition`,
+        text: textToAdd,
+        custom: true,
+        isCustom: true
+      }
+    ];
+
+    setContractClauses(updated);
+    setAiCustomPrompt('');
+    setAiError('');
+    setAiUpdateToast('Added custom landlord clause.');
+    setTimeout(() => setAiUpdateToast(''), 3000);
   };
 
   // Tenant Portal State
@@ -739,7 +743,7 @@ export function AppProvider({ children }) {
   const [gcashRefNumber, setGcashRefNumber] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Helper to load contract into active view
+  // Load contract into active view
   const loadContractIntoActiveState = (contractData) => {
     setActiveTenantContract(contractData);
     setLandlordName(contractData.landlordName || '');
@@ -769,21 +773,10 @@ export function AppProvider({ children }) {
       duration: contractData.leaseDuration
     });
 
-    const syncedClauses = currentClauses.map(c => {
-      if (c.num === 1) {
-        return {
-          ...c,
-          title: '1. Parties to the Agreement',
-          text: `This residential lease agreement is entered into by ${contractData.landlordName || '[Landlord Name]'} (Lessor) and ${cleanTenant || '[Tenant Name]'} (Lessee).`
-        };
-      }
-      return c;
-    });
-
-    setContractClauses(syncedClauses);
+    setContractClauses(currentClauses);
   };
 
-  // Real-time lookup: Firebase Firestore Cloud first, with local fallback
+  // Real-time lookup: Firebase Firestore first
   const lookupContractByCode = async (code) => {
     const cleanCode = (code || '').trim().toUpperCase();
     if (!cleanCode) return null;
@@ -798,7 +791,6 @@ export function AppProvider({ children }) {
       }
     } catch (err) {
       if (err.code === 'permission-denied') setDbStatus('rules_needed');
-      console.warn('[Firebase] Cloud lookup notice:', err.message);
     }
 
     const foundLocal = contracts.find(c => c.code?.toUpperCase() === cleanCode);
@@ -810,78 +802,28 @@ export function AppProvider({ children }) {
     return null;
   };
 
-  // Tenant Register with Username, Password & Full Legal Name
-  const registerTenant = async ({ username, password, name, phone, code }) => {
+  // Tenant Register via Firebase Auth
+  const registerTenant = async ({ username, password, email, name, phone, code }) => {
     try {
-      const cleanUsername = (username || '').trim().toLowerCase();
-      const cleanPassword = (password || '').trim();
-      const cleanCode = (code || activeCode || roomCodeInput || '').trim().toUpperCase();
+      const tenantRecord = await registerTenantUser({
+        username,
+        password,
+        email,
+        name,
+        phone,
+        code: code || activeCode || roomCodeInput
+      });
 
-      if (!cleanUsername) {
-        return { success: false, error: 'Please choose a username.' };
-      }
-      if (!cleanPassword || cleanPassword.length < 4) {
-        return { success: false, error: 'Password must be at least 4 characters long.' };
-      }
-
-      // Look up contract to get prefilled landlord details
-      let linkedContract = null;
+      const cleanCode = tenantRecord.contractCode;
       if (cleanCode) {
-        linkedContract = await lookupContractByCode(cleanCode);
-        if (linkedContract) {
-          setActiveCode(cleanCode);
-        }
-      }
-
-      // Prioritize: Explicit typed name > Landlord's input (if not generic) > username
-      let finalTenantName = (name || '').trim();
-      if (isGenericTenantName(finalTenantName)) {
-        finalTenantName = (!isGenericTenantName(linkedContract?.tenantName) ? linkedContract.tenantName : '') || 
-                          (!isGenericTenantName(tenantName) ? tenantName : '') || 
-                          cleanUsername;
-      }
-      const finalPhone = (phone || '').trim() || linkedContract?.tenantPhone || contactNumber || '';
-
-      const tenantRecord = {
-        id: cleanUsername,
-        username: cleanUsername,
-        password: cleanPassword,
-        name: finalTenantName,
-        phone: finalPhone,
-        contractCode: cleanCode,
-        createdAt: new Date().toISOString()
-      };
-
-      // 1. Save to Cloud Firestore
-      try {
-        await setDoc(doc(db, 'tenants', cleanUsername), tenantRecord, { merge: true });
-        if (cleanCode) {
-          await setDoc(doc(db, 'contracts', cleanCode), {
-            tenantUsername: cleanUsername,
-            tenantName: finalTenantName,
-            status: 'Reviewing'
-          }, { merge: true });
-        }
-      } catch (err) {
-        console.warn('[Firebase] Tenant register notice:', err.message);
-      }
-
-      // 2. Save to localStorage database
-      try {
-        const stored = JSON.parse(localStorage.getItem('rip_tenants_store') || '{}');
-        stored[cleanUsername] = tenantRecord;
-        if (finalPhone) stored[finalPhone] = tenantRecord;
-        localStorage.setItem('rip_tenants_store', JSON.stringify(stored));
-      } catch (e) {}
-
-      // 3. Update contracts state with the new tenant name
-      if (cleanCode) {
+        await lookupContractByCode(cleanCode);
+        setActiveCode(cleanCode);
         setContracts(prev => prev.map(c => {
           if (c.code === cleanCode || c.id === cleanCode) {
             return {
               ...c,
-              tenantName: finalTenantName,
-              tenantUsername: cleanUsername
+              tenantName: tenantRecord.name,
+              tenantUsername: tenantRecord.username
             };
           }
           return c;
@@ -889,124 +831,39 @@ export function AppProvider({ children }) {
       }
 
       setTenantProfile(tenantRecord);
-      setTenantName(finalTenantName);
+      setTenantName(tenantRecord.name);
       setUserRole('TENANT');
       localStorage.setItem('rip_user_role', 'TENANT');
 
-      // Refresh clause 1 with the exact final legal name
-      setContractClauses(prev => prev.map(c => {
-        if (c.num === 1) {
-          return {
-            ...c,
-            title: '1. Parties to the Agreement',
-            text: `This residential lease agreement is entered into by ${landlordName || '[Landlord Name]'} (Lessor) and ${finalTenantName} (Lessee).`
-          };
-        }
-        return c;
-      }));
-
-      return { 
-        success: true, 
-        tenant: tenantRecord, 
-        hasContract: Boolean(linkedContract || cleanCode)
-      };
+      return { success: true, tenant: tenantRecord, hasContract: Boolean(cleanCode) };
     } catch (err) {
-      console.warn('[Register] Tenant error:', err);
-      return { success: false, error: 'Registration failed. Please try again.' };
+      return { success: false, error: err.message };
     }
   };
 
-  // Returning Tenant Login by Username / Phone & Password
-  const loginTenant = async (username, password, code) => {
+  // Tenant Sign In via Firebase Auth
+  const loginTenant = async (usernameOrEmail, password, code) => {
     try {
-      const cleanIdent = (username || '').trim().toLowerCase();
-      const cleanPassword = (password || '').trim();
-      const explicitCode = (code || '').trim().toUpperCase();
+      const tenantData = await loginTenantUser({ identifier: usernameOrEmail, password, code });
 
-      if (!cleanIdent) {
-        return { success: false, error: 'Please enter your username.' };
-      }
-      if (!cleanPassword) {
-        return { success: false, error: 'Please enter your password.' };
-      }
-
-      let tenantData = null;
-
-      // 1. Try querying Firestore
-      try {
-        const snap = await getDoc(doc(db, 'tenants', cleanIdent));
-        if (snap.exists()) {
-          tenantData = snap.data();
-        }
-      } catch (err) {
-        console.warn('[Firebase] Tenant query notice:', err.message);
-      }
-
-      // 2. Check local tenants store
-      if (!tenantData) {
-        try {
-          const stored = JSON.parse(localStorage.getItem('rip_tenants_store') || '{}');
-          tenantData = stored[cleanIdent] || Object.values(stored).find(
-            t => (t.username && t.username.toLowerCase() === cleanIdent) || t.phone === cleanIdent
-          );
-        } catch (e) {}
-      }
-
-      // 3. Fallback: check saved contracts for tenant match
-      if (!tenantData) {
-        const local = contracts.find(c => 
-          (c.tenantPhone && c.tenantPhone.toLowerCase() === cleanIdent) || 
-          (c.tenantUsername && c.tenantUsername.toLowerCase() === cleanIdent) ||
-          (c.tenantName && c.tenantName.toLowerCase() === cleanIdent)
-        );
-        if (local) {
-          tenantData = {
-            id: cleanIdent,
-            username: local.tenantUsername || cleanIdent,
-            name: isGenericTenantName(local.tenantName) ? cleanIdent : local.tenantName,
-            phone: local.tenantPhone || '',
-            contractCode: local.code
-          };
-        }
-      }
-
-      if (!tenantData) {
-        return {
-          success: false,
-          error: `Account "${cleanIdent}" not found. Please click Join Unit / Register to create your tenant account.`
-        };
-      }
-
-      if (tenantData.password && tenantData.password !== cleanPassword) {
-        return {
-          success: false,
-          error: 'Incorrect password. Please verify and try again.'
-        };
-      }
-
-      const targetCode = explicitCode || tenantData.contractCode || activeCode || roomCodeInput;
+      const targetCode = code || tenantData.contractCode || activeCode || roomCodeInput;
       if (targetCode) {
         await lookupContractByCode(targetCode);
         setActiveCode(targetCode);
       }
 
       setTenantProfile(tenantData);
-      setTenantName(tenantData.name || cleanIdent);
+      setTenantName(tenantData.name || tenantData.username);
       setUserRole('TENANT');
       localStorage.setItem('rip_user_role', 'TENANT');
 
-      return { 
-        success: true, 
-        tenant: tenantData, 
-        hasContract: Boolean(targetCode) 
-      };
+      return { success: true, tenant: tenantData, hasContract: Boolean(targetCode) };
     } catch (err) {
-      console.warn('[Tenant Login] Error:', err);
-      return { success: false, error: 'Login failed. Please check your credentials.' };
+      return { success: false, error: err.message };
     }
   };
 
-  // Record tenant check-in, signature, and GCash screenshot in Firebase Firestore
+  // Record tenant check-in: Access code is NOT generated or sent here (Requirement 4 & 5)
   const recordTenantCheckin = async () => {
     const contractCode = activeCode || roomCodeInput || 'RIP-KEY';
     const amountVal = Number(advanceRent || monthlyRent || 0);
@@ -1022,7 +879,6 @@ export function AppProvider({ children }) {
       gcashRef: gcashRefNumber || 'Direct Payment Submitted',
       hasReceipt: Boolean(receiptImage),
       receiptData: receiptImage,
-      lockboxPin: '5829',
       signedAt: new Date().toISOString()
     };
 
@@ -1030,6 +886,7 @@ export function AppProvider({ children }) {
       status: 'Pending Verification',
       isSigned: true,
       paymentVerified: false,
+      accessCode: null, // Explicitly null until landlord verifies!
       tenantSignedAt: new Date().toISOString(),
       tenantName: cleanTenant,
       signingMode: signingMode || checkinPayload.signingMode,
@@ -1045,10 +902,7 @@ export function AppProvider({ children }) {
     if (contractExists) {
       updatedContracts = contracts.map(c => {
         if (c.code === contractCode || c.id === contractCode) {
-          return {
-            ...c,
-            ...baseContractUpdate
-          };
+          return { ...c, ...baseContractUpdate };
         }
         return c;
       });
@@ -1062,13 +916,13 @@ export function AppProvider({ children }) {
           roomNumber: roomNumber || 'Unit 1',
           monthlyRent: monthlyRent || 0,
           deposit: deposit || 0,
-          propertyAddress: propertyAddress || 'Cagayan de Oro City'
+          propertyAddress: propertyAddress || 'Specified Property Address'
         }
       ];
     }
     setContracts(updatedContracts);
 
-    // Initial advance rent payment into payments ledger
+    // Initial advance rent payment log
     const initialPayment = {
       id: `pay-${Date.now()}`,
       contractCode,
@@ -1092,6 +946,7 @@ export function AppProvider({ children }) {
             status: 'Pending Verification',
             isSigned: true,
             paymentVerified: false,
+            accessCode: null,
             tenantSignedAt: new Date().toISOString(),
             tenantSignature: signatureData || 'Digital Signature Stored',
             gcashRef: gcashRefNumber || 'Direct Payment Submitted',
@@ -1108,25 +963,28 @@ export function AppProvider({ children }) {
     }
   };
 
-  // Landlord verification of tenant payment & unlocking room PIN
+  // Landlord verification of tenant payment: Generates secure random access code (Requirement 4 & 5)
   const verifyTenantPayment = async (contractCode, paymentId = null) => {
-    if (!contractCode) return;
+    if (!contractCode) return null;
     const cleanCode = contractCode.trim().toUpperCase();
 
-    // 1. Update contracts
+    // Generate cryptographically secure access code and persist to Firestore
+    const { accessCode: newCode } = await verifyPaymentAndIssueCode(cleanCode, paymentId, db);
+
+    // Update local state with the newly verified status and access code
     setContracts(prev => prev.map(c => {
       if (c.code === cleanCode || c.id === cleanCode) {
         return {
           ...c,
           status: 'Active',
           paymentVerified: true,
+          accessCode: newCode,
           verifiedAt: new Date().toISOString()
         };
       }
       return c;
     }));
 
-    // 2. Update payments ledger
     setPayments(prev => prev.map(p => {
       if (p.contractCode === cleanCode && (!paymentId || p.id === paymentId)) {
         return {
@@ -1138,28 +996,37 @@ export function AppProvider({ children }) {
       return p;
     }));
 
-    // 3. Write to Firestore contracts
-    try {
-      await setDoc(doc(db, 'contracts', cleanCode), {
+    if (activeTenantContract && (activeTenantContract.code === cleanCode || activeTenantContract.id === cleanCode)) {
+      setActiveTenantContract(prev => ({
+        ...prev,
         status: 'Active',
         paymentVerified: true,
-        verifiedAt: new Date().toISOString()
-      }, { merge: true });
-
-      // 4. Update matching payments in Firestore
-      const q = query(collection(db, 'payments'), where('contractCode', '==', cleanCode));
-      const pSnap = await getDocs(q);
-      for (const pDoc of pSnap.docs) {
-        if (!paymentId || pDoc.id === paymentId) {
-          await setDoc(doc(db, 'payments', pDoc.id), { 
-            status: 'Verified', 
-            verifiedAt: new Date().toISOString() 
-          }, { merge: true });
-        }
-      }
-    } catch (err) {
-      console.warn('[Firebase] Verify payment notice:', err.message);
+        accessCode: newCode
+      }));
     }
+
+    return newCode;
+  };
+
+  // Landlord regeneration of access code (invalidates old code) (Requirement 4)
+  const regenerateTenantAccessCode = async (contractCode) => {
+    if (!contractCode) return null;
+    const cleanCode = contractCode.trim().toUpperCase();
+
+    const { accessCode: newCode } = await regenerateAccessCode(cleanCode, db);
+
+    setContracts(prev => prev.map(c => {
+      if (c.code === cleanCode || c.id === cleanCode) {
+        return { ...c, accessCode: newCode };
+      }
+      return c;
+    }));
+
+    if (activeTenantContract && (activeTenantContract.code === cleanCode || activeTenantContract.id === cleanCode)) {
+      setActiveTenantContract(prev => ({ ...prev, accessCode: newCode }));
+    }
+
+    return newCode;
   };
 
   // Landlord rejection or request for new payment proof
@@ -1185,12 +1052,10 @@ export function AppProvider({ children }) {
         paymentRejectionReason: reason,
         status: 'Payment Resubmission Required'
       }, { merge: true });
-    } catch (err) {
-      console.warn('[Firebase] Rejection notice:', err.message);
-    }
+    } catch (err) {}
   };
 
-  // In-app payment submitted by tenant with real screenshot receipt upload
+  // In-app tenant payment submission
   const submitTenantPayment = async ({ contractCode, amount, cycleName, gcashRef, receiptData }) => {
     const cleanCode = (contractCode || activeCode || '').trim().toUpperCase();
     const receiptImage = receiptData?.dataUrl || receiptData?.preview || (typeof receiptData === 'string' ? receiptData : null);
@@ -1211,7 +1076,6 @@ export function AppProvider({ children }) {
 
     setPayments(prev => [newPayment, ...prev]);
 
-    // Update contract latest payment state
     setContracts(prev => prev.map(c => {
       if (c.code === cleanCode || c.id === cleanCode) {
         return {
@@ -1227,7 +1091,6 @@ export function AppProvider({ children }) {
       return c;
     }));
 
-    // Write to Firestore
     try {
       await addDoc(collection(db, 'payments'), newPayment);
       if (cleanCode) {
@@ -1240,15 +1103,14 @@ export function AppProvider({ children }) {
           gcashReceiptData: receiptImage
         }, { merge: true });
       }
-    } catch (err) {
-      console.warn('[Firebase] Submit payment notice:', err.message);
-    }
+    } catch (err) {}
 
     return newPayment;
   };
 
   // Logout / Switch Account
-  const logout = () => {
+  const logout = async () => {
+    await signOutUser();
     localStorage.removeItem('rip_user_role');
     localStorage.removeItem('rip_landlord_profile');
     localStorage.removeItem('rip_tenant_profile');
@@ -1280,6 +1142,7 @@ export function AppProvider({ children }) {
       status: c.status || 'Active',
       isSigned: Boolean(c.isSigned),
       paymentVerified: Boolean(c.paymentVerified),
+      accessCode: c.accessCode || null,
       signingMode: c.signingMode || 'DIGITAL',
       signatureData: c.signatureData || null,
       idFileData: c.idFileData || null,
@@ -1292,7 +1155,6 @@ export function AppProvider({ children }) {
   });
 
   const filteredTenants = tenantsList.filter(t => {
-    // 1. Search filter
     if (searchQuery && searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       const matchName = t.name && t.name.toLowerCase().includes(q);
@@ -1301,7 +1163,6 @@ export function AppProvider({ children }) {
       if (!matchName && !matchUnit && !matchCode) return false;
     }
 
-    // 2. Tab filter
     if (tenantFilter === 'ACTIVE') {
       return Boolean(t.paymentVerified);
     }
@@ -1312,10 +1173,11 @@ export function AppProvider({ children }) {
       return !t.paymentVerified || (t.due && t.due.includes('5th'));
     }
 
-    return true; // 'ALL'
+    return true;
   });
 
   const handleCopyLink = () => {
+    if (!activeCode) return;
     const url = `${window.location.origin}?code=${activeCode}`;
     navigator.clipboard?.writeText(url).catch(() => {});
     setCopiedLink(true);
@@ -1358,17 +1220,17 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
-      currentScreen, setCurrentScreen,
+      currentScreen, setCurrentScreen, navigateBack,
       userRole, setUserRole,
       dbStatus,
       landlordProfile, setLandlordProfile,
-      loginLandlord, registerLandlord,
+      loginLandlord, registerLandlord, resetPasswordWithEmail,
       tenantProfile, setTenantProfile,
       loginTenant, registerTenant,
       logout,
       contracts, setContracts,
       payments, setPayments,
-      verifyTenantPayment, rejectTenantPayment, submitTenantPayment,
+      verifyTenantPayment, rejectTenantPayment, regenerateTenantAccessCode, submitTenantPayment,
       propertyType, setPropertyType,
       landlordName, setLandlordName,
       contactNumber, setContactNumber,
@@ -1386,7 +1248,9 @@ export function AppProvider({ children }) {
       aiCustomPrompt, setAiCustomPrompt,
       aiIsCustomizing, setAiIsCustomizing,
       aiUpdateToast, setAiUpdateToast,
+      aiError, setAiError,
       handleApplyAiCustomization,
+      handleAddDirectCustomClause,
       roomCodeInput, setRoomCodeInput,
       activeCode, setActiveCode,
       tenantName, setTenantName,

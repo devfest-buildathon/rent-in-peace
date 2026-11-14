@@ -10,24 +10,31 @@ import {
   ZoomIn, 
   X, 
   HelpCircle, 
-  Loader2 
+  Loader2,
+  RefreshCw,
+  Copy,
+  Check
 } from 'lucide-react';
 
 export default function TenantDetailScreen() {
   const { 
-    setCurrentScreen, 
+    navigateBack,
     selectedTenant, 
     contracts, 
     payments,
     verifyTenantPayment,
+    regenerateTenantAccessCode,
     lookupContractByCode
   } = useApp();
 
   const [verificationToast, setVerificationToast] = useState('');
   const [zoomReceiptUrl, setZoomReceiptUrl] = useState(null);
   const [confirmVerifyModal, setConfirmVerifyModal] = useState(false);
+  const [confirmRegenModal, setConfirmRegenModal] = useState(false);
   const [pendingTargetPayment, setPendingTargetPayment] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const tenant = selectedTenant || {
     name: 'Tenant Resident',
@@ -37,6 +44,7 @@ export default function TenantDetailScreen() {
     phone: '09XXXXXXXXX',
     isSigned: false,
     paymentVerified: false,
+    accessCode: null,
     signingMode: 'DIGITAL',
     contract: null
   };
@@ -48,6 +56,7 @@ export default function TenantDetailScreen() {
   ) || tenant.contract || {};
 
   const isVerified = Boolean(liveContract.paymentVerified || tenant.paymentVerified);
+  const activeAccessCode = liveContract.accessCode || tenant.accessCode || null;
 
   // Filter every payment recorded for this resident / contract
   const tenantPayments = payments.filter(p => 
@@ -84,12 +93,24 @@ export default function TenantDetailScreen() {
     const code = liveContract.code || liveContract.id || tenant.contract?.code;
     const paymentId = pendingTargetPayment?.id || null;
     if (code) {
-      await verifyTenantPayment(code, paymentId);
-      setVerificationToast('Payment verified! Door lockbox PIN (5829) is now released to tenant.');
-      setTimeout(() => setVerificationToast(''), 4500);
+      const generatedCode = await verifyTenantPayment(code, paymentId);
+      setVerificationToast(`Payment verified! Door code (${generatedCode}) generated and released to tenant.`);
+      setTimeout(() => setVerificationToast(''), 5000);
     }
     setIsVerifying(false);
     setConfirmVerifyModal(false);
+  };
+
+  const confirmAndExecuteRegeneration = async () => {
+    setIsRegenerating(true);
+    const code = liveContract.code || liveContract.id || tenant.contract?.code;
+    if (code) {
+      const newCode = await regenerateTenantAccessCode(code);
+      setVerificationToast(`Access code updated to ${newCode}. Previous code invalidated.`);
+      setTimeout(() => setVerificationToast(''), 5000);
+    }
+    setIsRegenerating(false);
+    setConfirmRegenModal(false);
   };
 
   const handleOpenKasulatan = async () => {
@@ -97,7 +118,13 @@ export default function TenantDetailScreen() {
     if (code) {
       await lookupContractByCode(code);
     }
-    setCurrentScreen('WIZARD_CONTRACT');
+  };
+
+  const handleCopyAccessCode = () => {
+    if (!activeAccessCode) return;
+    navigator.clipboard?.writeText(activeAccessCode).catch(() => {});
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   return (
@@ -106,12 +133,13 @@ export default function TenantDetailScreen() {
         {/* Top Header */}
         <div className="flex items-center justify-between mb-3">
           <button 
-            onClick={() => setCurrentScreen('LANDLORD_TENANTS')} 
+            type="button"
+            onClick={navigateBack} 
             className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
-          <h2 className="text-sm font-bold text-slate-900">Tenant Profile</h2>
+          <h2 className="text-sm font-bold text-slate-900">Resident Profile</h2>
           <div className="w-10"></div>
         </div>
 
@@ -138,7 +166,7 @@ export default function TenantDetailScreen() {
           </div>
         )}
 
-        {/* GCash Latest Payment Submission Card */}
+        {/* GCash Payment Submission Card */}
         {(gcashRef || receiptImage) && (
           <div className="p-4 bg-white border-2 border-emerald-600/30 rounded-3xl mb-4 shadow-xs space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -147,7 +175,7 @@ export default function TenantDetailScreen() {
                   <CreditCard className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Latest Payment Proof</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Advance Rent Payment</span>
                   <p className="text-xs font-bold text-slate-900">₱{Number(paymentAmount).toLocaleString()}</p>
                 </div>
               </div>
@@ -192,7 +220,7 @@ export default function TenantDetailScreen() {
             {!isVerified ? (
               <div className="pt-1">
                 <p className="text-[11px] text-slate-500 mb-2 leading-relaxed">
-                  Confirm receipt match to unlock the apartment key lockbox PIN for {tenant.name}.
+                  Confirm receipt match to issue a unique door lockbox access code for {tenant.name}.
                 </p>
                 <button 
                   type="button"
@@ -200,41 +228,66 @@ export default function TenantDetailScreen() {
                   className="w-full py-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Verify GCash Payment & Release PIN</span>
+                  <span>Verify GCash Payment & Issue Access Code</span>
                 </button>
               </div>
             ) : (
               <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs text-[#14532D] font-bold">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Payment Verified · Lockbox PIN Released</span>
+                  <span>Payment Verified · Access Code Active</span>
                 </div>
-                <span className="font-mono text-[11px] bg-white text-emerald-900 px-2 py-0.5 rounded-lg border border-emerald-200">
-                  PIN: 5829
-                </span>
               </div>
             )}
           </div>
         )}
 
-        {/* Lockbox Status Card in Forest Emerald palette */}
-        <div className="p-4 bg-[#052e16] text-white rounded-3xl shadow-md border border-emerald-900/60 mb-4 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-1.5 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>Lockbox Access PIN</span>
+        {/* Per-Tenant Door Access Code Card (Requirements 4 & 5) */}
+        <div className="p-4 bg-[#052e16] text-white rounded-3xl shadow-md border border-emerald-900/60 mb-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-1.5 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Door Access Keypad Code</span>
+              </div>
+              <p className="font-mono text-3xl font-black tracking-widest text-white mt-1">
+                {isVerified && activeAccessCode ? activeAccessCode : '•••• (Locked)'}
+              </p>
+              <p className="text-[10px] text-emerald-200/80 mt-0.5">
+                {isVerified && activeAccessCode 
+                  ? 'Set this code on your physical door lock. It is now visible on the resident hub.' 
+                  : 'Locked until you verify the advance payment receipt.'}
+              </p>
             </div>
-            <p className="font-mono text-2xl font-black tracking-widest text-white mt-1">
-              5829
-            </p>
-            <p className="text-[10px] text-emerald-200/80 mt-0.5">
-              {isVerified ? 'Unlocked and visible on tenant dashboard' : 'Locked until payment verified'}
-            </p>
+
+            <div className={`p-2.5 rounded-2xl ${isVerified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
+              {isVerified ? <CheckCircle2 className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
+            </div>
           </div>
 
-          <div className={`p-2.5 rounded-2xl ${isVerified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
-            {isVerified ? <CheckCircle2 className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
-          </div>
+          {/* Regenerate Code Button */}
+          {isVerified && (
+            <div className="pt-2 border-t border-emerald-900/60 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={handleCopyAccessCode}
+                className="px-3 py-1.5 bg-emerald-800/80 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
+              >
+                {copiedCode ? <Check className="w-3 h-3 text-emerald-300 stroke-[3]" /> : <Copy className="w-3 h-3" />}
+                <span>{copiedCode ? 'Copied' : 'Copy Code'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setConfirmRegenModal(true)}
+                className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/30 rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
+                title="Generate new code when tenant moves out or on request"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Regenerate Code</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* All Payments Ledger & Audit Trail for this Resident */}
@@ -352,11 +405,11 @@ export default function TenantDetailScreen() {
 
           <button
             type="button"
-            onClick={handleOpenKasulatan}
+            onClick={() => window.print()}
             className="w-full py-3 px-3 bg-emerald-50 hover:bg-emerald-100 text-[#14532D] font-bold text-xs rounded-2xl flex items-center justify-center gap-1.5 transition cursor-pointer border border-emerald-200"
           >
             <FileText className="w-4 h-4" />
-            <span>View & Print Kasulatan (A4)</span>
+            <span>Download / Print Kasulatan (A4)</span>
           </button>
         </div>
 
@@ -365,14 +418,15 @@ export default function TenantDetailScreen() {
       {/* Bottom Back Button */}
       <div className="pt-2 pb-2">
         <button 
-          onClick={() => setCurrentScreen('LANDLORD_TENANTS')}
+          type="button"
+          onClick={navigateBack}
           className="w-full bg-slate-200/80 hover:bg-slate-300 text-slate-800 font-bold py-3.5 rounded-2xl text-xs transition cursor-pointer"
         >
           Back to Directory
         </button>
       </div>
 
-      {/* Confirmation Modal: Are You Sure? */}
+      {/* Confirmation Modal: Are You Sure? (Requirement 5) */}
       {confirmVerifyModal && (
         <div 
           onClick={() => setConfirmVerifyModal(false)}
@@ -414,7 +468,7 @@ export default function TenantDetailScreen() {
             </div>
 
             <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 leading-snug">
-              Approving will mark this payment as <strong>Verified</strong> and immediately unlock the physical master lockbox PIN (<strong>5829</strong>) on the resident's app.
+              Approving will mark this payment as <strong>Verified</strong> and generate a secure, random door access code that appears here and on the resident's account.
             </div>
 
             <div className="grid grid-cols-2 gap-2 pt-1">
@@ -439,6 +493,51 @@ export default function TenantDetailScreen() {
                     <span>Yes, Verify</span>
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Regenerate Access Code? */}
+      {confirmRegenModal && (
+        <div 
+          onClick={() => setConfirmRegenModal(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                <RefreshCw className="w-6 h-6 stroke-[2.5]" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900">Regenerate Door Code?</h3>
+                <p className="text-[11px] text-slate-500">Invalidate previous door code</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              This will create a new cryptographically random code for <strong>{tenant.name}</strong>. Remember to update the physical lock on the door.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmRegenModal(false)}
+                className="py-3 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isRegenerating}
+                onClick={confirmAndExecuteRegeneration}
+                className="py-3 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-xs font-bold text-white shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                {isRegenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Regenerate Now</span>}
               </button>
             </div>
           </div>

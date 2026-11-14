@@ -66,7 +66,7 @@ export const VALID_ROUTES: Record<string, { requiredRole: UserRole | "public"; l
 
 /**
  * Parses a hash or pathname into path and query params.
- * e.g. "#/tenant/join?code=CDO-4921" -> { path: "/tenant/join", params: { code: "CDO-4921" } }
+ * e.g. "#/tenant/join?code=RIP-4921" -> { path: "/tenant/join", params: { code: "RIP-4921" } }
  */
 export function parseRoute(rawLocation: string): ParsedRoute {
   let clean = rawLocation.trim()
