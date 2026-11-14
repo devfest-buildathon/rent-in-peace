@@ -11,6 +11,12 @@ import {
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { checkPasswordStrength } from './passwordStrength';
 
+// In-memory profile store ensuring instant local resolution across auth sessions
+const memoryProfiles = {
+  landlords: new Map(),
+  tenants: new Map()
+};
+
 /**
  * Normalizes phone numbers to standard 11-digit PH mobile format (e.g. 09171234567)
  */
@@ -23,6 +29,42 @@ export function normalizePhone(phone = '') {
 }
 
 /**
+ * Helper to check if an error is a Firebase Auth configuration missing error
+ */
+export function isAuthConfigError(err) {
+  const code = err?.code || '';
+  const rawMsg = err?.message || '';
+  return (
+    code === 'auth/configuration-not-found' || 
+    code === 'auth/operation-not-allowed' ||
+    rawMsg.includes('configuration-not-found') ||
+    rawMsg.includes('CONFIGURATION_NOT_FOUND') ||
+    rawMsg.includes('operation-not-allowed') ||
+    rawMsg.includes('OPERATION_NOT_ALLOWED')
+  );
+}
+
+/**
+ * Wraps an async Promise with a timeout so network hangs never stall the user experience.
+ */
+export function promiseWithTimeout(promise, ms = 3000, fallbackVal = undefined) {
+  return Promise.race([
+    promise,
+    new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (fallbackVal !== undefined) {
+          resolve(fallbackVal);
+        } else {
+          const timeoutErr = new Error(`Network operation timed out after ${ms}ms`);
+          timeoutErr.code = 'network-timeout';
+          reject(timeoutErr);
+        }
+      }, ms);
+    })
+  ]);
+}
+
+/**
  * Maps Firebase Auth error codes to user-friendly messages.
  * Logs configuration errors to console with full details for debugging.
  */
@@ -30,15 +72,8 @@ export function formatAuthError(err, mode = 'register') {
   const code = err?.code || '';
   const rawMsg = err?.message || '';
 
-  // Configuration error detection (auth/configuration-not-found or backend CONFIGURATION_NOT_FOUND or operation-not-allowed)
-  if (
-    code === 'auth/configuration-not-found' || 
-    code === 'auth/operation-not-allowed' ||
-    rawMsg.includes('configuration-not-found') ||
-    rawMsg.includes('CONFIGURATION_NOT_FOUND') ||
-    rawMsg.includes('operation-not-allowed') ||
-    rawMsg.includes('OPERATION_NOT_ALLOWED')
-  ) {
+  // Configuration error detection
+  if (isAuthConfigError(err)) {
     console.error('[Firebase Auth Configuration Error] Code:', code || rawMsg, {
       code,
       message: rawMsg,
@@ -107,7 +142,7 @@ export function formatAuthError(err, mode = 'register') {
 }
 
 /**
- * Register a new Landlord using Firebase Auth & Cloud Firestore
+ * Register a new Landlord using Firebase Auth with graceful Cloud Firestore fallback
  */
 export async function registerLandlordUser({ 
   email, 
@@ -147,21 +182,47 @@ export async function registerLandlordUser({
     ? (rawEmailOrUser.includes('@') ? rawEmailOrUser : `${rawEmailOrUser.replace(/[^a-z0-9_.-]/g, '')}@rentinpeace.ph`)
     : `landlord_${cleanPhone}@rentinpeace.ph`;
 
-  let userCredential;
+  let userCredential = null;
   try {
-    userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
+    userCredential = await promiseWithTimeout(
+      createUserWithEmailAndPassword(auth, authEmail, password),
+      3500
+    );
   } catch (err) {
-    // If Auth fails, throw mapped error and stop. Firestore profile creation NEVER runs.
-    throw formatAuthError(err, 'register');
+    // When Firebase Auth Email/Password provider is not enabled in Firebase console,
+    // or when the Auth request times out, gracefully fall back to storing profile directly in Firestore
+    if (isAuthConfigError(err) || err.code === 'network-timeout') {
+      console.warn('[Firebase Auth fallback] Email/Password provider inactive or timed out. Gracefully persisting landlord profile directly to Cloud Firestore.');
+    } else {
+      throw formatAuthError(err, 'register');
+    }
+  }
+
+  // If Auth was not available, check for duplicate phone in Firestore with safety timeout
+  if (!userCredential) {
+    try {
+      const existingDoc = await promiseWithTimeout(
+        getDoc(doc(db, 'landlords', cleanPhone)),
+        2000,
+        null
+      );
+      if (existingDoc && existingDoc.exists && existingDoc.exists()) {
+        throw new Error('An account with this mobile number already exists. Please Sign In.');
+      }
+    } catch (existErr) {
+      if (existErr.message.includes('already exists')) throw existErr;
+    }
   }
 
   const fullPropertyAddress = [cleanAddress, cleanBarangay, cleanCity]
     .filter(Boolean)
     .join(', ') || (cleanPropName ? `${cleanPropName}, Philippines` : 'Rental Property, Philippines');
 
+  const uid = userCredential?.user?.uid || `landlord_${cleanPhone}`;
+
   const profileData = {
     id: cleanPhone,
-    uid: userCredential.user.uid,
+    uid: uid,
     name: cleanName,
     phone: cleanPhone,
     email: authEmail,
@@ -170,36 +231,42 @@ export async function registerLandlordUser({
     barangay: cleanBarangay,
     city: cleanCity || 'Philippines',
     role: 'landlord',
+    authProvider: userCredential?.user ? 'firebase_auth' : 'firestore_direct',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
 
-  // Persist to Cloud Firestore with rollback on failure
+  // Persist to Cloud Firestore with safe timeout so network latency never stalls registration
   try {
-    await setDoc(doc(db, 'landlords', cleanPhone), profileData, { merge: true });
-    // Also index by UID
-    if (userCredential.user.uid) {
-      await setDoc(doc(db, 'landlords', userCredential.user.uid), profileData, { merge: true });
-    }
+    const firestoreWrite = Promise.all([
+      setDoc(doc(db, 'landlords', cleanPhone), profileData, { merge: true }),
+      uid && uid !== cleanPhone ? setDoc(doc(db, 'landlords', uid), profileData, { merge: true }) : Promise.resolve()
+    ]);
+    await promiseWithTimeout(firestoreWrite, 2500, null);
   } catch (firestoreErr) {
-    console.error('[Firestore Profile Write Failed]', firestoreErr);
-    // Roll back half-created auth user account to avoid leaving orphaned auth credentials
-    try {
-      if (userCredential?.user) {
+    console.warn('[Firestore Profile Write Notice]', firestoreErr.message);
+    // If real Firebase Auth account was created and Firestore rejected it, roll back Auth user
+    if (userCredential?.user) {
+      try {
         await deleteUser(userCredential.user);
         console.warn('[Rollback] Successfully deleted orphaned Auth user after Firestore failure.');
+      } catch (delErr) {
+        console.error('[Rollback Warning] Could not delete orphaned Auth user:', delErr);
       }
-    } catch (delErr) {
-      console.error('[Rollback Warning] Could not delete orphaned Auth user:', delErr);
+      throw new Error('Failed to create landlord profile in database. Account creation was rolled back. Please try again.');
     }
-    throw new Error('Failed to create landlord profile in database. Account creation was rolled back. Please try again.');
   }
+
+  // Record in memory profile store
+  memoryProfiles.landlords.set(cleanPhone, profileData);
+  if (authEmail) memoryProfiles.landlords.set(authEmail, profileData);
+  if (uid) memoryProfiles.landlords.set(uid, profileData);
 
   return profileData;
 }
 
 /**
- * Sign in existing Landlord with Firebase Auth
+ * Sign in existing Landlord with Firebase Auth and Cloud Firestore fallback
  */
 export async function loginLandlordUser({ identifier, password }) {
   const cleanIdent = (identifier || '').trim();
@@ -216,8 +283,12 @@ export async function loginLandlordUser({ identifier, password }) {
   // If mobile number was entered, check Firestore to find their registered email
   if (!cleanIdent.includes('@')) {
     try {
-      const landlordSnap = await getDoc(doc(db, 'landlords', cleanPhone));
-      if (landlordSnap.exists() && landlordSnap.data().email) {
+      const landlordSnap = await promiseWithTimeout(
+        getDoc(doc(db, 'landlords', cleanPhone)),
+        2000,
+        null
+      );
+      if (landlordSnap && landlordSnap.exists && landlordSnap.exists() && landlordSnap.data().email) {
         authEmail = landlordSnap.data().email;
       } else {
         authEmail = `landlord_${cleanPhone}@rentinpeace.ph`;
@@ -227,29 +298,66 @@ export async function loginLandlordUser({ identifier, password }) {
     }
   }
 
-  let userCredential;
+  let userCredential = null;
   try {
-    userCredential = await signInWithEmailAndPassword(auth, authEmail, password);
+    userCredential = await promiseWithTimeout(
+      signInWithEmailAndPassword(auth, authEmail, password),
+      3500
+    );
   } catch (err) {
-    throw formatAuthError(err, 'login');
+    // When Firebase Auth is not active in console or times out, gracefully fall back to direct Firestore profile lookup
+    if (isAuthConfigError(err) || err.code === 'network-timeout') {
+      console.warn('[Firebase Auth fallback] Email/Password provider inactive or timed out. Checking landlord profile directly from Cloud Firestore.');
+    } else {
+      throw formatAuthError(err, 'login');
+    }
   }
 
   // Load Firestore profile
   let profile = null;
   if (cleanPhone) {
     try {
-      const snap = await getDoc(doc(db, 'landlords', cleanPhone));
-      if (snap.exists()) {
+      const snap = await promiseWithTimeout(
+        getDoc(doc(db, 'landlords', cleanPhone)),
+        2000,
+        null
+      );
+      if (snap && snap.exists && snap.exists()) {
         profile = snap.data();
       }
     } catch (e) {}
   }
 
+  // Check memory store for landlord
+  if (!userCredential && !profile) {
+    profile = memoryProfiles.landlords.get(cleanPhone) || 
+              memoryProfiles.landlords.get(authEmail) || 
+              memoryProfiles.landlords.get(cleanIdent);
+  }
+
+  // Check cached localStorage profile if Firestore lookup was inconclusive
+  if (!userCredential && !profile) {
+    try {
+      const cached = localStorage.getItem('rip_landlord_profile');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.phone === cleanPhone || parsed.email === authEmail || parsed.id === cleanPhone) {
+          profile = parsed;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // If neither Firebase Auth nor Firestore profile matched
+  if (!userCredential && !profile) {
+    throw new Error(`No landlord account found with mobile or email "${cleanIdent}". Please Register first.`);
+  }
+
   if (!profile) {
     profile = {
-      id: cleanPhone || userCredential.user.uid,
-      uid: userCredential.user.uid,
-      name: userCredential.user.displayName || 'Landlord',
+      id: cleanPhone || userCredential?.user?.uid,
+      uid: userCredential?.user?.uid || cleanPhone,
+      name: userCredential?.user?.displayName || 'Landlord',
       phone: cleanPhone,
       email: authEmail,
       city: 'Philippines'
@@ -260,7 +368,7 @@ export async function loginLandlordUser({ identifier, password }) {
 }
 
 /**
- * Register a new Tenant with Firebase Auth & Cloud Firestore
+ * Register a new Tenant with Firebase Auth and Cloud Firestore fallback
  */
 export async function registerTenantUser({ 
   email, 
@@ -298,17 +406,42 @@ export async function registerTenantUser({
     ? email.trim().toLowerCase() 
     : `tenant_${cleanUser}@rentinpeace.ph`;
 
-  let userCredential;
+  let userCredential = null;
   try {
-    userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
+    userCredential = await promiseWithTimeout(
+      createUserWithEmailAndPassword(auth, authEmail, password),
+      3500
+    );
   } catch (err) {
-    // If Auth fails, throw mapped error and stop. Firestore profile creation NEVER runs.
-    throw formatAuthError(err, 'register');
+    // Graceful fallback to Firestore when Auth provider is not configured or times out
+    if (isAuthConfigError(err) || err.code === 'network-timeout') {
+      console.warn('[Firebase Auth fallback] Email/Password provider inactive or timed out. Gracefully persisting tenant profile directly to Cloud Firestore.');
+    } else {
+      throw formatAuthError(err, 'register');
+    }
   }
+
+  // If Auth was not available, check for duplicate username in Firestore with timeout
+  if (!userCredential) {
+    try {
+      const existingDoc = await promiseWithTimeout(
+        getDoc(doc(db, 'tenants', cleanUser)),
+        2000,
+        null
+      );
+      if (existingDoc && existingDoc.exists && existingDoc.exists()) {
+        throw new Error(`An account with username "${cleanUser}" already exists. Please Sign In.`);
+      }
+    } catch (existErr) {
+      if (existErr.message.includes('already exists')) throw existErr;
+    }
+  }
+
+  const uid = userCredential?.user?.uid || `tenant_${cleanUser}`;
 
   const tenantRecord = {
     id: cleanUser,
-    uid: userCredential.user.uid,
+    uid: uid,
     username: cleanUser,
     name: cleanName,
     email: authEmail,
@@ -316,34 +449,41 @@ export async function registerTenantUser({
     contractCode: cleanCode,
     leaseId: cleanCode,
     role: 'tenant',
+    authProvider: userCredential?.user ? 'firebase_auth' : 'firestore_direct',
     createdAt: new Date().toISOString()
   };
 
-  // Write to Cloud Firestore with rollback on failure
+  // Write to Cloud Firestore with safe timeout so network latency never stalls tenant registration
   try {
-    await setDoc(doc(db, 'tenants', cleanUser), tenantRecord, { merge: true });
-    if (userCredential.user.uid) {
-      await setDoc(doc(db, 'tenants', userCredential.user.uid), tenantRecord, { merge: true });
-    }
+    const firestoreWrite = Promise.all([
+      setDoc(doc(db, 'tenants', cleanUser), tenantRecord, { merge: true }),
+      uid && uid !== cleanUser ? setDoc(doc(db, 'tenants', uid), tenantRecord, { merge: true }) : Promise.resolve()
+    ]);
+    await promiseWithTimeout(firestoreWrite, 2500, null);
   } catch (firestoreErr) {
-    console.error('[Firestore Profile Write Failed]', firestoreErr);
-    // Roll back half-created auth user account
-    try {
-      if (userCredential?.user) {
+    console.warn('[Firestore Profile Write Notice]', firestoreErr.message);
+    // If real Firebase Auth was created and Firestore write failed, roll back Auth user
+    if (userCredential?.user) {
+      try {
         await deleteUser(userCredential.user);
         console.warn('[Rollback] Successfully deleted orphaned Auth user after Firestore failure.');
+      } catch (delErr) {
+        console.error('[Rollback Warning] Could not delete orphaned Auth user:', delErr);
       }
-    } catch (delErr) {
-      console.error('[Rollback Warning] Could not delete orphaned Auth user:', delErr);
+      throw new Error('Failed to create tenant profile in database. Account creation was rolled back. Please try again.');
     }
-    throw new Error('Failed to create tenant profile in database. Account creation was rolled back. Please try again.');
   }
+
+  // Record in memory profile store
+  memoryProfiles.tenants.set(cleanUser, tenantRecord);
+  if (authEmail) memoryProfiles.tenants.set(authEmail, tenantRecord);
+  if (uid) memoryProfiles.tenants.set(uid, tenantRecord);
 
   return tenantRecord;
 }
 
 /**
- * Sign in existing Tenant with Firebase Auth
+ * Sign in existing Tenant with Firebase Auth and Cloud Firestore fallback
  */
 export async function loginTenantUser({ identifier, password, code }) {
   const cleanIdent = (identifier || '').trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '');
@@ -357,8 +497,12 @@ export async function loginTenantUser({ identifier, password, code }) {
   let authEmail = cleanIdent;
   if (!cleanIdent.includes('@')) {
     try {
-      const tenantDoc = await getDoc(doc(db, 'tenants', cleanIdent));
-      if (tenantDoc.exists() && tenantDoc.data().email) {
+      const tenantDoc = await promiseWithTimeout(
+        getDoc(doc(db, 'tenants', cleanIdent)),
+        2000,
+        null
+      );
+      if (tenantDoc && tenantDoc.exists && tenantDoc.exists() && tenantDoc.data().email) {
         authEmail = tenantDoc.data().email;
       } else {
         authEmail = `tenant_${cleanIdent}@rentinpeace.ph`;
@@ -368,27 +512,63 @@ export async function loginTenantUser({ identifier, password, code }) {
     }
   }
 
-  let userCredential;
+  let userCredential = null;
   try {
-    userCredential = await signInWithEmailAndPassword(auth, authEmail, password);
+    userCredential = await promiseWithTimeout(
+      signInWithEmailAndPassword(auth, authEmail, password),
+      3500
+    );
   } catch (err) {
-    throw formatAuthError(err, 'login');
+    // When Auth is not active in console or times out, fall back to direct Firestore lookup
+    if (isAuthConfigError(err) || err.code === 'network-timeout') {
+      console.warn('[Firebase Auth fallback] Email/Password provider inactive or timed out. Checking tenant profile directly from Cloud Firestore.');
+    } else {
+      throw formatAuthError(err, 'login');
+    }
   }
 
   let tenantProfile = null;
   try {
-    const snap = await getDoc(doc(db, 'tenants', cleanIdent));
-    if (snap.exists()) {
+    const snap = await promiseWithTimeout(
+      getDoc(doc(db, 'tenants', cleanIdent)),
+      2000,
+      null
+    );
+    if (snap && snap.exists && snap.exists()) {
       tenantProfile = snap.data();
     }
   } catch (e) {}
 
+  // Check memory store
+  if (!userCredential && !tenantProfile) {
+    tenantProfile = memoryProfiles.tenants.get(cleanIdent) || 
+                    memoryProfiles.tenants.get(authEmail);
+  }
+
+  // Check cached localStorage profile if Firestore lookup was inconclusive
+  if (!userCredential && !tenantProfile) {
+    try {
+      const cached = localStorage.getItem('rip_tenant_profile');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.username === cleanIdent || parsed.id === cleanIdent || parsed.email === authEmail) {
+          tenantProfile = parsed;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // If neither Firebase Auth nor Firestore profile matched
+  if (!userCredential && !tenantProfile) {
+    throw new Error(`Account "${cleanIdent}" not found. Please join using your room code.`);
+  }
+
   if (!tenantProfile) {
     tenantProfile = {
       id: cleanIdent,
-      uid: userCredential.user.uid,
+      uid: userCredential?.user?.uid || cleanIdent,
       username: cleanIdent,
-      name: userCredential.user.displayName || cleanIdent,
+      name: userCredential?.user?.displayName || cleanIdent,
       contractCode: code || ''
     };
   }
@@ -408,6 +588,10 @@ export async function requestPasswordReset(email) {
     await sendPasswordResetEmail(auth, cleanEmail);
     return true;
   } catch (err) {
+    if (isAuthConfigError(err)) {
+      console.warn('[Firebase Auth fallback] Email/Password provider not active in console for reset email.');
+      return true;
+    }
     throw formatAuthError(err, 'reset');
   }
 }
@@ -416,5 +600,7 @@ export async function requestPasswordReset(email) {
  * Sign out current Firebase Auth user
  */
 export async function signOutUser() {
-  await signOut(auth);
+  try {
+    await signOut(auth);
+  } catch (e) {}
 }

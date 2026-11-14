@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertCircle, BookOpen } from 'lucide-react';
 import StepIndicator from '../../components/shared/StepIndicator';
 
 export default function BasicsFormScreen() {
@@ -16,10 +16,20 @@ export default function BasicsFormScreen() {
     deposit, setDeposit,
     advanceRent, setAdvanceRent,
     leaseDuration, setLeaseDuration,
-    refreshClausesFromDraft
+    refreshClausesFromDraft,
+    selectedPresetId, setSelectedPresetId,
+    availablePresets, applyPreset,
+    landlordProfile
   } = useApp();
 
   const [error, setError] = useState('');
+
+  // Prefill property location from landlord profile if available
+  useEffect(() => {
+    if (!propertyAddress && landlordProfile?.propertyAddress) {
+      setPropertyAddress(landlordProfile.propertyAddress);
+    }
+  }, [landlordProfile?.propertyAddress]);
 
   const handleContinue = () => {
     if (!landlordName.trim()) {
@@ -40,7 +50,11 @@ export default function BasicsFormScreen() {
     }
 
     setError('');
-    refreshClausesFromDraft();
+    if (selectedPresetId && applyPreset) {
+      applyPreset(selectedPresetId);
+    } else {
+      refreshClausesFromDraft();
+    }
     setCurrentScreen('WIZARD_REVIEW');
   };
 
@@ -57,7 +71,9 @@ export default function BasicsFormScreen() {
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
           <h2 className="text-sm font-bold text-slate-900">Lease Terms</h2>
-          <div className="w-10"></div>
+          <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 p-1 flex items-center justify-center shadow-2xs overflow-hidden">
+            <img src="/assets/logo-icon.png" alt="Rent in Peace" className="w-full h-full object-contain rounded-xl" />
+          </div>
         </div>
 
         {/* Stepper */}
@@ -203,6 +219,49 @@ export default function BasicsFormScreen() {
                 placeholder="Leave blank or enter known tenant name" 
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
               />
+            </div>
+          </div>
+
+          {/* Card 4: House Rules & Clauses Preset */}
+          <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-900">House Rules & Clauses Preset</h3>
+              <span className="text-[10px] font-bold text-[#14532D] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                Preset Library
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              Select statutory clauses and house rules template for this lease.
+            </p>
+
+            <div className="space-y-2 pt-1">
+              {(availablePresets || []).map((preset) => {
+                const isSelected = selectedPresetId === preset.id;
+                return (
+                  <div
+                    key={preset.id}
+                    onClick={() => {
+                      setSelectedPresetId(preset.id);
+                      if (applyPreset) applyPreset(preset.id);
+                    }}
+                    className={`p-3 rounded-2xl border text-left transition cursor-pointer flex items-center justify-between ${
+                      isSelected
+                        ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] shadow-2xs ring-1 ring-[#14532D]'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-slate-900">{preset.name}</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">{preset.description}</p>
+                    </div>
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ml-2 ${
+                      isSelected ? 'border-[#14532D] bg-[#14532D] text-white' : 'border-slate-300 bg-white'
+                    }`}>
+                      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white"></span>}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

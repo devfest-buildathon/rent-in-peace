@@ -277,20 +277,31 @@ export default function PrintableContract() {
       {/* ==================== 1-PAGE OFFICIAL LEGAL CONTRACT ==================== */}
       <div className="single-page-contract">
         <div>
-          {/* Formal Legal Caption */}
-          <div className="text-center pb-1 mb-1.5 border-b-2 border-black">
-            <p className={`uppercase font-sans font-semibold text-black ${scale.caption}`}>
-              Republika ng Pilipinas · {address}
-            </p>
-            <h1 className={`uppercase tracking-tight text-black mt-0.5 font-serif ${scale.title}`}>
-              KASULATAN SA PAG-ABANG NG PAUPAHAN
-            </h1>
-            <p className={`text-black uppercase tracking-wide ${scale.subTitle}`}>
-              (CONTRACT OF RESIDENTIAL LEASE — {pType.toUpperCase()})
-            </p>
-            <p className={`text-black ${scale.citation}`}>
-              Isinagawa alinsunod sa Kodigo Sibil ng Pilipinas (Batas Republika Blg. 386) at Rent Control Act
-            </p>
+          {/* Formal Legal Caption with Official Brand Logo Header */}
+          <div className="flex items-center justify-between pb-1 mb-1.5 border-b-2 border-black">
+            <img 
+              src="/assets/logo-icon.png" 
+              alt="Rent in Peace" 
+              className="w-12 h-12 object-contain mr-2 shrink-0" 
+            />
+            <div className="flex-1 text-center">
+              <p className={`uppercase font-sans font-semibold text-black ${scale.caption}`}>
+                Republika ng Pilipinas · {address}
+              </p>
+              <h1 className={`uppercase tracking-tight text-black mt-0.5 font-serif ${scale.title}`}>
+                KASULATAN SA PAG-ABANG NG PAUPAHAN
+              </h1>
+              <p className={`text-black uppercase tracking-wide ${scale.subTitle}`}>
+                (CONTRACT OF RESIDENTIAL LEASE — {pType.toUpperCase()})
+              </p>
+              <p className={`text-black ${scale.citation}`}>
+                Isinagawa alinsunod sa Kodigo Sibil ng Pilipinas (Batas Republika Blg. 386) at Rent Control Act
+              </p>
+            </div>
+            <div className="w-12 text-right shrink-0">
+              <span className="font-mono text-[6.5pt] font-bold uppercase text-slate-600 block">Form RIP</span>
+              <span className="font-mono text-[5.5pt] text-slate-400 block">Certified</span>
+            </div>
           </div>
 
           {/* Legal Preamble */}

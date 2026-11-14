@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { db } from '../lib/firebase';
-import { generateClause } from '../services/ai/gemini';
+import { db, storage, ref, uploadBytes, uploadString, getDownloadURL } from '../lib/firebase';
+import { generateClause, generateFullKasulatan } from '../services/ai/gemini';
 import { 
   registerLandlordUser, 
   loginLandlordUser, 
@@ -10,8 +10,15 @@ import {
   signOutUser 
 } from '../auth/authService';
 import { createUniqueRoomCode } from '../features/lease/roomCode';
-import { verifyPaymentAndIssueCode, regenerateAccessCode } from '../features/verification/accessCode';
+import { 
+  verifyPaymentAndIssueCode, 
+  regenerateAccessCode, 
+  endLeaseAndRevokeCodes 
+} from '../features/verification/accessCode';
 import { getLogicalPreviousScreen, initHistoryRouter, pushScreenHistory } from '../router/navigation';
+import { BUILTIN_PRESETS } from '../features/lease-templates/constants';
+import { renderLease } from '../features/lease-templates/renderer';
+import { getPresets } from '../features/lease-templates/presetService';
 import { 
   doc, 
   setDoc, 
@@ -23,6 +30,13 @@ import {
   onSnapshot,
   addDoc 
 } from 'firebase/firestore';
+
+// Non-blocking timeout wrapper to ensure asynchronous cloud calls never freeze the UI
+export const safeTimeout = (promise, ms = 2500, fallback = null) =>
+  Promise.race([
+    promise,
+    new Promise((resolve) => setTimeout(() => resolve(fallback), ms))
+  ]);
 
 const AppContext = createContext();
 
@@ -42,7 +56,7 @@ export const isGenericTenantName = (name) => {
   );
 };
 
-// Helper to generate realistic legal clauses from entered data
+// Helper to generate realistic bilingual legal clauses from entered data
 export function generateDefaultClauses({
   landlord = '',
   tenant = '',
@@ -66,41 +80,57 @@ export function generateDefaultClauses({
     {
       num: 1,
       title: '1. Parties to the Agreement',
+      english: `This residential lease agreement is entered into by ${landlord || '[Landlord Name]'} (Lessor) and ${cleanTenant || '[Tenant Name]'} (Lessee).`,
+      bisaya: `Kini nga kasulatan sa pag-abang gipirmahan nila ${landlord || '[Pangalan sa Tag-iya]'} (Lessor) ug ${cleanTenant || '[Pangalan sa Umuupa]'} (Lessee).`,
       text: `This residential lease agreement is entered into by ${landlord || '[Landlord Name]'} (Lessor) and ${cleanTenant || '[Tenant Name]'} (Lessee).`
     },
     {
       num: 2,
       title: '2. Leased Premises',
+      english: `The Lessor hereby leases ${room || '[Unit/Room]'} located at ${address || '[Property Address]'} (${propType}) exclusively for peaceful residential dwelling.`,
+      bisaya: `Ang Lessor nagpaabang sa ${room || '[Lawak/Unit]'} nga nahimutang sa ${address || '[Adres sa Property]'} (${propType}) alang lamang sa residential nga kapuy-an.`,
       text: `The Lessor hereby leases ${room || '[Unit/Room]'} located at ${address || '[Property Address]'} (${propType}) exclusively for peaceful residential dwelling.`
     },
     {
       num: 3,
       title: '3. Rent and Financial Obligations',
+      english: `Monthly rent is ${rentFormatted}, payable on or before the 5th day of each calendar month. A security deposit of ${depFormatted} and advance rent of ${advanceFormatted} are required upon signing in accordance with the Rent Control Act of the Philippines.`,
+      bisaya: `Ang binulan nga abang nagkantidad og ${rentFormatted}, bayaran sa o sa dili pa ang ika-5 nga adlaw sa matag bulan. Ang security deposit nga ${depFormatted} ug paunang abang nga ${advanceFormatted} gikinahanglan sa pagpirma sumala sa Rent Control Act.`,
       text: `Monthly rent is ${rentFormatted}, payable on or before the 5th day of each calendar month. A security deposit of ${depFormatted} and advance rent of ${advanceFormatted} are required upon signing in accordance with the Rent Control Act of the Philippines.`
     },
     {
       num: 4,
       title: '4. Lease Term',
+      english: `The lease commences on ${startDate} for an agreed initial duration of ${duration}, renewable upon mutual written agreement of both parties.`,
+      bisaya: `Ang abang magsugod sa ${startDate} sulod sa ${duration}, ug mahimong bag-ohon pinaagi sa sinulat nga kasabotan sa duha ka partido.`,
       text: `The lease commences on ${startDate} for an agreed initial duration of ${duration}, renewable upon mutual written agreement of both parties.`
     },
     {
       num: 5,
       title: '5. Utilities and Operational Expenses',
+      english: `Electricity utility arrangement: ${electricity}. Water utility arrangement: ${water}. Tenant agrees to pay utility shares promptly upon statement delivery.`,
+      bisaya: `Kahikayan sa kuryente: ${electricity}. Kahikayan sa tubig: ${water}. Ang umuupa uyon nga mobayad sa bahin sa bayronon sa oras nga madawat ang pahibalo.`,
       text: `Electricity utility arrangement: ${electricity}. Water utility arrangement: ${water}. Tenant agrees to pay utility shares promptly upon statement delivery.`
     },
     {
       num: 6,
       title: '6. House Rules & Community Peace',
+      english: 'Quiet hours begin at 10:00 PM. Common passageways and bathrooms must be kept clean and unobstructed. No unauthorized subleasing or assignment.',
+      bisaya: 'Ang oras sa kalinaw magsugod sa 10:00 sa gabii. Ang agianan ug kasilyas kinahanglang limpyo kanunay. Gidili ang pagpasublease nga walay pagtugot.',
       text: 'Quiet hours begin at 10:00 PM. Common passageways and bathrooms must be kept clean and unobstructed. No unauthorized subleasing or assignment.'
     },
     {
       num: 7,
       title: '7. Maintenance & Care of Premises',
+      english: 'The Lessee shall maintain the room in tenantable, sanitary condition and promptly notify the Lessor of any required structural or plumbing repairs.',
+      bisaya: 'Ang Lessee mag-atiman sa lawak sa limpyo ug maayong kahimtang ug magpahibalo gilayon sa Lessor kung may kinahanglang ayuhon sa istruktura o tubo.',
       text: 'The Lessee shall maintain the room in tenantable, sanitary condition and promptly notify the Lessor of any required structural or plumbing repairs.'
     },
     {
       num: 8,
       title: '8. Move-Out Notice & Termination',
+      english: 'Either party may terminate this lease by providing at least 30 days prior written notice in accordance with Philippine law.',
+      bisaya: 'Ang bisan kinsa nga partido mahimong motapos niini nga abang pinaagi sa paghatag og 30 ka adlaw nga sinulat nga pahibalo sumala sa balaod sa Pilipinas.',
       text: 'Either party may terminate this lease by providing at least 30 days prior written notice in accordance with Philippine law.'
     }
   ];
@@ -248,7 +278,22 @@ export function AppProvider({ children }) {
 
   const [rentReminderEnabled, setRentReminderEnabled] = useState(true);
   
-  // Persistent Room / Invite Code - ONLY generated after Kasulatan is finalized and saved
+  // Chosen Preset for the lease (Requirement 3: from landlord's chosen preset)
+  const [selectedPresetId, setSelectedPresetId] = useState('builtin-bedspace');
+  const [availablePresets, setAvailablePresets] = useState(BUILTIN_PRESETS);
+
+  useEffect(() => {
+    if (landlordProfile?.phone || landlordProfile?.id || landlordProfile?.uid) {
+      const landlordId = landlordProfile.uid || landlordProfile.phone || landlordProfile.id;
+      getPresets(landlordId).then(p => {
+        if (Array.isArray(p) && p.length > 0) {
+          setAvailablePresets(p);
+        }
+      }).catch(() => {});
+    }
+  }, [landlordProfile?.phone, landlordProfile?.id, landlordProfile?.uid]);
+
+  // Persistent Room / Invite Code - ONLY generated after Kasulatan is finalized and saved (Requirement 3)
   const [activeCode, setActiveCodeState] = useState(() => {
     return localStorage.getItem('rip_active_code') || '';
   });
@@ -280,7 +325,7 @@ export function AppProvider({ children }) {
   const [landlordSigningMode, setLandlordSigningMode] = useState('DIGITAL');
   const [landlordSignature, setLandlordSignature] = useState(null);
 
-  // Persistence: Real Saved Contracts List (Strictly NO fake demo data fallback)
+  // Persistence: Real Saved Contracts / Leases List (Loaded from Firestore)
   const [contracts, setContractsState] = useState(() => {
     try {
       const saved = localStorage.getItem('rip_contracts');
@@ -322,29 +367,11 @@ export function AppProvider({ children }) {
     } catch (e) {}
   };
 
-  // Test live connection to Firestore on mount
-  useEffect(() => {
-    const testConnection = async () => {
-      try {
-        await getDoc(doc(db, '_connection_test', 'status'));
-        setDbStatus('connected');
-      } catch (err) {
-        if (err.code === 'permission-denied') {
-          setDbStatus('rules_needed');
-        } else if (err.message?.includes('network') || err.code === 'unavailable') {
-          setDbStatus('offline');
-        } else {
-          setDbStatus('connected');
-        }
-      }
-    };
-    testConnection();
-  }, []);
-
   // Real-time Firestore Subscription for Landlord Contracts
   useEffect(() => {
-    if (!landlordProfile?.phone && !landlordProfile?.id) return;
-    const landlordId = landlordProfile.phone || landlordProfile.id;
+    if (!landlordProfile) return;
+    const landlordId = landlordProfile.uid || landlordProfile.phone || landlordProfile.id;
+    if (!landlordId) return;
 
     try {
       const q = query(
@@ -356,7 +383,7 @@ export function AppProvider({ children }) {
         const liveContracts = snapshot.docs.map(d => ({
           ...d.data(),
           id: d.id,
-          code: d.data().code || d.id
+          code: d.data().code || d.data().roomCode || d.id
         }));
         setContractsState(liveContracts);
         try {
@@ -371,11 +398,11 @@ export function AppProvider({ children }) {
 
       return () => unsubscribe();
     } catch (e) {}
-  }, [landlordProfile?.phone, landlordProfile?.id]);
+  }, [landlordProfile?.uid, landlordProfile?.phone, landlordProfile?.id]);
 
   // Real-time Firestore Subscription for Active Tenant Contract
   useEffect(() => {
-    const codeToWatch = activeCode || tenantProfile?.contractCode;
+    const codeToWatch = activeCode || tenantProfile?.contractCode || tenantProfile?.leaseId;
     if (!codeToWatch) return;
 
     try {
@@ -400,7 +427,7 @@ export function AppProvider({ children }) {
 
       return () => unsubscribe();
     } catch (e) {}
-  }, [activeCode, tenantProfile?.contractCode]);
+  }, [activeCode, tenantProfile?.contractCode, tenantProfile?.leaseId]);
 
   // Real-time Firestore Subscription for Payments Ledger
   useEffect(() => {
@@ -413,8 +440,8 @@ export function AppProvider({ children }) {
             id: d.id
           }));
           livePayments.sort((a, b) => {
-            const timeA = new Date(a.createdAt || a.date || 0).getTime();
-            const timeB = new Date(b.createdAt || b.date || 0).getTime();
+            const timeA = new Date(a.submittedAt || a.createdAt || a.date || 0).getTime();
+            const timeB = new Date(b.submittedAt || b.createdAt || b.date || 0).getTime();
             return timeB - timeA;
           });
           setPaymentsState(livePayments);
@@ -459,21 +486,24 @@ export function AppProvider({ children }) {
         setPropertyAddress(profile.propertyAddress);
       }
 
-      // Fetch landlord contracts
+      // Fetch landlord contracts from Firestore directly (Requirement 2: always loads from Firestore)
       try {
         const q = query(
           collection(db, 'contracts'),
-          where('landlordId', '==', profile.phone || profile.id)
+          where('landlordId', '==', profile.uid || profile.phone || profile.id)
         );
         const querySnap = await getDocs(q);
         const liveContracts = querySnap.docs.map(d => ({
           ...d.data(),
           id: d.id,
-          code: d.data().code || d.id
+          code: d.data().code || d.data().roomCode || d.id
         }));
         setContractsState(liveContracts);
         localStorage.setItem('rip_contracts', JSON.stringify(liveContracts));
       } catch (qErr) {}
+
+      // Navigate to landlord home dashboard upon successful authentication
+      setCurrentScreen('LANDLORD_HOME');
 
       return { success: true, profile };
     } catch (err) {
@@ -482,7 +512,7 @@ export function AppProvider({ children }) {
   };
 
   // Landlord Registration via Firebase Auth
-  const registerLandlord = async ({ name, phone, email, password, propertyName, propertyAddress, city }) => {
+  const registerLandlord = async ({ name, phone, email, password, propertyName, propertyAddress, barangay, city }) => {
     try {
       const profile = await registerLandlordUser({
         name,
@@ -491,6 +521,7 @@ export function AppProvider({ children }) {
         password,
         propertyName,
         propertyAddress,
+        barangay,
         city
       });
 
@@ -504,6 +535,9 @@ export function AppProvider({ children }) {
       setPropertyAddress(profile.propertyAddress || `${profile.propertyName}, ${profile.city}`);
       setContractsState([]);
       localStorage.setItem('rip_contracts', JSON.stringify([]));
+
+      // Navigate to landlord home dashboard upon successful registration
+      setCurrentScreen('LANDLORD_HOME');
 
       return { success: true, profile };
     } catch (err) {
@@ -535,6 +569,95 @@ export function AppProvider({ children }) {
     })
   );
 
+  const applyPreset = (presetId) => {
+    setSelectedPresetId(presetId);
+    const preset = availablePresets.find(p => p.id === presetId) || BUILTIN_PRESETS[0];
+    if (preset) {
+      const cleanTenant = isGenericTenantName(tenantName) ? '' : tenantName;
+      const values = {
+        tenant_name: cleanTenant || 'Tenant',
+        landlord_name: landlordName || landlordProfile?.name || 'Landlord',
+        unit: roomNumber || 'Unit 1',
+        property_address: propertyAddress || 'Property Address',
+        rent: monthlyRent ? `₱${Number(monthlyRent).toLocaleString()}` : '₱[Amount]',
+        deposit: deposit ? `₱${Number(deposit).toLocaleString()}` : '₱[Amount]',
+        advance: advanceRent ? `₱${Number(advanceRent).toLocaleString()}` : '₱[Amount]',
+        due_day: '5th',
+        lease_duration: leaseDuration || '6 months',
+        start_date: new Date().toISOString().split('T')[0]
+      };
+      const rendered = renderLease(preset, values);
+      if (rendered.success && Array.isArray(rendered.clauses)) {
+        setContractClauses(rendered.clauses);
+        return;
+      }
+    }
+    refreshClausesFromDraft();
+  };
+
+  // Generate a complete Kasulatan from scratch using Gemini AI fitted for single A4 bond paper
+  const generateKasulatanFromScratch = async (requirements) => {
+    setAiIsCustomizing(true);
+    setAiError('');
+    try {
+      const generated = await generateFullKasulatan(requirements, {
+        landlordName: landlordName || landlordProfile?.name || 'Landlord',
+        tenantName: isGenericTenantName(tenantName) ? '' : tenantName,
+        roomNumber,
+        propertyAddress,
+        propertyType,
+        monthlyRent,
+        deposit,
+        advanceRent,
+        leaseDuration
+      });
+
+      if (generated && Array.isArray(generated.clauses) && generated.clauses.length > 0) {
+        setContractClauses(generated.clauses);
+        setAiUpdateToast(`Generated complete Kasulatan (${generated.clauses.length} clauses) fitted for A4 bond paper!`);
+        setTimeout(() => setAiUpdateToast(''), 4500);
+        return { success: true, clauses: generated.clauses };
+      }
+      throw new Error('AI did not return valid clauses.');
+    } catch (err) {
+      console.warn('[Gemini AI] Full Kasulatan generation error:', err.message);
+      setAiError(err.message || 'Failed to generate Kasulatan with AI. Please retry.');
+      return { success: false, error: err.message };
+    } finally {
+      setAiIsCustomizing(false);
+    }
+  };
+
+  // Clause manipulation helpers for full Kasulatan customization
+  const updateSingleClause = (index, updatedFields) => {
+    setContractClauses(prev => prev.map((c, i) => i === index ? { ...c, ...updatedFields } : c));
+  };
+
+  const removeSingleClause = (indexToRemove) => {
+    setContractClauses(prev => {
+      const filtered = prev.filter((_, idx) => idx !== indexToRemove);
+      return filtered.map((c, idx) => ({
+        ...c,
+        num: idx + 1,
+        title: (c.title || '').replace(/^\d+\.\s*/, `${idx + 1}. `)
+      }));
+    });
+  };
+
+  const moveSingleClause = (fromIndex, toIndex) => {
+    setContractClauses(prev => {
+      if (toIndex < 0 || toIndex >= prev.length) return prev;
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      return updated.map((c, idx) => ({
+        ...c,
+        num: idx + 1,
+        title: (c.title || '').replace(/^\d+\.\s*/, `${idx + 1}. `)
+      }));
+    });
+  };
+
   const refreshClausesFromDraft = () => {
     setContractClauses(generateDefaultClauses({
       landlord: landlordName,
@@ -549,10 +672,11 @@ export function AppProvider({ children }) {
     }));
   };
 
-  // Start a new contract wizard: NO room code generated yet (per Requirement 3)
+  // Start a new contract wizard: NO room code generated yet (Requirement 3)
   const startNewContract = () => {
-    setActiveCode(''); // Do NOT generate room code until Kasulatan is saved!
+    setActiveCode(''); // Strictly NO room code before Save!
     setPropertyType('Boarding House / Bedspace');
+    setSelectedPresetId('builtin-bedspace');
     setLandlordName(landlordProfile?.name || '');
     setContactNumber(landlordProfile?.phone || '');
     setTenantName('');
@@ -591,6 +715,7 @@ export function AppProvider({ children }) {
 
   // Save finalized contract into Cloud Firestore: Room code generated ONLY here (Requirement 3)
   const saveFinalizedContract = async () => {
+    // Generate unique room code RIP-XXXX only on save (Requirement 3)
     let codeToUse = (activeCode && activeCode.trim()) || null;
     if (!codeToUse) {
       codeToUse = await createUniqueRoomCode(db);
@@ -598,15 +723,25 @@ export function AppProvider({ children }) {
     setActiveCode(codeToUse);
 
     const cleanTenant = isGenericTenantName(tenantName) ? '' : tenantName;
+    const now = new Date().toISOString();
+
+    // Compile frozen copy of the contract text (Requirement 3: stored as a frozen copy)
+    const frozenContractText = contractClauses.map(c => 
+      `${c.num}. ${c.title}\nEnglish: ${c.english || c.text}\nBisaya: ${c.bisaya || c.text}`
+    ).join('\n\n');
 
     const newContract = {
       id: codeToUse,
+      leaseId: codeToUse,
       code: codeToUse,
-      accessCode: null, // No access code before landlord payment verification!
-      createdAt: new Date().toISOString(),
-      landlordId: landlordProfile?.phone || landlordProfile?.id || contactNumber || 'LANDLORD-DEFAULT',
+      roomCode: codeToUse,
+      accessCode: null, // Strictly null before landlord payment verification!
+      createdAt: now,
+      updatedAt: now,
+      landlordId: landlordProfile?.uid || landlordProfile?.phone || landlordProfile?.id || contactNumber || 'LANDLORD-DEFAULT',
       landlordName: landlordName || landlordProfile?.name || 'Landlord',
       contactNumber: contactNumber || landlordProfile?.phone || '',
+      tenantId: null, // No tenant yet until join
       tenantName: cleanTenant,
       roomNumber: roomNumber || 'Unit 1',
       propertyAddress: propertyAddress || landlordProfile?.propertyAddress || 'Specified Rental Unit',
@@ -616,16 +751,18 @@ export function AppProvider({ children }) {
       advanceRent: Number(advanceRent) || 0,
       leaseDuration,
       rentReminderEnabled,
-      contractClauses,
+      presetId: selectedPresetId,
+      contractClauses: JSON.parse(JSON.stringify(contractClauses)), // Frozen copy of clauses
+      frozenContractText, // Frozen full text snapshot
       landlordSigningMode,
       landlordSignature,
-      status: 'Active',
+      landlordSignedAt: now,
+      status: 'open', // Requirement 3: Only on Save created with status "open"
       isSigned: false,
+      tenantSigned: false,
       paymentVerified: false,
       dueDay: 'Every 5th',
-      paymentHistory: [
-        { cycle: 'Advance / Move-in Deposit', status: 'Pending Verification', date: new Date().toLocaleDateString() }
-      ]
+      shareUrl: `${window.location.origin}?code=${codeToUse}`
     };
 
     const existingIndex = contracts.findIndex(c => c.code === newContract.code);
@@ -638,13 +775,11 @@ export function AppProvider({ children }) {
     }
     setContracts(updated);
 
-    // Write to Firebase Cloud Firestore directly
+    // Write to Firebase Cloud Firestore (both contracts and leases for relational compliance)
     try {
-      await Promise.race([
-        (async () => {
-          await setDoc(doc(db, 'contracts', newContract.code), newContract, { merge: true });
-        })(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000))
+      await Promise.all([
+        setDoc(doc(db, 'contracts', newContract.code), newContract, { merge: true }),
+        setDoc(doc(db, 'leases', newContract.code), newContract, { merge: true })
       ]);
       setDbStatus('connected');
     } catch (err) {
@@ -682,6 +817,8 @@ export function AppProvider({ children }) {
         const clauseData = {
           num: generated.targetClauseNum,
           title: `${generated.targetClauseNum}. ${cleanTitle}`,
+          english: generated.text,
+          bisaya: generated.bisaya || generated.text,
           text: generated.text
         };
         if (idx >= 0) updated[idx] = clauseData;
@@ -692,6 +829,8 @@ export function AppProvider({ children }) {
         updated.push({
           num: nextNum,
           title: `${nextNum}. ${cleanTitle}`,
+          english: generated.text,
+          bisaya: generated.bisaya || generated.text,
           text: generated.text
         });
       }
@@ -719,6 +858,8 @@ export function AppProvider({ children }) {
       {
         num: nextNum,
         title: `${nextNum}. Special Landlord Condition`,
+        english: textToAdd,
+        bisaya: textToAdd,
         text: textToAdd,
         custom: true,
         isCustom: true
@@ -789,11 +930,18 @@ export function AppProvider({ children }) {
         setDbStatus('connected');
         return cloudData;
       }
+      const leaseDoc = await getDoc(doc(db, 'leases', cleanCode));
+      if (leaseDoc.exists()) {
+        const cloudData = { ...leaseDoc.data(), id: leaseDoc.id, code: leaseDoc.id };
+        loadContractIntoActiveState(cloudData);
+        setDbStatus('connected');
+        return cloudData;
+      }
     } catch (err) {
       if (err.code === 'permission-denied') setDbStatus('rules_needed');
     }
 
-    const foundLocal = contracts.find(c => c.code?.toUpperCase() === cleanCode);
+    const foundLocal = contracts.find(c => c.code?.toUpperCase() === cleanCode || c.id?.toUpperCase() === cleanCode);
     if (foundLocal) {
       loadContractIntoActiveState(foundLocal);
       return foundLocal;
@@ -802,8 +950,50 @@ export function AppProvider({ children }) {
     return null;
   };
 
-  // Tenant Register via Firebase Auth
+  // Tenant Register via Firebase Auth (Requirement 4: Verify code exists, check if room taken, link to lease only)
   const registerTenant = async ({ username, password, email, name, phone, code }) => {
+    const cleanCode = (code || activeCode || roomCodeInput || '').trim().toUpperCase();
+    if (!cleanCode) {
+      return { success: false, error: 'Please enter a valid room code (e.g. RIP-XXXX).' };
+    }
+
+    // 1. Verify that the room code exists
+    let existingLease = null;
+    try {
+      const contractSnap = await safeTimeout(getDoc(doc(db, 'contracts', cleanCode)), 2000, null);
+      if (contractSnap && contractSnap.exists && contractSnap.exists()) {
+        existingLease = contractSnap.data();
+      } else {
+        const leaseSnap = await safeTimeout(getDoc(doc(db, 'leases', cleanCode)), 1500, null);
+        if (leaseSnap && leaseSnap.exists && leaseSnap.exists()) existingLease = leaseSnap.data();
+      }
+    } catch (e) {
+      console.warn('[Register Tenant] Lease existence lookup notice:', e.message);
+    }
+
+    if (!existingLease) {
+      const localFound = contracts.find(c => c.code === cleanCode || c.id === cleanCode);
+      if (localFound) existingLease = localFound;
+    }
+
+    if (!existingLease) {
+      return { 
+        success: false, 
+        error: `Room code "${cleanCode}" does not exist. Please check your room code or invite link.` 
+      };
+    }
+
+    // 2. Check if the room slot is already taken (Requirement 4: "This room is already taken")
+    const isAlreadyTaken = (existingLease.status && existingLease.status !== 'open') || 
+                           (existingLease.tenantId && existingLease.tenantId !== username);
+    if (isAlreadyTaken) {
+      return { 
+        success: false, 
+        error: 'This room is already taken.' 
+      };
+    }
+
+    // 3. Register Tenant in Firebase Auth & Cloud Firestore
     try {
       const tenantRecord = await registerTenantUser({
         username,
@@ -811,31 +1001,38 @@ export function AppProvider({ children }) {
         email,
         name,
         phone,
-        code: code || activeCode || roomCodeInput
+        code: cleanCode
       });
 
-      const cleanCode = tenantRecord.contractCode;
-      if (cleanCode) {
-        await lookupContractByCode(cleanCode);
-        setActiveCode(cleanCode);
-        setContracts(prev => prev.map(c => {
-          if (c.code === cleanCode || c.id === cleanCode) {
-            return {
-              ...c,
-              tenantName: tenantRecord.name,
-              tenantUsername: tenantRecord.username
-            };
-          }
-          return c;
-        }));
-      }
+      // Link lease to this tenant
+      const tenantUid = tenantRecord.uid || tenantRecord.id;
+      const leaseLinkUpdate = {
+        tenantId: tenantUid,
+        tenantUsername: tenantRecord.username,
+        tenantName: tenantRecord.name,
+        tenantPhone: tenantRecord.phone,
+        updatedAt: new Date().toISOString()
+      };
 
+      try {
+        const linkPromise = Promise.all([
+          setDoc(doc(db, 'contracts', cleanCode), leaseLinkUpdate, { merge: true }),
+          setDoc(doc(db, 'leases', cleanCode), leaseLinkUpdate, { merge: true })
+        ]);
+        await safeTimeout(linkPromise, 2000, null);
+      } catch (linkErr) {}
+
+      safeTimeout(lookupContractByCode(cleanCode), 1500, null).catch(() => {});
+      setActiveCode(cleanCode);
       setTenantProfile(tenantRecord);
       setTenantName(tenantRecord.name);
       setUserRole('TENANT');
       localStorage.setItem('rip_user_role', 'TENANT');
 
-      return { success: true, tenant: tenantRecord, hasContract: Boolean(cleanCode) };
+      // Navigate to tenant portal for lease onboarding
+      setCurrentScreen('TENANT_PORTAL');
+
+      return { success: true, tenant: tenantRecord, hasContract: true };
     } catch (err) {
       return { success: false, error: err.message };
     }
@@ -846,7 +1043,7 @@ export function AppProvider({ children }) {
     try {
       const tenantData = await loginTenantUser({ identifier: usernameOrEmail, password, code });
 
-      const targetCode = code || tenantData.contractCode || activeCode || roomCodeInput;
+      const targetCode = code || tenantData.contractCode || tenantData.leaseId || activeCode || roomCodeInput;
       if (targetCode) {
         await lookupContractByCode(targetCode);
         setActiveCode(targetCode);
@@ -857,140 +1054,244 @@ export function AppProvider({ children }) {
       setUserRole('TENANT');
       localStorage.setItem('rip_user_role', 'TENANT');
 
+      // Navigate to tenant home
+      setCurrentScreen('TENANT_HOME');
+
       return { success: true, tenant: tenantData, hasContract: Boolean(targetCode) };
     } catch (err) {
       return { success: false, error: err.message };
     }
   };
 
-  // Record tenant check-in: Access code is NOT generated or sent here (Requirement 4 & 5)
-  const recordTenantCheckin = async () => {
-    const contractCode = activeCode || roomCodeInput || 'RIP-KEY';
-    const amountVal = Number(advanceRent || monthlyRent || 0);
-    const receiptImage = gcashFileData?.dataUrl || gcashFileData?.preview || (typeof gcashFileData === 'string' ? gcashFileData : null);
-    const cleanTenant = (!isGenericTenantName(tenantName) ? tenantName : null) || tenantProfile?.name || 'Resident';
+  // Step 4 Completion: Tenant signs Kasulatan -> status becomes "pending_payment" (Requirement 4)
+  const signTenantKasulatan = async ({ signingMode: sMode = 'DIGITAL', signatureData: sData = null }) => {
+    const cleanCode = (activeCode || roomCodeInput || tenantProfile?.contractCode || '').trim().toUpperCase();
+    if (!cleanCode) throw new Error('No active room code found to sign.');
 
-    const checkinPayload = {
-      contractCode,
-      tenantName: cleanTenant,
-      signingMode,
-      isIdVerified: Boolean(idFileData),
-      idFileName: idFileData?.meta?.name || 'ID Photo Uploaded',
-      gcashRef: gcashRefNumber || 'Direct Payment Submitted',
-      hasReceipt: Boolean(receiptImage),
-      receiptData: receiptImage,
-      signedAt: new Date().toISOString()
-    };
+    const now = new Date().toISOString();
+    const cleanTenant = tenantProfile?.name || tenantName || 'Tenant';
 
-    const baseContractUpdate = {
-      status: 'Pending Verification',
+    const updatePayload = {
+      status: 'pending_payment', // Requirement 4: The lease status becomes "pending_payment" (tenant signed, not paid)
       isSigned: true,
-      paymentVerified: false,
-      accessCode: null, // Explicitly null until landlord verifies!
-      tenantSignedAt: new Date().toISOString(),
+      tenantSigned: true,
+      tenantSignedAt: now,
       tenantName: cleanTenant,
-      signingMode: signingMode || checkinPayload.signingMode,
-      signatureData: signatureData || null,
-      idFileData: idFileData || null,
-      gcashRef: checkinPayload.gcashRef,
-      gcashReceiptData: receiptImage,
-      advancePaidAmount: amountVal
+      signingMode: sMode,
+      tenantSigningMode: sMode,
+      tenantSignature: sData || 'Digital Signature Stored',
+      signatureData: sData || null,
+      updatedAt: now
     };
 
-    let updatedContracts;
-    const contractExists = contracts.some(c => c.code === contractCode || c.id === contractCode);
-    if (contractExists) {
-      updatedContracts = contracts.map(c => {
-        if (c.code === contractCode || c.id === contractCode) {
-          return { ...c, ...baseContractUpdate };
-        }
-        return c;
-      });
-    } else {
-      updatedContracts = [
-        ...contracts,
-        {
-          id: contractCode,
-          code: contractCode,
-          ...baseContractUpdate,
-          roomNumber: roomNumber || 'Unit 1',
-          monthlyRent: monthlyRent || 0,
-          deposit: deposit || 0,
-          propertyAddress: propertyAddress || 'Specified Property Address'
-        }
-      ];
+    setContracts(prev => prev.map(c => (c.code === cleanCode || c.id === cleanCode ? { ...c, ...updatePayload } : c)));
+    if (activeTenantContract) {
+      setActiveTenantContract(prev => ({ ...prev, ...updatePayload }));
     }
-    setContracts(updatedContracts);
-
-    // Initial advance rent payment log
-    const initialPayment = {
-      id: `pay-${Date.now()}`,
-      contractCode,
-      tenantName: cleanTenant,
-      cycleName: 'Advance / Move-in Deposit',
-      amount: amountVal,
-      gcashRef: checkinPayload.gcashRef,
-      receiptData: receiptImage,
-      status: 'Pending Verification',
-      date: new Date().toLocaleDateString(),
-      createdAt: new Date().toISOString()
-    };
-    setPayments(prev => [initialPayment, ...prev.filter(p => !(p.contractCode === contractCode && p.cycleName === 'Advance / Move-in Deposit'))]);
 
     try {
-      await Promise.race([
-        (async () => {
-          await addDoc(collection(db, 'checkins'), checkinPayload);
-          await addDoc(collection(db, 'payments'), initialPayment);
-          await setDoc(doc(db, 'contracts', contractCode), {
-            status: 'Pending Verification',
-            isSigned: true,
-            paymentVerified: false,
-            accessCode: null,
-            tenantSignedAt: new Date().toISOString(),
-            tenantSignature: signatureData || 'Digital Signature Stored',
-            gcashRef: gcashRefNumber || 'Direct Payment Submitted',
-            gcashReceiptData: receiptImage,
-            advancePaidAmount: amountVal
-          }, { merge: true });
-        })(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000))
+      await Promise.all([
+        setDoc(doc(db, 'contracts', cleanCode), updatePayload, { merge: true }),
+        setDoc(doc(db, 'leases', cleanCode), updatePayload, { merge: true })
       ]);
-      setDbStatus('connected');
     } catch (err) {
-      if (err.code === 'permission-denied') setDbStatus('rules_needed');
-      console.warn('[Firebase] Check-in record notice:', err.message);
+      console.warn('[Firebase] Contract sign notice:', err.message);
     }
+
+    return updatePayload;
   };
 
-  // Landlord verification of tenant payment: Generates secure random access code (Requirement 4 & 5)
+  // Legacy alias for checkin
+  const recordTenantCheckin = async () => {
+    return signTenantKasulatan({ signingMode, signatureData });
+  };
+
+  // Step 5: Tenant pays and submits proof (Requirement 5)
+  // Validate: image required, reference number required, reference number not already used on another payment (duplicate = error)
+  const submitTenantPaymentProof = async ({ contractCode, amount, type = 'advance/deposit', gcashRef, receiptData, file = null }) => {
+    const cleanCode = (contractCode || activeCode || roomCodeInput || '').trim().toUpperCase();
+    if (!cleanCode) throw new Error('Lease code is missing.');
+
+    const cleanRef = (gcashRef || '').trim();
+    if (!cleanRef) {
+      throw new Error('GCash reference number is required.');
+    }
+
+    const receiptImage = receiptData?.dataUrl || receiptData?.preview || (typeof receiptData === 'string' ? receiptData : null);
+    if (!receiptImage && !file) {
+      throw new Error('Screenshot proof of payment is required.');
+    }
+
+    // Duplicate reference number check across all payments (Requirement 5)
+    const isDuplicateLocal = payments.some(p => 
+      (p.referenceNumber && p.referenceNumber.toLowerCase() === cleanRef.toLowerCase()) ||
+      (p.gcashRef && p.gcashRef.toLowerCase() === cleanRef.toLowerCase())
+    );
+    if (isDuplicateLocal) {
+      throw new Error(`GCash reference number "${cleanRef}" has already been used on another payment. Duplicate reference numbers are not permitted.`);
+    }
+
+    try {
+      const q = query(collection(db, 'payments'), where('referenceNumber', '==', cleanRef));
+      const snap = await safeTimeout(getDocs(q), 2000, null);
+      if (snap && !snap.empty) {
+        throw new Error(`GCash reference number "${cleanRef}" has already been used on another payment. Duplicate reference numbers are not permitted.`);
+      }
+      const qAlt = query(collection(db, 'payments'), where('gcashRef', '==', cleanRef));
+      const snapAlt = await safeTimeout(getDocs(qAlt), 2000, null);
+      if (snapAlt && !snapAlt.empty) {
+        throw new Error(`GCash reference number "${cleanRef}" has already been used on another payment. Duplicate reference numbers are not permitted.`);
+      }
+    } catch (fsErr) {
+      if (fsErr.message?.includes('already been used')) throw fsErr;
+    }
+
+    // Upload receipt to Firebase Storage with safe timeout fallback
+    let finalImageUrl = receiptImage;
+    if (storage) {
+      try {
+        const uploadTask = (async () => {
+          if (file) {
+            const storageRef = ref(storage, `receipts/${cleanCode}/${Date.now()}_receipt.jpg`);
+            const res = await uploadBytes(storageRef, file);
+            return await getDownloadURL(res.ref);
+          } else if (receiptImage && receiptImage.startsWith('data:')) {
+            const storageRef = ref(storage, `receipts/${cleanCode}/${Date.now()}_receipt.jpg`);
+            const res = await uploadString(storageRef, receiptImage, 'data_url');
+            return await getDownloadURL(res.ref);
+          }
+          return receiptImage;
+        })();
+        const uploaded = await safeTimeout(uploadTask, 2500, null);
+        if (uploaded) {
+          finalImageUrl = uploaded;
+        }
+      } catch (stErr) {
+        console.warn('[Firebase Storage] Notice:', stErr.message);
+      }
+    }
+
+    const now = new Date().toISOString();
+    const cleanTenant = (!isGenericTenantName(tenantName) ? tenantName : null) || tenantProfile?.name || 'Resident';
+    const amountVal = Number(amount || advanceRent || monthlyRent || 0);
+    const paymentId = `pay_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+    // Store payment record (Requirement 5: leaseId, tenantId, amount, type, reference number, image URL, submittedAt)
+    const paymentRecord = {
+      id: paymentId,
+      paymentId,
+      leaseId: cleanCode,
+      contractCode: cleanCode,
+      tenantId: tenantProfile?.uid || tenantProfile?.id || cleanTenant,
+      landlordId: activeTenantContract?.landlordId || landlordProfile?.uid || landlordProfile?.id || '',
+      amount: amountVal,
+      type,
+      referenceNumber: cleanRef,
+      gcashRef: cleanRef,
+      imageUrl: finalImageUrl || receiptImage,
+      receiptData: finalImageUrl || receiptImage,
+      status: 'pending_verification',
+      submittedAt: now,
+      date: new Date().toLocaleDateString(),
+      createdAt: now
+    };
+
+    setPayments(prev => [paymentRecord, ...prev]);
+
+    // Update lease status to "pending_verification" (Requirement 5)
+    // NO access code or any code is visible or readable anywhere for the tenant at this stage
+    const leaseUpdate = {
+      status: 'pending_verification',
+      paymentVerified: false,
+      accessCode: null, // Strictly null
+      latestPaymentId: paymentId,
+      latestPaymentAmount: amountVal,
+      latestGcashRef: cleanRef,
+      gcashRef: cleanRef,
+      gcashReceiptData: finalImageUrl || receiptImage,
+      paymentRejectionReason: null,
+      updatedAt: now
+    };
+
+    setContracts(prev => prev.map(c => (c.code === cleanCode || c.id === cleanCode ? { ...c, ...leaseUpdate } : c)));
+    if (activeTenantContract) {
+      setActiveTenantContract(prev => ({ ...prev, ...leaseUpdate }));
+    }
+
+    try {
+      const syncWrites = Promise.all([
+        setDoc(doc(db, 'payments', paymentId), paymentRecord),
+        setDoc(doc(db, 'contracts', cleanCode), leaseUpdate, { merge: true }),
+        setDoc(doc(db, 'leases', cleanCode), leaseUpdate, { merge: true })
+      ]);
+      await safeTimeout(syncWrites, 2500, null);
+    } catch (err) {
+      console.warn('[Firebase] Payment submission write notice:', err.message);
+    }
+
+    return paymentRecord;
+  };
+
+  const submitTenantPayment = async ({ contractCode, amount, cycleName, gcashRef, receiptData, file }) => {
+    return submitTenantPaymentProof({
+      contractCode,
+      amount,
+      type: cycleName?.toLowerCase().includes('advance') || cycleName?.toLowerCase().includes('deposit') ? 'advance/deposit' : 'monthly_rent',
+      gcashRef,
+      receiptData,
+      file
+    });
+  };
+
+  // Step 6: Landlord verification of tenant payment (Requirement 6)
+  // On Verify:
+  // a) Payment status = "verified", with verifiedAt and verifiedBy
+  // b) Lease status = "active"
+  // c) A NEW random access code (4-6 digits, crypto.getRandomValues) generated for this tenant and lease
+  // d) Code stored LINKED (leaseId, paymentId, tenantId, landlordId, createdAt, status "active") and unique among landlord's active codes
+  // e) Code shown first on landlord's screen
+  // f) Tenant's app updates in real time to "Verified Active"
   const verifyTenantPayment = async (contractCode, paymentId = null) => {
     if (!contractCode) return null;
     const cleanCode = contractCode.trim().toUpperCase();
 
-    // Generate cryptographically secure access code and persist to Firestore
-    const { accessCode: newCode } = await verifyPaymentAndIssueCode(cleanCode, paymentId, db);
+    const landlordId = landlordProfile?.uid || landlordProfile?.phone || landlordProfile?.id || 'landlord';
+    const tenantId = selectedTenant?.id || activeTenantContract?.tenantId || null;
 
-    // Update local state with the newly verified status and access code
+    // Generate secure random access code and persist to Firestore linked records
+    const { accessCode: newCode, accessCodeId } = await verifyPaymentAndIssueCode(
+      cleanCode, 
+      paymentId, 
+      db, 
+      landlordId, 
+      tenantId
+    );
+
+    const now = new Date().toISOString();
+
+    // Update local state with the verified status and access code
     setContracts(prev => prev.map(c => {
       if (c.code === cleanCode || c.id === cleanCode) {
         return {
           ...c,
-          status: 'Active',
+          status: 'active',
           paymentVerified: true,
           accessCode: newCode,
-          verifiedAt: new Date().toISOString()
+          accessCodeId,
+          verifiedAt: now,
+          verifiedBy: landlordId
         };
       }
       return c;
     }));
 
     setPayments(prev => prev.map(p => {
-      if (p.contractCode === cleanCode && (!paymentId || p.id === paymentId)) {
+      if ((p.contractCode === cleanCode || p.leaseId === cleanCode) && (!paymentId || p.id === paymentId)) {
         return {
           ...p,
-          status: 'Verified',
-          verifiedAt: new Date().toISOString()
+          status: 'verified',
+          verifiedAt: now,
+          verifiedBy: landlordId
         };
       }
       return p;
@@ -999,40 +1300,22 @@ export function AppProvider({ children }) {
     if (activeTenantContract && (activeTenantContract.code === cleanCode || activeTenantContract.id === cleanCode)) {
       setActiveTenantContract(prev => ({
         ...prev,
-        status: 'Active',
+        status: 'active',
         paymentVerified: true,
-        accessCode: newCode
+        accessCode: newCode,
+        accessCodeId,
+        verifiedAt: now
       }));
     }
 
     return newCode;
   };
 
-  // Landlord regeneration of access code (invalidates old code) (Requirement 4)
-  const regenerateTenantAccessCode = async (contractCode) => {
-    if (!contractCode) return null;
-    const cleanCode = contractCode.trim().toUpperCase();
-
-    const { accessCode: newCode } = await regenerateAccessCode(cleanCode, db);
-
-    setContracts(prev => prev.map(c => {
-      if (c.code === cleanCode || c.id === cleanCode) {
-        return { ...c, accessCode: newCode };
-      }
-      return c;
-    }));
-
-    if (activeTenantContract && (activeTenantContract.code === cleanCode || activeTenantContract.id === cleanCode)) {
-      setActiveTenantContract(prev => ({ ...prev, accessCode: newCode }));
-    }
-
-    return newCode;
-  };
-
-  // Landlord rejection or request for new payment proof
-  const rejectTenantPayment = async (contractCode, reason = 'Payment proof invalid or not found') => {
+  // Step 6: Landlord rejection with reason (Requirement 6: Reject with a reason tenant can see, and tenant can resubmit)
+  const rejectTenantPayment = async (contractCode, reason = 'Payment proof invalid or unverified', paymentId = null) => {
     if (!contractCode) return;
     const cleanCode = contractCode.trim().toUpperCase();
+    const now = new Date().toISOString();
 
     setContracts(prev => prev.map(c => {
       if (c.code === cleanCode || c.id === cleanCode) {
@@ -1040,72 +1323,104 @@ export function AppProvider({ children }) {
           ...c,
           paymentVerified: false,
           paymentRejectionReason: reason,
-          status: 'Payment Resubmission Required'
+          status: 'pending_resubmission',
+          updatedAt: now
         };
       }
       return c;
     }));
 
-    try {
-      await setDoc(doc(db, 'contracts', cleanCode), {
+    setPayments(prev => prev.map(p => {
+      if ((p.contractCode === cleanCode || p.leaseId === cleanCode) && (!paymentId || p.id === paymentId)) {
+        return {
+          ...p,
+          status: 'rejected',
+          rejectionReason: reason,
+          rejectedAt: now
+        };
+      }
+      return p;
+    }));
+
+    if (activeTenantContract && (activeTenantContract.code === cleanCode || activeTenantContract.id === cleanCode)) {
+      setActiveTenantContract(prev => ({
+        ...prev,
         paymentVerified: false,
         paymentRejectionReason: reason,
-        status: 'Payment Resubmission Required'
-      }, { merge: true });
-    } catch (err) {}
+        status: 'pending_resubmission'
+      }));
+    }
+
+    try {
+      await Promise.all([
+        setDoc(doc(db, 'contracts', cleanCode), {
+          paymentVerified: false,
+          paymentRejectionReason: reason,
+          status: 'pending_resubmission',
+          updatedAt: now
+        }, { merge: true }),
+        setDoc(doc(db, 'leases', cleanCode), {
+          paymentVerified: false,
+          paymentRejectionReason: reason,
+          status: 'pending_resubmission',
+          updatedAt: now
+        }, { merge: true })
+      ]);
+
+      if (paymentId) {
+        await setDoc(doc(db, 'payments', paymentId), {
+          status: 'rejected',
+          rejectionReason: reason,
+          rejectedAt: now
+        }, { merge: true });
+      }
+    } catch (err) {
+      console.warn('[Reject Payment] Notice:', err.message);
+    }
   };
 
-  // In-app tenant payment submission
-  const submitTenantPayment = async ({ contractCode, amount, cycleName, gcashRef, receiptData }) => {
-    const cleanCode = (contractCode || activeCode || '').trim().toUpperCase();
-    const receiptImage = receiptData?.dataUrl || receiptData?.preview || (typeof receiptData === 'string' ? receiptData : null);
-    const cleanTenant = (!isGenericTenantName(tenantName) ? tenantName : null) || tenantProfile?.name || 'Resident';
+  // Step 9: Landlord regenerates access code (old code becomes "revoked" immediately, history kept)
+  const regenerateTenantAccessCode = async (contractCode) => {
+    if (!contractCode) return null;
+    const cleanCode = contractCode.trim().toUpperCase();
 
-    const newPayment = {
-      id: `pay-${Date.now()}`,
-      contractCode: cleanCode,
-      tenantName: cleanTenant,
-      cycleName: cycleName || 'Monthly Rent Payment',
-      amount: Number(amount) || 0,
-      gcashRef: gcashRef || '',
-      receiptData: receiptImage,
-      status: 'Pending Verification',
-      date: new Date().toLocaleDateString(),
-      createdAt: new Date().toISOString()
-    };
+    const landlordId = landlordProfile?.uid || landlordProfile?.phone || landlordProfile?.id;
+    const tenantId = selectedTenant?.id || activeTenantContract?.tenantId;
 
-    setPayments(prev => [newPayment, ...prev]);
+    const { accessCode: newCode, accessCodeId } = await regenerateAccessCode(cleanCode, db, landlordId, tenantId);
 
     setContracts(prev => prev.map(c => {
       if (c.code === cleanCode || c.id === cleanCode) {
-        return {
-          ...c,
-          paymentVerified: false,
-          latestPaymentStatus: 'Pending Verification',
-          latestPaymentAmount: Number(amount),
-          latestGcashRef: gcashRef,
-          gcashRef: gcashRef,
-          gcashReceiptData: receiptImage
-        };
+        return { ...c, accessCode: newCode, accessCodeId };
       }
       return c;
     }));
 
-    try {
-      await addDoc(collection(db, 'payments'), newPayment);
-      if (cleanCode) {
-        await setDoc(doc(db, 'contracts', cleanCode), {
-          paymentVerified: false,
-          latestPaymentStatus: 'Pending Verification',
-          latestPaymentAmount: Number(amount),
-          latestGcashRef: gcashRef,
-          gcashRef: gcashRef,
-          gcashReceiptData: receiptImage
-        }, { merge: true });
-      }
-    } catch (err) {}
+    if (activeTenantContract && (activeTenantContract.code === cleanCode || activeTenantContract.id === cleanCode)) {
+      setActiveTenantContract(prev => ({ ...prev, accessCode: newCode, accessCodeId }));
+    }
 
-    return newPayment;
+    return newCode;
+  };
+
+  // Step 9: Landlord ends the lease (status becomes "ended", active code revoked)
+  const endTenantLease = async (contractCode) => {
+    if (!contractCode) return;
+    const cleanCode = contractCode.trim().toUpperCase();
+    const landlordId = landlordProfile?.uid || landlordProfile?.phone || landlordProfile?.id;
+
+    await endLeaseAndRevokeCodes(cleanCode, db, landlordId);
+
+    setContracts(prev => prev.map(c => {
+      if (c.code === cleanCode || c.id === cleanCode) {
+        return { ...c, status: 'ended', accessCode: null };
+      }
+      return c;
+    }));
+
+    if (activeTenantContract && (activeTenantContract.code === cleanCode || activeTenantContract.id === cleanCode)) {
+      setActiveTenantContract(prev => ({ ...prev, status: 'ended', accessCode: null }));
+    }
   };
 
   // Logout / Switch Account
@@ -1129,7 +1444,9 @@ export function AppProvider({ children }) {
   const [tenantFilter, setTenantFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Tenants derived from live contracts
+  // Step 8: Landlord search must connect everything
+  // Accepts: access code, room code, tenant name, unit, GCash reference number.
+  // Searching an access code must open one result page showing: contract (frozen copy & PDF), tenant, unit, every payment with receipts & ref numbers, verification date, code status.
   const tenantsList = contracts.map((c, idx) => {
     const rawName = c.tenantName || '';
     const cleanName = isGenericTenantName(rawName) ? (c.tenantUsername || 'Resident') : rawName;
@@ -1139,7 +1456,7 @@ export function AppProvider({ children }) {
       name: cleanName,
       unit: `${c.roomNumber} · ${c.propertyType || 'Bedspace'}`,
       rent: c.monthlyRent || 0,
-      status: c.status || 'Active',
+      status: c.status || 'open',
       isSigned: Boolean(c.isSigned),
       paymentVerified: Boolean(c.paymentVerified),
       accessCode: c.accessCode || null,
@@ -1149,7 +1466,7 @@ export function AppProvider({ children }) {
       gcashRef: c.gcashRef || c.latestGcashRef || '',
       gcashReceiptData: c.gcashReceiptData || null,
       due: c.dueDay || 'Every 5th',
-      phone: c.tenantPhone || c.contactNumber || '09XXXXXXXXX',
+      phone: c.tenantPhone || c.contactNumber || '',
       contract: c
     };
   });
@@ -1160,14 +1477,23 @@ export function AppProvider({ children }) {
       const matchName = t.name && t.name.toLowerCase().includes(q);
       const matchUnit = t.unit && t.unit.toLowerCase().includes(q);
       const matchCode = t.contract?.code && t.contract.code.toLowerCase().includes(q);
-      if (!matchName && !matchUnit && !matchCode) return false;
+      const matchAccessCode = t.accessCode && t.accessCode.toLowerCase().includes(q);
+      const matchGcash = (t.gcashRef && t.gcashRef.toLowerCase().includes(q)) ||
+        payments.some(p => (p.contractCode === t.contract?.code || p.leaseId === t.contract?.code) && (
+          (p.referenceNumber && p.referenceNumber.toLowerCase().includes(q)) ||
+          (p.gcashRef && p.gcashRef.toLowerCase().includes(q))
+        ));
+
+      if (!matchName && !matchUnit && !matchCode && !matchAccessCode && !matchGcash) {
+        return false;
+      }
     }
 
     if (tenantFilter === 'ACTIVE') {
-      return Boolean(t.paymentVerified);
+      return Boolean(t.paymentVerified) || t.status === 'active';
     }
     if (tenantFilter === 'PENDING') {
-      return !t.paymentVerified || t.status === 'Pending Verification' || Boolean(t.gcashRef && !t.paymentVerified);
+      return t.status === 'pending_payment' || t.status === 'pending_verification' || !t.paymentVerified;
     }
     if (tenantFilter === 'DUE') {
       return !t.paymentVerified || (t.due && t.due.includes('5th'));
@@ -1176,9 +1502,10 @@ export function AppProvider({ children }) {
     return true;
   });
 
-  const handleCopyLink = () => {
-    if (!activeCode) return;
-    const url = `${window.location.origin}?code=${activeCode}`;
+  const handleCopyLink = (codeOverride) => {
+    const code = codeOverride || activeCode;
+    if (!code) return;
+    const url = `${window.location.origin}?code=${code}`;
     navigator.clipboard?.writeText(url).catch(() => {});
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -1218,6 +1545,87 @@ export function AppProvider({ children }) {
     setCurrentScreen('SPLASH');
   };
 
+  // --- [Branding, Demo & Docs Agent] Start: Demo Pitch Data Loader ---
+  const loadDemoPitchData = async (role = 'LANDLORD') => {
+    try {
+      let seedData = null;
+      try {
+        const res = await fetch('/demo-seed.json');
+        if (res.ok) {
+          seedData = await res.json();
+        }
+      } catch (e) {}
+
+      if (seedData) {
+        if (role === 'LANDLORD') {
+          setLandlordProfile(seedData.landlord);
+          setUserRole('LANDLORD');
+          setContracts(seedData.contracts || []);
+          setPayments(seedData.payments || []);
+          if (seedData.presets) {
+            try {
+              localStorage.setItem(`rip_lease_presets_${seedData.landlord.id}`, JSON.stringify(seedData.presets));
+            } catch (e) {}
+          }
+          setCurrentScreen('LANDLORD_HOME');
+        } else {
+          setTenantProfile(seedData.tenant);
+          setUserRole('TENANT');
+          setActiveCode('RIP-ACTV');
+          setRoomCodeInput('RIP-ACTV');
+          setContracts(seedData.contracts || []);
+          setPayments(seedData.payments || []);
+          const activeC = seedData.contracts.find(c => c.code === 'RIP-ACTV');
+          if (activeC) {
+            setActiveTenantContract(activeC);
+            setTenantName(seedData.tenant.name);
+            setRoomNumber(activeC.roomNumber);
+            setPropertyAddress(activeC.propertyAddress);
+            setMonthlyRent(activeC.monthlyRent);
+          }
+          setCurrentScreen('TENANT_HOME');
+        }
+        return true;
+      }
+    } catch (err) {
+      console.warn('[DemoLoader] Could not load demo seed:', err);
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.__appContext = {
+        setCurrentScreen,
+        loadDemoPitchData,
+        setSelectedTenant,
+        setSearchQuery,
+        resetAppData,
+        setActiveTenantContract,
+        setActiveCode,
+        setTenantName,
+        setTenantHasReadContract,
+        setSigningMode,
+        setSignatureData,
+        setGcashRefNumber,
+        setGcashFileData
+      };
+    }
+  }, [
+    setCurrentScreen, 
+    setSelectedTenant, 
+    setSearchQuery,
+    setActiveTenantContract,
+    setActiveCode,
+    setTenantName,
+    setTenantHasReadContract,
+    setSigningMode,
+    setSignatureData,
+    setGcashRefNumber,
+    setGcashFileData
+  ]);
+  // --- [Branding, Demo & Docs Agent] End ---
+
   return (
     <AppContext.Provider value={{
       currentScreen, setCurrentScreen, navigateBack,
@@ -1230,8 +1638,11 @@ export function AppProvider({ children }) {
       logout,
       contracts, setContracts,
       payments, setPayments,
-      verifyTenantPayment, rejectTenantPayment, regenerateTenantAccessCode, submitTenantPayment,
+      verifyTenantPayment, rejectTenantPayment, regenerateTenantAccessCode, endTenantLease,
+      submitTenantPayment, submitTenantPaymentProof, signTenantKasulatan,
       propertyType, setPropertyType,
+      selectedPresetId, setSelectedPresetId, applyPreset, availablePresets,
+      generateKasulatanFromScratch, updateSingleClause, removeSingleClause, moveSingleClause,
       landlordName, setLandlordName,
       contactNumber, setContactNumber,
       roomNumber, setRoomNumber,
@@ -1271,7 +1682,8 @@ export function AppProvider({ children }) {
       tenantFilter, setTenantFilter,
       searchQuery, setSearchQuery,
       tenantsList, filteredTenants,
-      resetAppData
+      resetAppData,
+      loadDemoPitchData
     }}>
       {children}
     </AppContext.Provider>

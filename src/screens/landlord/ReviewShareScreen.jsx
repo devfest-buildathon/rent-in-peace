@@ -37,7 +37,9 @@ export default function ReviewShareScreen() {
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
           <h2 className="text-sm font-bold text-slate-900">Summary</h2>
-          <div className="w-10"></div>
+          <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 p-1 flex items-center justify-center shadow-2xs overflow-hidden">
+            <img src="/assets/logo-icon.png" alt="Rent in Peace" className="w-full h-full object-contain rounded-xl" />
+          </div>
         </div>
 
         {/* Stepper */}
@@ -114,7 +116,7 @@ export default function ReviewShareScreen() {
           onClick={handleGenerateKasulatan}
           className="w-full bg-[#14532D] hover:bg-[#0f4022] text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
         >
-          <span>Review Kasulatan sa Abang</span>
+          <span>Generate Kasulatan</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

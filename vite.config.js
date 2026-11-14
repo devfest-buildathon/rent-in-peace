@@ -8,16 +8,25 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'pwa-192x192.svg', 'pwa-512x512.svg'],
+      devOptions: {
+        enabled: true
+      },
+      includeAssets: ['favicon.svg', 'pwa-192x192.svg', 'pwa-512x512.svg', 'assets/logo-icon.png', 'assets/logo-full.png'],
       manifest: {
-        name: 'Rent in Peace — AI Lease & Rental Ledger',
+        name: 'Rent in Peace — Smart Rental Architecture',
         short_name: 'Rent in Peace',
-        description: 'AI-assisted residential lease drafting and rental ledger for CDO landlords and tenants.',
-        theme_color: '#14532D',
-        background_color: '#F8FAFC',
+        description: 'AI-assisted residential lease drafting and rental ledger for Philippine boarding houses and bedspaces.',
+        theme_color: '#144C2E',
+        background_color: '#E4EFE9',
         display: 'standalone',
         orientation: 'portrait-primary',
         icons: [
+          {
+            src: '/assets/logo-icon.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
           {
             src: '/pwa-192x192.svg',
             sizes: '192x192',
@@ -34,6 +43,20 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}']
       }
-    })
+    }),
+    {
+      name: 'pwa-virtual-register-fallback',
+      enforce: 'post',
+      resolveId(id) {
+        if (id === 'virtual:pwa-register' || id === 'virtual:pwa-register/react') {
+          return '\0' + id;
+        }
+      },
+      load(id) {
+        if (id === '\0virtual:pwa-register' || id === '\0virtual:pwa-register/react') {
+          return 'export function registerSW() { return async () => {}; }';
+        }
+      }
+    }
   ],
 })

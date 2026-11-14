@@ -18,7 +18,8 @@ export default function SplashScreen() {
     tenantProfile, 
     userRole, 
     logout,
-    resetAppData
+    resetAppData,
+    loadDemoPitchData
   } = useApp();
 
   return (
@@ -28,20 +29,32 @@ export default function SplashScreen() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-gradient-to-tr from-emerald-200/40 via-green-100/30 to-amber-100/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
       <div>
-        <BrandHeader subtitle="Good contracts make good neighbors." />
+        {/* Full Brand Identity Logo */}
+        <div className="flex flex-col items-center justify-center pt-1 pb-2">
+          <img 
+            src="/assets/logo-full.png" 
+            alt="Rent in Peace — Smart Rental Architecture" 
+            className="w-52 max-w-[220px] h-auto object-contain drop-shadow-xs" 
+          />
+          <p className="text-[11px] text-[#527060] font-medium tracking-tight mt-0.5">
+            Good contracts make good neighbors.
+          </p>
+        </div>
 
-        {/* Hero Card Visual: Original Emerald/Gold palette in iOS FinTech Card architecture */}
-        <div className="my-4 relative flex flex-col items-center justify-center">
-          <div className="w-full max-w-[320px] h-[190px] rounded-[28px] bg-gradient-to-tr from-[#14532D] via-[#047857] to-[#10b981] p-5 text-white shadow-[0_16px_36px_rgba(20,83,45,0.30)] flex flex-col justify-between relative overflow-hidden group">
+        {/* Hero Card Visual: Brand Forest Green & Gold Palette */}
+        <div className="my-3 relative flex flex-col items-center justify-center">
+          <div className="w-full max-w-[320px] h-[190px] rounded-[28px] bg-gradient-to-tr from-[#144C2E] via-[#047857] to-[#10b981] p-5 text-white shadow-[0_16px_36px_rgba(20,76,46,0.28)] flex flex-col justify-between relative overflow-hidden group">
             {/* Soft geometric glows */}
             <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
-            <div className="absolute right-6 top-6 w-20 h-20 rounded-full bg-amber-400/20 blur-md pointer-events-none"></div>
+            <div className="absolute right-6 top-6 w-20 h-20 rounded-full bg-[#F1AE17]/25 blur-md pointer-events-none"></div>
 
             <div className="flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#EAB308] text-emerald-950 flex items-center justify-center shadow-xs">
-                  <Home className="w-4 h-4 stroke-[2.5]" />
-                </div>
+                <img 
+                  src="/assets/logo-icon.png" 
+                  alt="" 
+                  className="w-8 h-8 rounded-xl object-contain shadow-xs bg-white/95 p-0.5" 
+                />
                 <span className="text-xs font-bold tracking-wide text-white">Rent in Peace</span>
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider bg-white/15 px-2.5 py-0.5 rounded-full border border-white/20">
@@ -199,13 +212,29 @@ export default function SplashScreen() {
           </div>
         )}
 
-        <div className="pt-2">
+        <div className="pt-2 flex items-center justify-center gap-2.5 text-[10px] text-slate-400">
           <button
             type="button"
             onClick={resetAppData}
-            className="text-[10px] text-slate-400 hover:text-slate-600 transition cursor-pointer underline underline-offset-2"
+            className="hover:text-slate-600 transition cursor-pointer underline underline-offset-2"
           >
-            Clear Test Data (Start Fresh)
+            Clear Data
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => loadDemoPitchData('LANDLORD')}
+            className="text-[#14532D] font-bold hover:underline transition cursor-pointer"
+          >
+            Demo (Landlord)
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => loadDemoPitchData('TENANT')}
+            className="text-[#14532D] font-bold hover:underline transition cursor-pointer"
+          >
+            Demo (Tenant)
           </button>
         </div>
       </div>

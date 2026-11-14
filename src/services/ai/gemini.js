@@ -149,3 +149,100 @@ Return ONLY a valid JSON array of 3 items:
   const cleanJson = rawText.trim().replace(/^```json/i, '').replace(/```$/, '').trim();
   return JSON.parse(cleanJson);
 }
+
+/**
+ * Generate a complete Kasulatan sa Pag-abang from scratch with Gemini AI
+ * strictly sized and formatted to fit onto a single A4 bond paper (6 to 8 concise clauses).
+ */
+export async function generateFullKasulatan(requirements, context = {}) {
+  if (!requirements || !requirements.trim()) {
+    throw new Error('Please describe the property, house rules, or terms you want in the Kasulatan.');
+  }
+
+  const systemInstruction = `You are an expert legal drafting assistant specializing in Philippine residential leases (Kasulatan sa Pag-abang) compliant with Republic Act 386 (Civil Code of the Philippines) and the Rent Control Act.
+The landlord wants you to generate a COMPLETE, legally balanced, custom Kasulatan from scratch based on their property details and specific rules.
+
+CRITICAL FORMATTING & LAYOUT REQUIREMENT (A4 BOND PAPER FIT):
+The entire contract will be printed on a SINGLE PAGE A4 BOND PAPER.
+To prevent multi-page overflow:
+1. Generate EXACTLY 6 to 8 concise, well-structured clauses:
+   - Clause 1: Contracting Parties & Demised Premises (Lessor, Lessee, Unit, Property Location)
+   - Clause 2: Rental Payment & Due Date (Monthly fee, due day, payment method)
+   - Clause 3: Security Deposit & Advance Rent (Deposit terms, deduction/refund terms)
+   - Clause 4: Utilities & Operating Arrangements (Electricity, water, sub-meter or shared split)
+   - Clause 5: House Rules, Curfew & Visitors (Directly incorporating landlord's rules)
+   - Clause 6: Care of Premises & Peaceful Living (Maintenance, cleanliness, prohibited acts)
+   - Clause 7: Move-Out Notice & Turnover (Written notice duration, clearance inspection)
+2. BREVITY: Keep each clause concise: 2 to 3 sentences max, under 35-40 words per language.
+3. BILINGUAL: Provide BOTH professional English AND natural Bisaya (Sinugbuanong Binisaya) for EVERY clause.
+4. INCORPORATE LANDLORD REQUESTS: Directly integrate the landlord's specific rules, restrictions, and instructions.
+5. NO UNVERIFIED CLAIMS: Do not claim clauses are "legally enforceable without exception" or cite bogus legal articles.
+6. OUTPUT SCHEMA: Return ONLY valid JSON matching this exact structure:
+{
+  "title": "Kasulatan sa Pag-abang",
+  "summary": "Brief 1-sentence overview of generated agreement",
+  "clauses": [
+    {
+      "num": 1,
+      "title": "Parties and Leased Premises",
+      "english": "Concise clause text in English...",
+      "bisaya": "Mubo nga hubad sa Sinugbuanong Binisaya..."
+    }
+  ]
+}`;
+
+  const userContent = `Landlord Requirements: "${requirements.trim()}"
+Rental Context:
+- Landlord Name: ${context.landlordName || '[Lessor Name]'}
+- Unit / Identifier: ${context.roomNumber || '[Room/Unit]'}
+- Location / Address: ${context.propertyAddress || '[Property Address]'}
+- Property Type: ${context.propertyType || 'Boarding House / Bedspace'}
+- Monthly Rent: ₱${context.monthlyRent || '0'}
+- Advance / Deposit: Adv ₱${context.advanceRent || '0'} / Dep ₱${context.deposit || '0'}
+- Lease Duration: ${context.leaseDuration || '6 months'}
+
+Generate the 6-8 bilingual A4-fitted clauses now:`;
+
+  const { data } = await callGeminiApi({
+    contents: [{
+      parts: [
+        { text: systemInstruction },
+        { text: userContent }
+      ]
+    }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.2
+    }
+  });
+
+  const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!rawText) throw new Error('Gemini API returned an empty response. Please retry.');
+  const cleanJson = rawText.trim().replace(/^```json/i, '').replace(/```$/, '').trim();
+  const parsed = JSON.parse(cleanJson);
+  if (!parsed.clauses || !Array.isArray(parsed.clauses) || parsed.clauses.length === 0) {
+    throw new Error('Gemini returned an invalid contract structure.');
+  }
+
+  // Format into standard clause schema with combined text for backward compatibility
+  const formattedClauses = parsed.clauses.map((c, idx) => {
+    const num = c.num || idx + 1;
+    const cleanTitle = (c.title || `Clause ${num}`).replace(/^\d+\.\s*/, '');
+    const titleWithNum = `${num}. ${cleanTitle}`;
+    return {
+      num,
+      title: titleWithNum,
+      english: c.english || '',
+      bisaya: c.bisaya || '',
+      text: c.english || c.bisaya || '',
+      custom: true,
+      isCustom: true
+    };
+  });
+
+  return {
+    title: parsed.title || 'Kasulatan sa Pag-abang',
+    summary: parsed.summary || 'Custom generated bilingual lease agreement',
+    clauses: formattedClauses
+  };
+}

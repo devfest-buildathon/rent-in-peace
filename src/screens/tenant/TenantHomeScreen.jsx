@@ -12,7 +12,8 @@ import {
   Clock,
   ShieldCheck,
   AlertCircle,
-  Copy
+  Copy,
+  Loader2
 } from 'lucide-react';
 import FileUpload from '../../components/shared/FileUpload';
 
@@ -73,24 +74,33 @@ export default function TenantHomeScreen() {
       setPayError('Please enter the GCash Reference Number.');
       return;
     }
+    if (!payReceiptData) {
+      setPayError('Please attach a screenshot of your GCash receipt.');
+      return;
+    }
 
     setIsSubmittingPay(true);
-    await submitTenantPayment({
-      amount: Number(payAmount),
-      cycleName: payCycle,
-      cycle: payCycle,
-      gcashRef: payGcashRef.trim(),
-      receiptData: payReceiptData?.dataUrl || payReceiptData,
-      contractCode: currentCode
-    });
-    setIsSubmittingPay(false);
-    setPaySuccess(true);
-    setTimeout(() => {
-      setPaySuccess(false);
-      setShowPayModal(false);
-      setPayGcashRef('');
-      setPayReceiptData(null);
-    }, 1800);
+    try {
+      await submitTenantPayment({
+        amount: Number(payAmount),
+        cycleName: payCycle,
+        cycle: payCycle,
+        gcashRef: payGcashRef.trim(),
+        receiptData: payReceiptData?.dataUrl || payReceiptData,
+        contractCode: currentCode
+      });
+      setPaySuccess(true);
+      setTimeout(() => {
+        setPaySuccess(false);
+        setShowPayModal(false);
+        setPayGcashRef('');
+        setPayReceiptData(null);
+      }, 1800);
+    } catch (err) {
+      setPayError(err.message || 'Failed to submit payment proof.');
+    } finally {
+      setIsSubmittingPay(false);
+    }
   };
 
   const handleCopyCode = () => {
@@ -104,15 +114,15 @@ export default function TenantHomeScreen() {
     <div className="flex-1 flex flex-col justify-between min-h-0 bg-[#F4F8F5]">
       <div className="px-5 pt-3 overflow-y-auto scrollbar-none pb-4">
         
-        {/* Top Header: Avatar + Sign Out */}
+        {/* Top Header: Brand Icon + Greeting + Sign Out */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#14532D] text-white font-black text-sm flex items-center justify-center shadow-xs">
-              {(tenantProfile?.name || tenantName || 'Tenant').charAt(0).toUpperCase()}
+            <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/90 p-1 flex items-center justify-center shadow-2xs overflow-hidden">
+              <img src="/assets/logo-icon.png" alt="Rent in Peace" className="w-full h-full object-contain rounded-xl" />
             </div>
             <div>
               <p className="text-[11px] text-slate-500 font-medium">Resident</p>
-              <h2 className="text-sm font-extrabold text-slate-900 leading-tight">
+              <h2 className="text-sm font-extrabold text-[#144C2E] leading-tight">
                 {tenantProfile?.name || tenantName || 'Valued Resident'}
               </h2>
             </div>
@@ -395,9 +405,16 @@ export default function TenantHomeScreen() {
                   <button 
                     type="submit"
                     disabled={isSubmittingPay}
-                    className="w-full py-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-2xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                    className="w-full py-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-2xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-70"
                   >
-                    <span>Submit Payment Proof</span>
+                    {isSubmittingPay ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Submitting Proof...</span>
+                      </>
+                    ) : (
+                      <span>Submit Payment Proof</span>
+                    )}
                   </button>
                 </div>
               </form>

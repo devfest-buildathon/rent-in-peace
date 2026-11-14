@@ -23,7 +23,8 @@ export default function LandlordAuthScreen({ initialTab = 'login' }) {
     navigateBack,
     loginLandlord, 
     registerLandlord,
-    resetPasswordWithEmail
+    resetPasswordWithEmail,
+    setCurrentScreen
   } = useApp();
 
   const [activeTab, setActiveTab] = useState(initialTab); // 'login' | 'register'
@@ -41,6 +42,7 @@ export default function LandlordAuthScreen({ initialTab = 'login' }) {
   const [showRegPassword, setShowRegPassword] = useState(false);
   const [regPropertyName, setRegPropertyName] = useState('');
   const [regPropertyAddress, setRegPropertyAddress] = useState('');
+  const [regBarangay, setRegBarangay] = useState('');
   const [regCity, setRegCity] = useState('');
 
   // Forgot Password Modal State
@@ -69,13 +71,17 @@ export default function LandlordAuthScreen({ initialTab = 'login' }) {
     }
 
     setIsLoading(true);
-    const result = await loginLandlord(loginIdentifier.trim(), loginPassword);
-    setIsLoading(false);
-
-    if (result.success) {
-      // Screen transition is handled in context / App
-    } else {
-      setError(result.error || 'Failed to sign in. Please verify your credentials.');
+    try {
+      const result = await loginLandlord(loginIdentifier.trim(), loginPassword);
+      if (result.success) {
+        setCurrentScreen('LANDLORD_HOME');
+      } else {
+        setError(result.error || 'Failed to sign in. Please verify your credentials.');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to sign in. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -103,19 +109,27 @@ export default function LandlordAuthScreen({ initialTab = 'login' }) {
     }
 
     setIsLoading(true);
-    const result = await registerLandlord({
-      name: regName.trim(),
-      phone: regPhone.trim(),
-      email: regEmail.trim(),
-      password: regPassword,
-      propertyName: regPropertyName.trim() || 'Rental House',
-      propertyAddress: regPropertyAddress.trim(),
-      city: regCity.trim()
-    });
-    setIsLoading(false);
+    try {
+      const result = await registerLandlord({
+        name: regName.trim(),
+        phone: regPhone.trim(),
+        email: regEmail.trim(),
+        password: regPassword,
+        propertyName: regPropertyName.trim() || 'Rental House',
+        propertyAddress: regPropertyAddress.trim(),
+        barangay: regBarangay.trim(),
+        city: regCity.trim()
+      });
 
-    if (!result.success) {
-      setError(result.error || 'Registration failed. Please try again.');
+      if (result.success) {
+        setCurrentScreen('LANDLORD_HOME');
+      } else {
+        setError(result.error || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -146,16 +160,20 @@ export default function LandlordAuthScreen({ initialTab = 'login' }) {
   return (
     <div className="flex-1 flex flex-col justify-between px-6 py-5 max-w-lg mx-auto w-full bg-[#F4F8F5]">
       <div>
-        {/* Header with Logical Back Button */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Header with Logical Back Button and Full Brand Logo */}
+        <div className="flex items-center justify-between mb-3">
           <button 
             type="button"
             onClick={navigateBack} 
-            className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
+            className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#144C2E] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
-          <span className="text-xs font-bold text-[#14532D] uppercase tracking-wider">Lessor Portal</span>
+          <img 
+            src="/assets/logo-full.png" 
+            alt="Rent in Peace" 
+            className="h-10 w-auto object-contain drop-shadow-2xs" 
+          />
           <div className="w-10"></div>
         </div>
 
@@ -329,20 +347,31 @@ export default function LandlordAuthScreen({ initialTab = 'login' }) {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-500 mb-1">Property Address</label>
+                <div className="relative">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input 
+                    type="text"
+                    value={regPropertyAddress}
+                    onChange={(e) => setRegPropertyAddress(e.target.value)}
+                    placeholder="e.g. 123 Rizal St"
+                    className="w-full pl-8 pr-2.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-500 mb-1">Property Address</label>
-                  <div className="relative">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input 
-                      type="text"
-                      value={regPropertyAddress}
-                      onChange={(e) => setRegPropertyAddress(e.target.value)}
-                      placeholder="e.g. 123 Rizal St"
-                      className="w-full pl-8 pr-2.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
-                      required
-                    />
-                  </div>
+                  <label className="block text-[11px] font-semibold text-slate-500 mb-1">Barangay</label>
+                  <input 
+                    type="text"
+                    value={regBarangay}
+                    onChange={(e) => setRegBarangay(e.target.value)}
+                    placeholder="e.g. Poblacion"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                  />
                 </div>
 
                 <div>

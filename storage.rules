@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Receipts in Storage are readable only by the landlord and that tenant
+    match /receipts/{leaseId}/{allPaths=**} {
+      allow read: if request.auth != null && (
+        // Landlord of the lease
+        request.auth.uid == firestore.get(/databases/(default)/documents/contracts/$(leaseId)).data.landlordId ||
+        request.auth.uid == firestore.get(/databases/(default)/documents/leases/$(leaseId)).data.landlordId ||
+        // Tenant of the lease
+        request.auth.uid == firestore.get(/databases/(default)/documents/contracts/$(leaseId)).data.tenantId ||
+        request.auth.uid == firestore.get(/databases/(default)/documents/leases/$(leaseId)).data.tenantId
+      );
+      allow write: if request.auth != null;
+    }
+  }
+}

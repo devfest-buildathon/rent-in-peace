@@ -1,0 +1,636 @@
+{
+  "generatedAt": "2026-11-14T15:43:34.788Z",
+  "projectId": "rentinpeace",
+  "landlord": {
+    "id": "09171234567",
+    "uid": "09171234567",
+    "name": "Engr. Roberto M. Tan",
+    "phone": "09171234567",
+    "email": "landlord.demo@rentinpeace.ph",
+    "propertyName": "Pineview Residences & Boarding House",
+    "propertyAddress": "Block 4, Lot 12, Mahogany Avenue, Carmen",
+    "barangay": "Barangay Carmen",
+    "city": "Cagayan de Oro City",
+    "pin": "1234",
+    "demo": true,
+    "createdAt": "2026-11-14T15:43:32.125Z"
+  },
+  "presets": [
+    {
+      "id": "preset-bedspace",
+      "name": "Bedspace / Student Dorm",
+      "description": "Shared room layout with quiet hours and equal utility splits.",
+      "propertyType": "Boarding House / Bedspace",
+      "isBuiltin": false,
+      "demo": true,
+      "updatedAt": "2026-11-14T15:43:32.253Z",
+      "clauses": [
+        {
+          "num": 1,
+          "title": "1. Mga Partido ug Paupahan (Parties & Premises)",
+          "english": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and {{tenant_name}} (Lessee) for the leased unit {{unit}} located at {{property_address}}.",
+          "bisaya": "Kini nga kasulatan sa pag-abang gikasabutan tali ni Engr. Roberto M. Tan (Tigpaabang) ug {{tenant_name}} (Nag-abang) alang sa unit {{unit}} nga nahimutang sa {{property_address}}.",
+          "text": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and {{tenant_name}} (Lessee) for the leased unit {{unit}} located at {{property_address}}."
+        },
+        {
+          "num": 2,
+          "title": "2. Abang ug Adlaw sa Pagbayad (Rent & Due Date)",
+          "english": "The monthly rental rate is {{rent}}, strictly due and payable on or before the {{due_day}} day of each calendar month without need of demand.",
+          "bisaya": "Ang binuwan nga abang nagkantidad og {{rent}}, nga kinahanglang bayran sa o sa dili pa ang ika-{{due_day}} nga adlaw sa matag bulan nga walay langan.",
+          "text": "The monthly rental rate is {{rent}}, strictly due and payable on or before the {{due_day}} day of each calendar month without need of demand."
+        },
+        {
+          "num": 3,
+          "title": "3. Seguridad Deposit ug Advance (Security Deposit & Advance)",
+          "english": "The Lessee pays an advance rent of {{advance}} and a security deposit of {{deposit}} to answer for unpaid bills or damages beyond normal wear and tear.",
+          "bisaya": "Ang Nag-abang mobayad og advance nga {{advance}} ug security deposit nga {{deposit}} aron pagsigurado sa bisan unsang wala mabayri nga bayronon o kadaot.",
+          "text": "The Lessee pays an advance rent of {{advance}} and a security deposit of {{deposit}} to answer for unpaid bills or damages beyond normal wear and tear."
+        },
+        {
+          "num": 4,
+          "title": "4. Panahon sa Pag-abang (Lease Term)",
+          "english": "The lease commences on 2026-11-01 for an initial duration of {{lease_duration}}, renewable upon mutual written agreement of both parties.",
+          "bisaya": "Ang pag-abang magsugod sa 2026-11-01 sulod sa gidugayon nga {{lease_duration}}, ug mahimong bag-ohon pinaagi sa sinulat nga kasabutan.",
+          "text": "The lease commences on 2026-11-01 for an initial duration of {{lease_duration}}, renewable upon mutual written agreement of both parties."
+        },
+        {
+          "num": 5,
+          "title": "5. Mga Serbisyo ug Bayronon (Utilities Arrangement)",
+          "english": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents.",
+          "bisaya": "Ang kuryente gibase sa sub-meter subay sa nakunsumong kilowatt. Ang bayronon sa tubig pagabahinon sa tanang residente sa paupahan.",
+          "text": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents."
+        },
+        {
+          "num": 6,
+          "title": "6. Kalinaw ug Alituntunin (House Rules & Peaceful Living)",
+          "english": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited.",
+          "bisaya": "Magsugod ang ting-hilom sa 10:00 PM matag gabii. Kinahanglang limpyo ang agianan ug kasilyas. Hugot nga gidili ang pagpasulod og sub-lessee.",
+          "text": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited."
+        },
+        {
+          "num": 7,
+          "title": "7. Pagbiya ug Pahibalo (Move-Out Notice)",
+          "english": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws.",
+          "bisaya": "Bisan kinsa sa duha ka partido mahimong mopaundang niini nga kasabutan pinaagi sa paghatag og 30 ka adlaw nga abanteng sinulat nga pahibalo.",
+          "text": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws."
+        }
+      ]
+    },
+    {
+      "id": "preset-room-cr",
+      "name": "Private Room with CR",
+      "description": "Private single room with ensuite bathroom and sub-metered power.",
+      "propertyType": "Private Room with Bath",
+      "isBuiltin": false,
+      "demo": true,
+      "updatedAt": "2026-11-14T15:43:32.253Z",
+      "clauses": [
+        {
+          "num": 1,
+          "title": "1. Mga Partido ug Paupahan (Parties & Premises)",
+          "english": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and {{tenant_name}} (Lessee) for the leased unit {{unit}} located at {{property_address}}.",
+          "bisaya": "Kini nga kasulatan sa pag-abang gikasabutan tali ni Engr. Roberto M. Tan (Tigpaabang) ug {{tenant_name}} (Nag-abang) alang sa unit {{unit}} nga nahimutang sa {{property_address}}.",
+          "text": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and {{tenant_name}} (Lessee) for the leased unit {{unit}} located at {{property_address}}."
+        },
+        {
+          "num": 2,
+          "title": "2. Abang ug Adlaw sa Pagbayad (Rent & Due Date)",
+          "english": "The monthly rental rate is {{rent}}, strictly due and payable on or before the {{due_day}} day of each calendar month without need of demand.",
+          "bisaya": "Ang binuwan nga abang nagkantidad og {{rent}}, nga kinahanglang bayran sa o sa dili pa ang ika-{{due_day}} nga adlaw sa matag bulan nga walay langan.",
+          "text": "The monthly rental rate is {{rent}}, strictly due and payable on or before the {{due_day}} day of each calendar month without need of demand."
+        },
+        {
+          "num": 3,
+          "title": "3. Seguridad Deposit ug Advance (Security Deposit & Advance)",
+          "english": "The Lessee pays an advance rent of {{advance}} and a security deposit of {{deposit}} to answer for unpaid bills or damages beyond normal wear and tear.",
+          "bisaya": "Ang Nag-abang mobayad og advance nga {{advance}} ug security deposit nga {{deposit}} aron pagsigurado sa bisan unsang wala mabayri nga bayronon o kadaot.",
+          "text": "The Lessee pays an advance rent of {{advance}} and a security deposit of {{deposit}} to answer for unpaid bills or damages beyond normal wear and tear."
+        },
+        {
+          "num": 4,
+          "title": "4. Panahon sa Pag-abang (Lease Term)",
+          "english": "The lease commences on 2026-11-01 for an initial duration of {{lease_duration}}, renewable upon mutual written agreement of both parties.",
+          "bisaya": "Ang pag-abang magsugod sa 2026-11-01 sulod sa gidugayon nga {{lease_duration}}, ug mahimong bag-ohon pinaagi sa sinulat nga kasabutan.",
+          "text": "The lease commences on 2026-11-01 for an initial duration of {{lease_duration}}, renewable upon mutual written agreement of both parties."
+        },
+        {
+          "num": 5,
+          "title": "5. Mga Serbisyo ug Bayronon (Utilities Arrangement)",
+          "english": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents.",
+          "bisaya": "Ang kuryente gibase sa sub-meter subay sa nakunsumong kilowatt. Ang bayronon sa tubig pagabahinon sa tanang residente sa paupahan.",
+          "text": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents."
+        },
+        {
+          "num": 6,
+          "title": "6. Kalinaw ug Alituntunin (House Rules & Peaceful Living)",
+          "english": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited.",
+          "bisaya": "Magsugod ang ting-hilom sa 10:00 PM matag gabii. Kinahanglang limpyo ang agianan ug kasilyas. Hugot nga gidili ang pagpasulod og sub-lessee.",
+          "text": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited."
+        },
+        {
+          "num": 7,
+          "title": "7. Pagbiya ug Pahibalo (Move-Out Notice)",
+          "english": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws.",
+          "bisaya": "Bisan kinsa sa duha ka partido mahimong mopaundang niini nga kasabutan pinaagi sa paghatag og 30 ka adlaw nga abanteng sinulat nga pahibalo.",
+          "text": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws."
+        }
+      ]
+    },
+    {
+      "id": "preset-apartment",
+      "name": "Studio Apartment",
+      "description": "Self-contained studio flat with private kitchen and balcony.",
+      "propertyType": "Apartment / Studio Unit",
+      "isBuiltin": false,
+      "demo": true,
+      "updatedAt": "2026-11-14T15:43:32.253Z",
+      "clauses": [
+        {
+          "num": 1,
+          "title": "1. Mga Partido ug Paupahan (Parties & Premises)",
+          "english": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and {{tenant_name}} (Lessee) for the leased unit {{unit}} located at {{property_address}}.",
+          "bisaya": "Kini nga kasulatan sa pag-abang gikasabutan tali ni Engr. Roberto M. Tan (Tigpaabang) ug {{tenant_name}} (Nag-abang) alang sa unit {{unit}} nga nahimutang sa {{property_address}}.",
+          "text": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and {{tenant_name}} (Lessee) for the leased unit {{unit}} located at {{property_address}}."
+        },
+        {
+          "num": 2,
+          "title": "2. Abang ug Adlaw sa Pagbayad (Rent & Due Date)",
+          "english": "The monthly rental rate is {{rent}}, strictly due and payable on or before the {{due_day}} day of each calendar month without need of demand.",
+          "bisaya": "Ang binuwan nga abang nagkantidad og {{rent}}, nga kinahanglang bayran sa o sa dili pa ang ika-{{due_day}} nga adlaw sa matag bulan nga walay langan.",
+          "text": "The monthly rental rate is {{rent}}, strictly due and payable on or before the {{due_day}} day of each calendar month without need of demand."
+        },
+        {
+          "num": 3,
+          "title": "3. Seguridad Deposit ug Advance (Security Deposit & Advance)",
+          "english": "The Lessee pays an advance rent of {{advance}} and a security deposit of {{deposit}} to answer for unpaid bills or damages beyond normal wear and tear.",
+          "bisaya": "Ang Nag-abang mobayad og advance nga {{advance}} ug security deposit nga {{deposit}} aron pagsigurado sa bisan unsang wala mabayri nga bayronon o kadaot.",
+          "text": "The Lessee pays an advance rent of {{advance}} and a security deposit of {{deposit}} to answer for unpaid bills or damages beyond normal wear and tear."
+        },
+        {
+          "num": 4,
+          "title": "4. Panahon sa Pag-abang (Lease Term)",
+          "english": "The lease commences on 2026-11-01 for an initial duration of {{lease_duration}}, renewable upon mutual written agreement of both parties.",
+          "bisaya": "Ang pag-abang magsugod sa 2026-11-01 sulod sa gidugayon nga {{lease_duration}}, ug mahimong bag-ohon pinaagi sa sinulat nga kasabutan.",
+          "text": "The lease commences on 2026-11-01 for an initial duration of {{lease_duration}}, renewable upon mutual written agreement of both parties."
+        },
+        {
+          "num": 5,
+          "title": "5. Mga Serbisyo ug Bayronon (Utilities Arrangement)",
+          "english": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents.",
+          "bisaya": "Ang kuryente gibase sa sub-meter subay sa nakunsumong kilowatt. Ang bayronon sa tubig pagabahinon sa tanang residente sa paupahan.",
+          "text": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents."
+        },
+        {
+          "num": 6,
+          "title": "6. Kalinaw ug Alituntunin (House Rules & Peaceful Living)",
+          "english": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited.",
+          "bisaya": "Magsugod ang ting-hilom sa 10:00 PM matag gabii. Kinahanglang limpyo ang agianan ug kasilyas. Hugot nga gidili ang pagpasulod og sub-lessee.",
+          "text": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited."
+        },
+        {
+          "num": 7,
+          "title": "7. Pagbiya ug Pahibalo (Move-Out Notice)",
+          "english": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws.",
+          "bisaya": "Bisan kinsa sa duha ka partido mahimong mopaundang niini nga kasabutan pinaagi sa paghatag og 30 ka adlaw nga abanteng sinulat nga pahibalo.",
+          "text": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws."
+        }
+      ]
+    }
+  ],
+  "contracts": [
+    {
+      "code": "RIP-OPEN",
+      "roomCode": "RIP-OPEN",
+      "landlordId": "09171234567",
+      "landlordName": "Engr. Roberto M. Tan",
+      "landlordPhone": "09171234567",
+      "propertyName": "Pineview Residences",
+      "propertyAddress": "Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City",
+      "propertyType": "Boarding House / Bedspace",
+      "roomNumber": "Room 101 (Bedspace A)",
+      "monthlyRent": 2500,
+      "deposit": 2500,
+      "advanceRent": 2500,
+      "leaseDuration": "6 months",
+      "dueDay": "5th",
+      "status": "open",
+      "isSigned": false,
+      "tenantSigned": false,
+      "paymentVerified": false,
+      "accessCode": null,
+      "clauses": [
+        {
+          "num": 1,
+          "title": "1. Mga Partido ug Paupahan (Parties & Premises)",
+          "english": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and Prospective Resident (Lessee) for the leased unit Room 101 (Bedspace A) located at Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City.",
+          "bisaya": "Kini nga kasulatan sa pag-abang gikasabutan tali ni Engr. Roberto M. Tan (Tigpaabang) ug Prospective Resident (Nag-abang) alang sa unit Room 101 (Bedspace A) nga nahimutang sa Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City.",
+          "text": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and Prospective Resident (Lessee) for the leased unit Room 101 (Bedspace A) located at Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City."
+        },
+        {
+          "num": 2,
+          "title": "2. Abang ug Adlaw sa Pagbayad (Rent & Due Date)",
+          "english": "The monthly rental rate is ₱2,500, strictly due and payable on or before the 5th day of each calendar month without need of demand.",
+          "bisaya": "Ang binuwan nga abang nagkantidad og ₱2,500, nga kinahanglang bayran sa o sa dili pa ang ika-5th nga adlaw sa matag bulan nga walay langan.",
+          "text": "The monthly rental rate is ₱2,500, strictly due and payable on or before the 5th day of each calendar month without need of demand."
+        },
+        {
+          "num": 3,
+          "title": "3. Seguridad Deposit ug Advance (Security Deposit & Advance)",
+          "english": "The Lessee pays an advance rent of ₱2,500 and a security deposit of ₱2,500 to answer for unpaid bills or damages beyond normal wear and tear.",
+          "bisaya": "Ang Nag-abang mobayad og advance nga ₱2,500 ug security deposit nga ₱2,500 aron pagsigurado sa bisan unsang wala mabayri nga bayronon o kadaot.",
+          "text": "The Lessee pays an advance rent of ₱2,500 and a security deposit of ₱2,500 to answer for unpaid bills or damages beyond normal wear and tear."
+        },
+        {
+          "num": 4,
+          "title": "4. Panahon sa Pag-abang (Lease Term)",
+          "english": "The lease commences on 2026-11-01 for an initial duration of 6 months, renewable upon mutual written agreement of both parties.",
+          "bisaya": "Ang pag-abang magsugod sa 2026-11-01 sulod sa gidugayon nga 6 months, ug mahimong bag-ohon pinaagi sa sinulat nga kasabutan.",
+          "text": "The lease commences on 2026-11-01 for an initial duration of 6 months, renewable upon mutual written agreement of both parties."
+        },
+        {
+          "num": 5,
+          "title": "5. Mga Serbisyo ug Bayronon (Utilities Arrangement)",
+          "english": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents.",
+          "bisaya": "Ang kuryente gibase sa sub-meter subay sa nakunsumong kilowatt. Ang bayronon sa tubig pagabahinon sa tanang residente sa paupahan.",
+          "text": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents."
+        },
+        {
+          "num": 6,
+          "title": "6. Kalinaw ug Alituntunin (House Rules & Peaceful Living)",
+          "english": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited.",
+          "bisaya": "Magsugod ang ting-hilom sa 10:00 PM matag gabii. Kinahanglang limpyo ang agianan ug kasilyas. Hugot nga gidili ang pagpasulod og sub-lessee.",
+          "text": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited."
+        },
+        {
+          "num": 7,
+          "title": "7. Pagbiya ug Pahibalo (Move-Out Notice)",
+          "english": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws.",
+          "bisaya": "Bisan kinsa sa duha ka partido mahimong mopaundang niini nga kasabutan pinaagi sa paghatag og 30 ka adlaw nga abanteng sinulat nga pahibalo.",
+          "text": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws."
+        }
+      ],
+      "demo": true,
+      "createdAt": "2026-11-14T08:00:00.000Z",
+      "updatedAt": "2026-11-14T08:00:00.000Z"
+    },
+    {
+      "code": "RIP-PEND",
+      "roomCode": "RIP-PEND",
+      "landlordId": "09171234567",
+      "landlordName": "Engr. Roberto M. Tan",
+      "landlordPhone": "09171234567",
+      "propertyName": "Pineview Residences",
+      "propertyAddress": "Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City",
+      "propertyType": "Private Room with Bath",
+      "roomNumber": "Room 102 (Private Room)",
+      "monthlyRent": 3500,
+      "deposit": 3500,
+      "advanceRent": 3500,
+      "leaseDuration": "6 months",
+      "dueDay": "5th",
+      "status": "pending_verification",
+      "tenantName": "Juan Paolo Dela Cruz",
+      "tenantPhone": "09193334444",
+      "tenantEmail": "juan.demo@rentinpeace.ph",
+      "isSigned": true,
+      "tenantSigned": true,
+      "tenantSignedAt": "2026-11-14T14:10:00.000Z",
+      "signingMode": "DIGITAL",
+      "paymentVerified": false,
+      "gcashRef": "GCASH-98231456201",
+      "gcashReceiptData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNDAwIDYwMCIgc3R5bGU9ImJhY2tncm91bmQ6IzAwNWNlNjtmb250LWZhbWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxzYW5zLXNlcmlmOyI+CiAgICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzAwNWNlNiIvPgogICAgPHJlY3QgeD0iMjAiIHk9IjQwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjUyMCIgcng9IjIyIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjAgNjIgUTIwIDQwIDQyIDQwIEwzNTggNDAgUTM4MCA0MCAzODAgNjIgTDM4MCAxMTAgTDIwIDExMCBaIiBmaWxsPSIjMDA1Y2U2Ii8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjgwIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMSI+R0Nhc2ggRS1SZWNlaXB0PC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNlNmYwZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9mZmljaWFsIFRyYW5zYWN0aW9uIENvbmZpcm1hdGlvbiAoRGVtbyk8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjMwIiBmaWxsPSIjZWNmZGY1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjI0IiBmaWxsPSIjMTBiOTgxIi8+CiAgICA8cGF0aCBkPSJNMTkwIDE1NSBMMTk3IDE2MiBMMjEyIDE0NyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIyMTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFtb3VudCBQYWlkPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBIUCAzLDUwMC4wMDwvdGV4dD4KICAgIDxyZWN0IHg9IjQwIiB5PSIyNzUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjA1IiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2UyZThmMCIvPgogICAgPHRleHQgeD0iNTUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBUbzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+RW5nci4gUm9iZXJ0byBNLiBUYW48L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzM1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5HQ2FzaCBNb2JpbGU6PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzMzUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJlbmQiPjA5MTcqKio0NTY3PC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBCeTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+SnVhbiBQYW9sbyBEZWxhIENydXo8L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzk1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5SZWZlcmVuY2UgTm86PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzOTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwMDVjZTYiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIHRleHQtYW5jaG9yPSJlbmQiPjk4MjMxNDU2MjAxMDwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1IiB5PSI0MjUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiPkRhdGUgJmFtcDsgVGltZTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjQyNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzMzNDE1NSIgdGV4dC1hbmNob3I9ImVuZCI+MTQgTm92IDIwMjYsIDAyOjE1IFBNPC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjQ1NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+UHVycG9zZTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjQ1NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzA0Nzg1NyIgdGV4dC1hbmNob3I9ImVuZCI+QWR2YW5jZSBSZW50IChSb29tIDEwMik8L3RleHQ+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjUxNSIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjOTRhM2I4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMC41Ij5SRU5UIElOIFBFQUNFIMK3IFNNQVJUIFJFTlRBTCBBUkNISVRFQ1RVUkU8L3RleHQ+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjUzMCIgZm9udC1zaXplPSI4IiBmaWxsPSIjY2JkNWUxIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TeW50aGV0aWMgc2FtcGxlIHJlY2VpcHQgZ2VuZXJhdGVkIGZvciBkZW1vIGV2YWx1YXRpb24gb25seTwvdGV4dD4KICA8L3N2Zz4=",
+      "advancePaidAmount": 3500,
+      "accessCode": null,
+      "clauses": [
+        {
+          "num": 1,
+          "title": "1. Mga Partido ug Paupahan (Parties & Premises)",
+          "english": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and Juan Paolo Dela Cruz (Lessee) for the leased unit Room 102 (Private Room) located at Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City.",
+          "bisaya": "Kini nga kasulatan sa pag-abang gikasabutan tali ni Engr. Roberto M. Tan (Tigpaabang) ug Juan Paolo Dela Cruz (Nag-abang) alang sa unit Room 102 (Private Room) nga nahimutang sa Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City.",
+          "text": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and Juan Paolo Dela Cruz (Lessee) for the leased unit Room 102 (Private Room) located at Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City."
+        },
+        {
+          "num": 2,
+          "title": "2. Abang ug Adlaw sa Pagbayad (Rent & Due Date)",
+          "english": "The monthly rental rate is ₱3,500, strictly due and payable on or before the 5th day of each calendar month without need of demand.",
+          "bisaya": "Ang binuwan nga abang nagkantidad og ₱3,500, nga kinahanglang bayran sa o sa dili pa ang ika-5th nga adlaw sa matag bulan nga walay langan.",
+          "text": "The monthly rental rate is ₱3,500, strictly due and payable on or before the 5th day of each calendar month without need of demand."
+        },
+        {
+          "num": 3,
+          "title": "3. Seguridad Deposit ug Advance (Security Deposit & Advance)",
+          "english": "The Lessee pays an advance rent of ₱3,500 and a security deposit of ₱3,500 to answer for unpaid bills or damages beyond normal wear and tear.",
+          "bisaya": "Ang Nag-abang mobayad og advance nga ₱3,500 ug security deposit nga ₱3,500 aron pagsigurado sa bisan unsang wala mabayri nga bayronon o kadaot.",
+          "text": "The Lessee pays an advance rent of ₱3,500 and a security deposit of ₱3,500 to answer for unpaid bills or damages beyond normal wear and tear."
+        },
+        {
+          "num": 4,
+          "title": "4. Panahon sa Pag-abang (Lease Term)",
+          "english": "The lease commences on 2026-11-01 for an initial duration of 6 months, renewable upon mutual written agreement of both parties.",
+          "bisaya": "Ang pag-abang magsugod sa 2026-11-01 sulod sa gidugayon nga 6 months, ug mahimong bag-ohon pinaagi sa sinulat nga kasabutan.",
+          "text": "The lease commences on 2026-11-01 for an initial duration of 6 months, renewable upon mutual written agreement of both parties."
+        },
+        {
+          "num": 5,
+          "title": "5. Mga Serbisyo ug Bayronon (Utilities Arrangement)",
+          "english": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents.",
+          "bisaya": "Ang kuryente gibase sa sub-meter subay sa nakunsumong kilowatt. Ang bayronon sa tubig pagabahinon sa tanang residente sa paupahan.",
+          "text": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents."
+        },
+        {
+          "num": 6,
+          "title": "6. Kalinaw ug Alituntunin (House Rules & Peaceful Living)",
+          "english": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited.",
+          "bisaya": "Magsugod ang ting-hilom sa 10:00 PM matag gabii. Kinahanglang limpyo ang agianan ug kasilyas. Hugot nga gidili ang pagpasulod og sub-lessee.",
+          "text": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited."
+        },
+        {
+          "num": 7,
+          "title": "7. Pagbiya ug Pahibalo (Move-Out Notice)",
+          "english": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws.",
+          "bisaya": "Bisan kinsa sa duha ka partido mahimong mopaundang niini nga kasabutan pinaagi sa paghatag og 30 ka adlaw nga abanteng sinulat nga pahibalo.",
+          "text": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws."
+        }
+      ],
+      "demo": true,
+      "createdAt": "2026-11-14T09:00:00.000Z",
+      "updatedAt": "2026-11-14T14:15:00.000Z"
+    },
+    {
+      "code": "RIP-ACTV",
+      "roomCode": "RIP-ACTV",
+      "landlordId": "09171234567",
+      "landlordName": "Engr. Roberto M. Tan",
+      "landlordPhone": "09171234567",
+      "propertyName": "Pineview Residences",
+      "propertyAddress": "Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City",
+      "propertyType": "Apartment / Studio Unit",
+      "roomNumber": "Room 201 (Corner Studio)",
+      "monthlyRent": 4500,
+      "deposit": 4500,
+      "advanceRent": 4500,
+      "leaseDuration": "12 months",
+      "dueDay": "5th",
+      "status": "active",
+      "tenantName": "Maria Teresa Santos",
+      "tenantPhone": "09181112222",
+      "tenantEmail": "maria.demo@rentinpeace.ph",
+      "isSigned": true,
+      "tenantSigned": true,
+      "tenantSignedAt": "2026-10-01T09:00:00.000Z",
+      "paymentVerified": true,
+      "paymentVerifiedAt": "2026-10-01T10:35:00.000Z",
+      "signingMode": "DIGITAL",
+      "accessCode": "48291",
+      "accessCodeIssuedAt": "2026-10-01T10:35:00.000Z",
+      "gcashRef": "GCASH-88124509101",
+      "gcashReceiptData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNDAwIDYwMCIgc3R5bGU9ImJhY2tncm91bmQ6IzAwNWNlNjtmb250LWZhbWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxzYW5zLXNlcmlmOyI+CiAgICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzAwNWNlNiIvPgogICAgPHJlY3QgeD0iMjAiIHk9IjQwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjUyMCIgcng9IjIyIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjAgNjIgUTIwIDQwIDQyIDQwIEwzNTggNDAgUTM4MCA0MCAzODAgNjIgTDM4MCAxMTAgTDIwIDExMCBaIiBmaWxsPSIjMDA1Y2U2Ii8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjgwIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMSI+R0Nhc2ggRS1SZWNlaXB0PC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNlNmYwZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9mZmljaWFsIFRyYW5zYWN0aW9uIENvbmZpcm1hdGlvbiAoRGVtbyk8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjMwIiBmaWxsPSIjZWNmZGY1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjI0IiBmaWxsPSIjMTBiOTgxIi8+CiAgICA8cGF0aCBkPSJNMTkwIDE1NSBMMTk3IDE2MiBMMjEyIDE0NyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIyMTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFtb3VudCBQYWlkPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBIUCA0LDUwMC4wMDwvdGV4dD4KICAgIDxyZWN0IHg9IjQwIiB5PSIyNzUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjA1IiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2UyZThmMCIvPgogICAgPHRleHQgeD0iNTUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBUbzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+RW5nci4gUm9iZXJ0byBNLiBUYW48L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzM1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5HQ2FzaCBNb2JpbGU6PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzMzUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJlbmQiPjA5MTcqKio0NTY3PC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBCeTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+TWFyaWEgVGVyZXNhIFNhbnRvczwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1IiB5PSIzOTUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiPlJlZmVyZW5jZSBObzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM5NSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzAwNWNlNiIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgdGV4dC1hbmNob3I9ImVuZCI+ODgxMjQ1MDkxMDEwPC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjQyNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+RGF0ZSAmYW1wOyBUaW1lOjwvdGV4dD4KICAgIDx0ZXh0IHg9IjM0NSIgeT0iNDI1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMzM0MTU1IiB0ZXh0LWFuY2hvcj0iZW5kIj4wMSBPY3QgMjAyNiwgMTA6MzAgQU08L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iNDU1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5QdXJwb3NlOjwvdGV4dD4KICAgIDx0ZXh0IHg9IjM0NSIgeT0iNDU1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMDQ3ODU3IiB0ZXh0LWFuY2hvcj0iZW5kIj5BZHZhbmNlIFJlbnQgJmFtcDsgRGVwb3NpdCAoUm9vbSAyMDEpPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSI1MTUiIGZvbnQtc2l6ZT0iOSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgbGV0dGVyLXNwYWNpbmc9IjAuNSI+UkVOVCBJTiBQRUFDRSDCtyBTTUFSVCBSRU5UQUwgQVJDSElURUNUVVJFPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSI1MzAiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iI2NiZDVlMSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U3ludGhldGljIHNhbXBsZSByZWNlaXB0IGdlbmVyYXRlZCBmb3IgZGVtbyBldmFsdWF0aW9uIG9ubHk8L3RleHQ+CiAgPC9zdmc+",
+      "advancePaidAmount": 4500,
+      "clauses": [
+        {
+          "num": 1,
+          "title": "1. Mga Partido ug Paupahan (Parties & Premises)",
+          "english": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and Maria Teresa Santos (Lessee) for the leased unit Room 201 (Corner Studio) located at Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City.",
+          "bisaya": "Kini nga kasulatan sa pag-abang gikasabutan tali ni Engr. Roberto M. Tan (Tigpaabang) ug Maria Teresa Santos (Nag-abang) alang sa unit Room 201 (Corner Studio) nga nahimutang sa Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City.",
+          "text": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and Maria Teresa Santos (Lessee) for the leased unit Room 201 (Corner Studio) located at Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City."
+        },
+        {
+          "num": 2,
+          "title": "2. Abang ug Adlaw sa Pagbayad (Rent & Due Date)",
+          "english": "The monthly rental rate is ₱4,500, strictly due and payable on or before the 5th day of each calendar month without need of demand.",
+          "bisaya": "Ang binuwan nga abang nagkantidad og ₱4,500, nga kinahanglang bayran sa o sa dili pa ang ika-5th nga adlaw sa matag bulan nga walay langan.",
+          "text": "The monthly rental rate is ₱4,500, strictly due and payable on or before the 5th day of each calendar month without need of demand."
+        },
+        {
+          "num": 3,
+          "title": "3. Seguridad Deposit ug Advance (Security Deposit & Advance)",
+          "english": "The Lessee pays an advance rent of ₱4,500 and a security deposit of ₱4,500 to answer for unpaid bills or damages beyond normal wear and tear.",
+          "bisaya": "Ang Nag-abang mobayad og advance nga ₱4,500 ug security deposit nga ₱4,500 aron pagsigurado sa bisan unsang wala mabayri nga bayronon o kadaot.",
+          "text": "The Lessee pays an advance rent of ₱4,500 and a security deposit of ₱4,500 to answer for unpaid bills or damages beyond normal wear and tear."
+        },
+        {
+          "num": 4,
+          "title": "4. Panahon sa Pag-abang (Lease Term)",
+          "english": "The lease commences on 2026-11-01 for an initial duration of 12 months, renewable upon mutual written agreement of both parties.",
+          "bisaya": "Ang pag-abang magsugod sa 2026-11-01 sulod sa gidugayon nga 12 months, ug mahimong bag-ohon pinaagi sa sinulat nga kasabutan.",
+          "text": "The lease commences on 2026-11-01 for an initial duration of 12 months, renewable upon mutual written agreement of both parties."
+        },
+        {
+          "num": 5,
+          "title": "5. Mga Serbisyo ug Bayronon (Utilities Arrangement)",
+          "english": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents.",
+          "bisaya": "Ang kuryente gibase sa sub-meter subay sa nakunsumong kilowatt. Ang bayronon sa tubig pagabahinon sa tanang residente sa paupahan.",
+          "text": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents."
+        },
+        {
+          "num": 6,
+          "title": "6. Kalinaw ug Alituntunin (House Rules & Peaceful Living)",
+          "english": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited.",
+          "bisaya": "Magsugod ang ting-hilom sa 10:00 PM matag gabii. Kinahanglang limpyo ang agianan ug kasilyas. Hugot nga gidili ang pagpasulod og sub-lessee.",
+          "text": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited."
+        },
+        {
+          "num": 7,
+          "title": "7. Pagbiya ug Pahibalo (Move-Out Notice)",
+          "english": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws.",
+          "bisaya": "Bisan kinsa sa duha ka partido mahimong mopaundang niini nga kasabutan pinaagi sa paghatag og 30 ka adlaw nga abanteng sinulat nga pahibalo.",
+          "text": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws."
+        }
+      ],
+      "demo": true,
+      "createdAt": "2026-10-01T08:00:00.000Z",
+      "updatedAt": "2026-12-04T11:45:00.000Z"
+    },
+    {
+      "code": "RIP-REJC",
+      "roomCode": "RIP-REJC",
+      "landlordId": "09171234567",
+      "landlordName": "Engr. Roberto M. Tan",
+      "landlordPhone": "09171234567",
+      "propertyName": "Pineview Residences",
+      "propertyAddress": "Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City",
+      "propertyType": "Boarding House / Bedspace",
+      "roomNumber": "Room 203 (Bedspace B)",
+      "monthlyRent": 2500,
+      "deposit": 2500,
+      "advanceRent": 2500,
+      "leaseDuration": "6 months",
+      "dueDay": "5th",
+      "status": "pending_resubmission",
+      "paymentStatus": "rejected",
+      "tenantName": "Joshua Mark Reyes",
+      "tenantPhone": "09175556666",
+      "tenantEmail": "joshua.demo@rentinpeace.ph",
+      "isSigned": true,
+      "tenantSigned": true,
+      "tenantSignedAt": "2026-11-14T11:00:00.000Z",
+      "paymentVerified": false,
+      "gcashRef": "GCASH-00000000000",
+      "gcashReceiptData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNDAwIDYwMCIgc3R5bGU9ImJhY2tncm91bmQ6IzAwNWNlNjtmb250LWZhbWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxzYW5zLXNlcmlmOyI+CiAgICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzAwNWNlNiIvPgogICAgPHJlY3QgeD0iMjAiIHk9IjQwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjUyMCIgcng9IjIyIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjAgNjIgUTIwIDQwIDQyIDQwIEwzNTggNDAgUTM4MCA0MCAzODAgNjIgTDM4MCAxMTAgTDIwIDExMCBaIiBmaWxsPSIjMDA1Y2U2Ii8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjgwIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMSI+R0Nhc2ggRS1SZWNlaXB0PC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNlNmYwZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9mZmljaWFsIFRyYW5zYWN0aW9uIENvbmZpcm1hdGlvbiAoRGVtbyk8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjMwIiBmaWxsPSIjZWNmZGY1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjI0IiBmaWxsPSIjMTBiOTgxIi8+CiAgICA8cGF0aCBkPSJNMTkwIDE1NSBMMTk3IDE2MiBMMjEyIDE0NyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIyMTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFtb3VudCBQYWlkPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBIUCAyLDUwMC4wMDwvdGV4dD4KICAgIDxyZWN0IHg9IjQwIiB5PSIyNzUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjA1IiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2UyZThmMCIvPgogICAgPHRleHQgeD0iNTUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBUbzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+RW5nci4gUm9iZXJ0byBNLiBUYW48L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzM1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5HQ2FzaCBNb2JpbGU6PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzMzUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJlbmQiPjA5MTcqKio0NTY3PC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBCeTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+Sm9zaHVhIE1hcmsgUmV5ZXM8L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzk1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5SZWZlcmVuY2UgTm86PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzOTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwMDVjZTYiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIHRleHQtYW5jaG9yPSJlbmQiPjAwMDAwMDAwMDAwMDwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1IiB5PSI0MjUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiPkRhdGUgJmFtcDsgVGltZTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjQyNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzMzNDE1NSIgdGV4dC1hbmNob3I9ImVuZCI+MTQgTm92IDIwMjYsIDA1OjAwIFBNPC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjQ1NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+UHVycG9zZTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjQ1NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzA0Nzg1NyIgdGV4dC1hbmNob3I9ImVuZCI+SW52YWxpZCBUcmFuc2FjdGlvbiBSZWZlcmVuY2U8L3RleHQ+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjUxNSIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjOTRhM2I4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMC41Ij5SRU5UIElOIFBFQUNFIMK3IFNNQVJUIFJFTlRBTCBBUkNISVRFQ1RVUkU8L3RleHQ+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjUzMCIgZm9udC1zaXplPSI4IiBmaWxsPSIjY2JkNWUxIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TeW50aGV0aWMgc2FtcGxlIHJlY2VpcHQgZ2VuZXJhdGVkIGZvciBkZW1vIGV2YWx1YXRpb24gb25seTwvdGV4dD4KICA8L3N2Zz4=",
+      "rejectionReason": "GCash reference number 00000000000 was not found in landlord bank statement. Please re-upload screenshot showing full transaction timestamp.",
+      "accessCode": null,
+      "clauses": [
+        {
+          "num": 1,
+          "title": "1. Mga Partido ug Paupahan (Parties & Premises)",
+          "english": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and Joshua Mark Reyes (Lessee) for the leased unit Room 203 (Bedspace B) located at Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City.",
+          "bisaya": "Kini nga kasulatan sa pag-abang gikasabutan tali ni Engr. Roberto M. Tan (Tigpaabang) ug Joshua Mark Reyes (Nag-abang) alang sa unit Room 203 (Bedspace B) nga nahimutang sa Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City.",
+          "text": "This residential lease agreement is made between Engr. Roberto M. Tan (Lessor) and Joshua Mark Reyes (Lessee) for the leased unit Room 203 (Bedspace B) located at Block 4, Lot 12, Mahogany Avenue, Carmen, Cagayan de Oro City."
+        },
+        {
+          "num": 2,
+          "title": "2. Abang ug Adlaw sa Pagbayad (Rent & Due Date)",
+          "english": "The monthly rental rate is ₱2,500, strictly due and payable on or before the 5th day of each calendar month without need of demand.",
+          "bisaya": "Ang binuwan nga abang nagkantidad og ₱2,500, nga kinahanglang bayran sa o sa dili pa ang ika-5th nga adlaw sa matag bulan nga walay langan.",
+          "text": "The monthly rental rate is ₱2,500, strictly due and payable on or before the 5th day of each calendar month without need of demand."
+        },
+        {
+          "num": 3,
+          "title": "3. Seguridad Deposit ug Advance (Security Deposit & Advance)",
+          "english": "The Lessee pays an advance rent of ₱2,500 and a security deposit of ₱2,500 to answer for unpaid bills or damages beyond normal wear and tear.",
+          "bisaya": "Ang Nag-abang mobayad og advance nga ₱2,500 ug security deposit nga ₱2,500 aron pagsigurado sa bisan unsang wala mabayri nga bayronon o kadaot.",
+          "text": "The Lessee pays an advance rent of ₱2,500 and a security deposit of ₱2,500 to answer for unpaid bills or damages beyond normal wear and tear."
+        },
+        {
+          "num": 4,
+          "title": "4. Panahon sa Pag-abang (Lease Term)",
+          "english": "The lease commences on 2026-11-01 for an initial duration of 6 months, renewable upon mutual written agreement of both parties.",
+          "bisaya": "Ang pag-abang magsugod sa 2026-11-01 sulod sa gidugayon nga 6 months, ug mahimong bag-ohon pinaagi sa sinulat nga kasabutan.",
+          "text": "The lease commences on 2026-11-01 for an initial duration of 6 months, renewable upon mutual written agreement of both parties."
+        },
+        {
+          "num": 5,
+          "title": "5. Mga Serbisyo ug Bayronon (Utilities Arrangement)",
+          "english": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents.",
+          "bisaya": "Ang kuryente gibase sa sub-meter subay sa nakunsumong kilowatt. Ang bayronon sa tubig pagabahinon sa tanang residente sa paupahan.",
+          "text": "Electricity utility arrangement: sub-metered billing based on official kilowatt consumption. Water is shared equally among residents."
+        },
+        {
+          "num": 6,
+          "title": "6. Kalinaw ug Alituntunin (House Rules & Peaceful Living)",
+          "english": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited.",
+          "bisaya": "Magsugod ang ting-hilom sa 10:00 PM matag gabii. Kinahanglang limpyo ang agianan ug kasilyas. Hugot nga gidili ang pagpasulod og sub-lessee.",
+          "text": "Quiet hours begin promptly at 10:00 PM daily. Hallways and shared facilities must be kept clean. Unauthorized subleasing is strictly prohibited."
+        },
+        {
+          "num": 7,
+          "title": "7. Pagbiya ug Pahibalo (Move-Out Notice)",
+          "english": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws.",
+          "bisaya": "Bisan kinsa sa duha ka partido mahimong mopaundang niini nga kasabutan pinaagi sa paghatag og 30 ka adlaw nga abanteng sinulat nga pahibalo.",
+          "text": "Either party may terminate this agreement by providing at least 30 days prior written notice in accordance with Philippine tenancy laws."
+        }
+      ],
+      "demo": true,
+      "createdAt": "2026-11-14T10:00:00.000Z",
+      "updatedAt": "2026-11-14T15:30:00.000Z"
+    }
+  ],
+  "tenant": {
+    "id": "09181112222",
+    "uid": "09181112222",
+    "username": "maria.santos",
+    "name": "Maria Teresa Santos",
+    "phone": "09181112222",
+    "email": "maria.demo@rentinpeace.ph",
+    "contractCode": "RIP-ACTV",
+    "leaseId": "RIP-ACTV",
+    "roomNumber": "Room 201 (Corner Studio)",
+    "demo": true,
+    "createdAt": "2026-10-01T08:30:00.000Z"
+  },
+  "payments": [
+    {
+      "id": "pay_demo_actv_1",
+      "contractCode": "RIP-ACTV",
+      "leaseId": "RIP-ACTV",
+      "tenantName": "Maria Teresa Santos",
+      "tenantPhone": "09181112222",
+      "amount": 9000,
+      "cycle": "Advance Rent & Security Deposit",
+      "cycleName": "Advance & Deposit (2 Months)",
+      "referenceNumber": "881245091010",
+      "gcashRef": "GCASH-88124509101",
+      "receiptData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNDAwIDYwMCIgc3R5bGU9ImJhY2tncm91bmQ6IzAwNWNlNjtmb250LWZhbWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxzYW5zLXNlcmlmOyI+CiAgICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzAwNWNlNiIvPgogICAgPHJlY3QgeD0iMjAiIHk9IjQwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjUyMCIgcng9IjIyIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjAgNjIgUTIwIDQwIDQyIDQwIEwzNTggNDAgUTM4MCA0MCAzODAgNjIgTDM4MCAxMTAgTDIwIDExMCBaIiBmaWxsPSIjMDA1Y2U2Ii8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjgwIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMSI+R0Nhc2ggRS1SZWNlaXB0PC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNlNmYwZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9mZmljaWFsIFRyYW5zYWN0aW9uIENvbmZpcm1hdGlvbiAoRGVtbyk8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjMwIiBmaWxsPSIjZWNmZGY1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjI0IiBmaWxsPSIjMTBiOTgxIi8+CiAgICA8cGF0aCBkPSJNMTkwIDE1NSBMMTk3IDE2MiBMMjEyIDE0NyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIyMTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFtb3VudCBQYWlkPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBIUCA0LDUwMC4wMDwvdGV4dD4KICAgIDxyZWN0IHg9IjQwIiB5PSIyNzUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjA1IiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2UyZThmMCIvPgogICAgPHRleHQgeD0iNTUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBUbzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+RW5nci4gUm9iZXJ0byBNLiBUYW48L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzM1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5HQ2FzaCBNb2JpbGU6PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzMzUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJlbmQiPjA5MTcqKio0NTY3PC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBCeTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+TWFyaWEgVGVyZXNhIFNhbnRvczwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1IiB5PSIzOTUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiPlJlZmVyZW5jZSBObzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM5NSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzAwNWNlNiIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgdGV4dC1hbmNob3I9ImVuZCI+ODgxMjQ1MDkxMDEwPC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjQyNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+RGF0ZSAmYW1wOyBUaW1lOjwvdGV4dD4KICAgIDx0ZXh0IHg9IjM0NSIgeT0iNDI1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMzM0MTU1IiB0ZXh0LWFuY2hvcj0iZW5kIj4wMSBPY3QgMjAyNiwgMTA6MzAgQU08L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iNDU1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5QdXJwb3NlOjwvdGV4dD4KICAgIDx0ZXh0IHg9IjM0NSIgeT0iNDU1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMDQ3ODU3IiB0ZXh0LWFuY2hvcj0iZW5kIj5BZHZhbmNlIFJlbnQgJmFtcDsgRGVwb3NpdCAoUm9vbSAyMDEpPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSI1MTUiIGZvbnQtc2l6ZT0iOSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgbGV0dGVyLXNwYWNpbmc9IjAuNSI+UkVOVCBJTiBQRUFDRSDCtyBTTUFSVCBSRU5UQUwgQVJDSElURUNUVVJFPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSI1MzAiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iI2NiZDVlMSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U3ludGhldGljIHNhbXBsZSByZWNlaXB0IGdlbmVyYXRlZCBmb3IgZGVtbyBldmFsdWF0aW9uIG9ubHk8L3RleHQ+CiAgPC9zdmc+",
+      "status": "verified",
+      "timestamp": "2026-10-01T10:30:00.000Z",
+      "verifiedAt": "2026-10-01T10:35:00.000Z",
+      "demo": true
+    },
+    {
+      "id": "pay_demo_actv_2",
+      "contractCode": "RIP-ACTV",
+      "leaseId": "RIP-ACTV",
+      "tenantName": "Maria Teresa Santos",
+      "tenantPhone": "09181112222",
+      "amount": 4500,
+      "cycle": "November 2026 Monthly Rent",
+      "cycleName": "November 2026 Rent",
+      "referenceNumber": "881245091020",
+      "gcashRef": "GCASH-88124509102",
+      "receiptData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNDAwIDYwMCIgc3R5bGU9ImJhY2tncm91bmQ6IzAwNWNlNjtmb250LWZhbWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxzYW5zLXNlcmlmOyI+CiAgICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzAwNWNlNiIvPgogICAgPHJlY3QgeD0iMjAiIHk9IjQwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjUyMCIgcng9IjIyIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjAgNjIgUTIwIDQwIDQyIDQwIEwzNTggNDAgUTM4MCA0MCAzODAgNjIgTDM4MCAxMTAgTDIwIDExMCBaIiBmaWxsPSIjMDA1Y2U2Ii8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjgwIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMSI+R0Nhc2ggRS1SZWNlaXB0PC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNlNmYwZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9mZmljaWFsIFRyYW5zYWN0aW9uIENvbmZpcm1hdGlvbiAoRGVtbyk8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjMwIiBmaWxsPSIjZWNmZGY1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjI0IiBmaWxsPSIjMTBiOTgxIi8+CiAgICA8cGF0aCBkPSJNMTkwIDE1NSBMMTk3IDE2MiBMMjEyIDE0NyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIyMTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFtb3VudCBQYWlkPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBIUCA0LDUwMC4wMDwvdGV4dD4KICAgIDxyZWN0IHg9IjQwIiB5PSIyNzUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjA1IiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2UyZThmMCIvPgogICAgPHRleHQgeD0iNTUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBUbzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+RW5nci4gUm9iZXJ0byBNLiBUYW48L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzM1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5HQ2FzaCBNb2JpbGU6PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzMzUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJlbmQiPjA5MTcqKio0NTY3PC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBCeTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+TWFyaWEgVGVyZXNhIFNhbnRvczwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1IiB5PSIzOTUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiPlJlZmVyZW5jZSBObzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM5NSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzAwNWNlNiIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgdGV4dC1hbmNob3I9ImVuZCI+ODgxMjQ1MDkxMDIwPC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjQyNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+RGF0ZSAmYW1wOyBUaW1lOjwvdGV4dD4KICAgIDx0ZXh0IHg9IjM0NSIgeT0iNDI1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMzM0MTU1IiB0ZXh0LWFuY2hvcj0iZW5kIj4wMyBOb3YgMjAyNiwgMDk6MTIgQU08L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iNDU1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5QdXJwb3NlOjwvdGV4dD4KICAgIDx0ZXh0IHg9IjM0NSIgeT0iNDU1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMDQ3ODU3IiB0ZXh0LWFuY2hvcj0iZW5kIj5Ob3ZlbWJlciAyMDI2IE1vbnRobHkgUmVudCAoUm9vbSAyMDEpPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSI1MTUiIGZvbnQtc2l6ZT0iOSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgbGV0dGVyLXNwYWNpbmc9IjAuNSI+UkVOVCBJTiBQRUFDRSDCtyBTTUFSVCBSRU5UQUwgQVJDSElURUNUVVJFPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSI1MzAiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iI2NiZDVlMSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U3ludGhldGljIHNhbXBsZSByZWNlaXB0IGdlbmVyYXRlZCBmb3IgZGVtbyBldmFsdWF0aW9uIG9ubHk8L3RleHQ+CiAgPC9zdmc+",
+      "status": "verified",
+      "timestamp": "2026-11-03T09:12:00.000Z",
+      "verifiedAt": "2026-11-03T09:40:00.000Z",
+      "demo": true
+    },
+    {
+      "id": "pay_demo_actv_3",
+      "contractCode": "RIP-ACTV",
+      "leaseId": "RIP-ACTV",
+      "tenantName": "Maria Teresa Santos",
+      "tenantPhone": "09181112222",
+      "amount": 4500,
+      "cycle": "December 2026 Monthly Rent",
+      "cycleName": "December 2026 Rent",
+      "referenceNumber": "881245091030",
+      "gcashRef": "GCASH-88124509103",
+      "receiptData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNDAwIDYwMCIgc3R5bGU9ImJhY2tncm91bmQ6IzAwNWNlNjtmb250LWZhbWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxzYW5zLXNlcmlmOyI+CiAgICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzAwNWNlNiIvPgogICAgPHJlY3QgeD0iMjAiIHk9IjQwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjUyMCIgcng9IjIyIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjAgNjIgUTIwIDQwIDQyIDQwIEwzNTggNDAgUTM4MCA0MCAzODAgNjIgTDM4MCAxMTAgTDIwIDExMCBaIiBmaWxsPSIjMDA1Y2U2Ii8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjgwIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMSI+R0Nhc2ggRS1SZWNlaXB0PC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNlNmYwZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9mZmljaWFsIFRyYW5zYWN0aW9uIENvbmZpcm1hdGlvbiAoRGVtbyk8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjMwIiBmaWxsPSIjZWNmZGY1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjI0IiBmaWxsPSIjMTBiOTgxIi8+CiAgICA8cGF0aCBkPSJNMTkwIDE1NSBMMTk3IDE2MiBMMjEyIDE0NyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIyMTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFtb3VudCBQYWlkPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBIUCA0LDUwMC4wMDwvdGV4dD4KICAgIDxyZWN0IHg9IjQwIiB5PSIyNzUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjA1IiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2UyZThmMCIvPgogICAgPHRleHQgeD0iNTUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBUbzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+RW5nci4gUm9iZXJ0byBNLiBUYW48L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzM1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5HQ2FzaCBNb2JpbGU6PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzMzUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJlbmQiPjA5MTcqKio0NTY3PC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBCeTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+TWFyaWEgVGVyZXNhIFNhbnRvczwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1IiB5PSIzOTUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiPlJlZmVyZW5jZSBObzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM5NSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iIzAwNWNlNiIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgdGV4dC1hbmNob3I9ImVuZCI+ODgxMjQ1MDkxMDMwPC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjQyNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+RGF0ZSAmYW1wOyBUaW1lOjwvdGV4dD4KICAgIDx0ZXh0IHg9IjM0NSIgeT0iNDI1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMzM0MTU1IiB0ZXh0LWFuY2hvcj0iZW5kIj4wNCBEZWMgMjAyNiwgMTE6NDUgQU08L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iNDU1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5QdXJwb3NlOjwvdGV4dD4KICAgIDx0ZXh0IHg9IjM0NSIgeT0iNDU1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMDQ3ODU3IiB0ZXh0LWFuY2hvcj0iZW5kIj5EZWNlbWJlciAyMDI2IE1vbnRobHkgUmVudCAoUm9vbSAyMDEpPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSI1MTUiIGZvbnQtc2l6ZT0iOSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzk0YTNiOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgbGV0dGVyLXNwYWNpbmc9IjAuNSI+UkVOVCBJTiBQRUFDRSDCtyBTTUFSVCBSRU5UQUwgQVJDSElURUNUVVJFPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSI1MzAiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iI2NiZDVlMSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U3ludGhldGljIHNhbXBsZSByZWNlaXB0IGdlbmVyYXRlZCBmb3IgZGVtbyBldmFsdWF0aW9uIG9ubHk8L3RleHQ+CiAgPC9zdmc+",
+      "status": "verified",
+      "timestamp": "2026-12-04T11:45:00.000Z",
+      "verifiedAt": "2026-12-04T12:00:00.000Z",
+      "demo": true
+    },
+    {
+      "id": "pay_demo_pend_1",
+      "contractCode": "RIP-PEND",
+      "leaseId": "RIP-PEND",
+      "tenantName": "Juan Paolo Dela Cruz",
+      "tenantPhone": "09193334444",
+      "amount": 3500,
+      "cycle": "Advance Rent Payment",
+      "cycleName": "Advance Rent",
+      "referenceNumber": "982314562010",
+      "gcashRef": "GCASH-98231456201",
+      "receiptData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNDAwIDYwMCIgc3R5bGU9ImJhY2tncm91bmQ6IzAwNWNlNjtmb250LWZhbWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxzYW5zLXNlcmlmOyI+CiAgICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzAwNWNlNiIvPgogICAgPHJlY3QgeD0iMjAiIHk9IjQwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjUyMCIgcng9IjIyIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjAgNjIgUTIwIDQwIDQyIDQwIEwzNTggNDAgUTM4MCA0MCAzODAgNjIgTDM4MCAxMTAgTDIwIDExMCBaIiBmaWxsPSIjMDA1Y2U2Ii8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjgwIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMSI+R0Nhc2ggRS1SZWNlaXB0PC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNlNmYwZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9mZmljaWFsIFRyYW5zYWN0aW9uIENvbmZpcm1hdGlvbiAoRGVtbyk8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjMwIiBmaWxsPSIjZWNmZGY1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjI0IiBmaWxsPSIjMTBiOTgxIi8+CiAgICA8cGF0aCBkPSJNMTkwIDE1NSBMMTk3IDE2MiBMMjEyIDE0NyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIyMTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFtb3VudCBQYWlkPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBIUCAzLDUwMC4wMDwvdGV4dD4KICAgIDxyZWN0IHg9IjQwIiB5PSIyNzUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjA1IiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2UyZThmMCIvPgogICAgPHRleHQgeD0iNTUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBUbzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+RW5nci4gUm9iZXJ0byBNLiBUYW48L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzM1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5HQ2FzaCBNb2JpbGU6PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzMzUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJlbmQiPjA5MTcqKio0NTY3PC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBCeTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+SnVhbiBQYW9sbyBEZWxhIENydXo8L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzk1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5SZWZlcmVuY2UgTm86PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzOTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwMDVjZTYiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIHRleHQtYW5jaG9yPSJlbmQiPjk4MjMxNDU2MjAxMDwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1IiB5PSI0MjUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiPkRhdGUgJmFtcDsgVGltZTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjQyNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzMzNDE1NSIgdGV4dC1hbmNob3I9ImVuZCI+MTQgTm92IDIwMjYsIDAyOjE1IFBNPC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjQ1NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+UHVycG9zZTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjQ1NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzA0Nzg1NyIgdGV4dC1hbmNob3I9ImVuZCI+QWR2YW5jZSBSZW50IChSb29tIDEwMik8L3RleHQ+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjUxNSIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjOTRhM2I4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMC41Ij5SRU5UIElOIFBFQUNFIMK3IFNNQVJUIFJFTlRBTCBBUkNISVRFQ1RVUkU8L3RleHQ+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjUzMCIgZm9udC1zaXplPSI4IiBmaWxsPSIjY2JkNWUxIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TeW50aGV0aWMgc2FtcGxlIHJlY2VpcHQgZ2VuZXJhdGVkIGZvciBkZW1vIGV2YWx1YXRpb24gb25seTwvdGV4dD4KICA8L3N2Zz4=",
+      "status": "pending",
+      "timestamp": "2026-11-14T14:15:00.000Z",
+      "demo": true
+    },
+    {
+      "id": "pay_demo_rejc_1",
+      "contractCode": "RIP-REJC",
+      "leaseId": "RIP-REJC",
+      "tenantName": "Joshua Mark Reyes",
+      "tenantPhone": "09175556666",
+      "amount": 2500,
+      "cycle": "Advance Rent Payment",
+      "cycleName": "Advance Rent",
+      "referenceNumber": "000000000000",
+      "gcashRef": "GCASH-00000000000",
+      "receiptData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNDAwIDYwMCIgc3R5bGU9ImJhY2tncm91bmQ6IzAwNWNlNjtmb250LWZhbWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxzYW5zLXNlcmlmOyI+CiAgICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzAwNWNlNiIvPgogICAgPHJlY3QgeD0iMjAiIHk9IjQwIiB3aWR0aD0iMzYwIiBoZWlnaHQ9IjUyMCIgcng9IjIyIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjAgNjIgUTIwIDQwIDQyIDQwIEwzNTggNDAgUTM4MCA0MCAzODAgNjIgTDM4MCAxMTAgTDIwIDExMCBaIiBmaWxsPSIjMDA1Y2U2Ii8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjgwIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMSI+R0Nhc2ggRS1SZWNlaXB0PC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNlNmYwZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9mZmljaWFsIFRyYW5zYWN0aW9uIENvbmZpcm1hdGlvbiAoRGVtbyk8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjMwIiBmaWxsPSIjZWNmZGY1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTUiIHI9IjI0IiBmaWxsPSIjMTBiOTgxIi8+CiAgICA8cGF0aCBkPSJNMTkwIDE1NSBMMTk3IDE2MiBMMjEyIDE0NyIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMjAwIiB5PSIyMTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFtb3VudCBQYWlkPC90ZXh0PgogICAgPHRleHQgeD0iMjAwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlBIUCAyLDUwMC4wMDwvdGV4dD4KICAgIDxyZWN0IHg9IjQwIiB5PSIyNzUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjA1IiByeD0iMTQiIGZpbGw9IiNmOGZhZmMiIHN0cm9rZT0iI2UyZThmMCIvPgogICAgPHRleHQgeD0iNTUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBUbzo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjMwNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+RW5nci4gUm9iZXJ0byBNLiBUYW48L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzM1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5HQ2FzaCBNb2JpbGU6PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzMzUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZjE3MmEiIHRleHQtYW5jaG9yPSJlbmQiPjA5MTcqKio0NTY3PC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+U2VudCBCeTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjM2NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9ImVuZCI+Sm9zaHVhIE1hcmsgUmV5ZXM8L3RleHQ+CiAgICA8dGV4dCB4PSI1NSIgeT0iMzk1IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNjQ3NDhiIj5SZWZlcmVuY2UgTm86PC90ZXh0PgogICAgPHRleHQgeD0iMzQ1IiB5PSIzOTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI5MDAiIGZpbGw9IiMwMDVjZTYiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIHRleHQtYW5jaG9yPSJlbmQiPjAwMDAwMDAwMDAwMDwvdGV4dD4KICAgIDx0ZXh0IHg9IjU1IiB5PSI0MjUiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM2NDc0OGIiPkRhdGUgJmFtcDsgVGltZTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjQyNSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzMzNDE1NSIgdGV4dC1hbmNob3I9ImVuZCI+MTQgTm92IDIwMjYsIDA1OjAwIFBNPC90ZXh0PgogICAgPHRleHQgeD0iNTUiIHk9IjQ1NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzY0NzQ4YiI+UHVycG9zZTo8L3RleHQ+CiAgICA8dGV4dCB4PSIzNDUiIHk9IjQ1NSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzA0Nzg1NyIgdGV4dC1hbmNob3I9ImVuZCI+SW52YWxpZCBUcmFuc2FjdGlvbiBSZWZlcmVuY2U8L3RleHQ+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjUxNSIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjOTRhM2I4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iMC41Ij5SRU5UIElOIFBFQUNFIMK3IFNNQVJUIFJFTlRBTCBBUkNISVRFQ1RVUkU8L3RleHQ+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjUzMCIgZm9udC1zaXplPSI4IiBmaWxsPSIjY2JkNWUxIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TeW50aGV0aWMgc2FtcGxlIHJlY2VpcHQgZ2VuZXJhdGVkIGZvciBkZW1vIGV2YWx1YXRpb24gb25seTwvdGV4dD4KICA8L3N2Zz4=",
+      "status": "rejected",
+      "rejectionReason": "GCash reference number 00000000000 was not found in landlord bank statement. Please re-upload screenshot showing full transaction timestamp.",
+      "timestamp": "2026-11-14T15:00:00.000Z",
+      "demo": true
+    }
+  ],
+  "checkin": {
+    "contractCode": "RIP-ACTV",
+    "tenantName": "Maria Teresa Santos",
+    "tenantPhone": "09181112222",
+    "accessCode": "48291",
+    "verified": true,
+    "verifiedAt": "2026-10-01T10:35:00.000Z",
+    "demo": true
+  }
+}

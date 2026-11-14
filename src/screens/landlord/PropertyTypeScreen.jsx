@@ -46,7 +46,9 @@ export default function PropertyTypeScreen() {
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
           <h2 className="text-sm font-bold text-slate-900">New Lease Agreement</h2>
-          <div className="w-10"></div>
+          <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 p-1 flex items-center justify-center shadow-2xs overflow-hidden">
+            <img src="/assets/logo-icon.png" alt="Rent in Peace" className="w-full h-full object-contain rounded-xl" />
+          </div>
         </div>
 
         {/* Stepper */}

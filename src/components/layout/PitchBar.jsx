@@ -10,6 +10,7 @@ const SCREENS = [
   { id: 'WIZARD_DETAILS', label: '5. Lease Basics' },
   { id: 'WIZARD_REVIEW', label: '6. Review Summary' },
   { id: 'WIZARD_CONTRACT', label: '7. Kasulatan sa Abang' },
+  { id: 'CUSTOMIZE_LEASE', label: '7b. Customize Presets' },
   { id: 'WIZARD_CHECK', label: '8. Smart Check AI' },
   { id: 'ALL_DONE', label: '9. Check-In Ready' },
   { id: 'LANDLORD_TENANTS', label: '10. Resident Directory' },

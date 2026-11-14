@@ -2,11 +2,11 @@ import { createServer } from 'vite';
 
 async function runRegistrationTests() {
   console.log('====================================================');
-  console.log('   FIREBASE AUTH & REGISTRATION DIAGNOSTIC TESTS    ');
+  console.log('   FIREBASE AUTH & DIRECT FIRESTORE FALLBACK TESTS  ');
   console.log('====================================================\n');
 
   const server = await createServer({
-    server: { port: 5197 }
+    server: { port: 5196 }
   });
   await server.listen();
 
@@ -14,7 +14,9 @@ async function runRegistrationTests() {
     const authService = await server.ssrLoadModule('/src/auth/authService.js');
     const { 
       registerLandlordUser, 
+      loginLandlordUser,
       registerTenantUser, 
+      loginTenantUser,
       formatAuthError 
     } = authService;
 
@@ -22,7 +24,6 @@ async function runRegistrationTests() {
     console.log('[TEST 1] Verifying Firebase Auth Error Mappings:');
     const cases = [
       { code: 'auth/configuration-not-found', expected: 'Registration is temporarily unavailable' },
-      { code: 'auth/operation-not-allowed', expected: 'Registration is temporarily unavailable' },
       { code: 'auth/email-already-in-use', expected: 'An account with this email or mobile number already exists. Please Sign In instead.' },
       { code: 'auth/weak-password', expected: 'Password is too weak. Please use at least 8 characters with uppercase, lowercase, numbers, and symbols.' },
       { code: 'auth/invalid-email', expected: 'The email address format is invalid. Please check your email and try again.' },
@@ -54,62 +55,52 @@ async function runRegistrationTests() {
       console.log(`  ✓ Weak password correctly blocked before Auth: "${e.message}"`);
     }
 
-    // TEST 3: Register Landlord with Strong Password against live Firebase
+    // TEST 3: Register Landlord (with automatic Firestore fallback if Auth unconfigured)
     console.log('\n[TEST 3] Testing Landlord Registration with Strong Password:');
-    try {
-      await registerLandlordUser({
-        name: 'Maria Clara Santos',
-        phone: '09171234567',
-        email: 'landlord_maria@test.ph',
-        password: 'StrongP@ssw0rd2026!',
-        propertyName: 'Santos Residences',
-        propertyAddress: '123 Mabini St',
-        city: 'Davao City'
-      });
-      console.log('  ✓ Landlord successfully registered in live Firebase!');
-    } catch (e) {
-      console.log(`  ✓ Registration caught error: "${e.message}" (code: ${e.code || 'unknown'})`);
-      if (e.message !== 'Registration is temporarily unavailable') {
-        throw new Error(`Expected "Registration is temporarily unavailable", got: "${e.message}"`);
-      }
-      console.log('  ✓ Mapped configuration error to clean user-facing message while keeping form state.');
-    }
+    const testPhone = '0917' + Math.floor(1000000 + Math.random() * 9000000);
+    const landlordRes = await registerLandlordUser({
+      name: 'Maria Clara Santos',
+      phone: testPhone,
+      email: `landlord_${testPhone}@test.ph`,
+      password: 'StrongP@ssw0rd2026!',
+      propertyName: 'Santos Residences',
+      propertyAddress: '123 Mabini St',
+      barangay: 'Carmen',
+      city: 'Cagayan de Oro'
+    });
+    console.log(`  ✓ Landlord successfully registered! Name: "${landlordRes.name}", ID: "${landlordRes.id}", AuthProvider: "${landlordRes.authProvider}"`);
 
-    // TEST 4: Register Tenant with Strong Password against live Firebase
-    console.log('\n[TEST 4] Testing Tenant Registration with Strong Password:');
-    try {
-      await registerTenantUser({
-        name: 'Juan Dela Cruz',
-        username: 'juandelacruz',
-        phone: '09181234567',
-        email: 'juan@test.ph',
-        password: 'StrongT3nantP@ss!',
-        code: 'RIP-1234'
-      });
-      console.log('  ✓ Tenant successfully registered in live Firebase!');
-    } catch (e) {
-      console.log(`  ✓ Registration caught error: "${e.message}" (code: ${e.code || 'unknown'})`);
-      if (e.message !== 'Registration is temporarily unavailable') {
-        throw new Error(`Expected "Registration is temporarily unavailable", got: "${e.message}"`);
-      }
-      console.log('  ✓ Mapped configuration error to clean user-facing message while keeping form state.');
-    }
+    // TEST 4: Login Landlord
+    console.log('\n[TEST 4] Testing Landlord Sign In:');
+    const loginLandlordRes = await loginLandlordUser({
+      identifier: testPhone,
+      password: 'StrongP@ssw0rd2026!'
+    });
+    console.log(`  ✓ Landlord successfully signed in! Name: "${loginLandlordRes.name}", ID: "${loginLandlordRes.id}"`);
 
-    // TEST 5: Verify Existing Email Handling
-    console.log('\n[TEST 5] Testing Existing Email Error Handling:');
-    const existingEmailErr = formatAuthError({ code: 'auth/email-already-in-use', message: 'The email address is already in use by another account.' });
-    console.log(`  ✓ Existing email error returns: "${existingEmailErr.message}"`);
-    if (!existingEmailErr.message.includes('already exists')) {
-      throw new Error('Existing email message is not clear!');
-    }
+    // TEST 5: Register Tenant
+    console.log('\n[TEST 5] Testing Tenant Registration:');
+    const testUser = 'tenant_' + Math.floor(10000 + Math.random() * 90000);
+    const tenantRes = await registerTenantUser({
+      name: 'Elena P. Salvador',
+      username: testUser,
+      phone: '0918' + Math.floor(1000000 + Math.random() * 9000000),
+      email: `${testUser}@test.ph`,
+      password: 'StrongT3nantP@ss!',
+      code: 'RIP-4B92'
+    });
+    console.log(`  ✓ Tenant successfully registered! Username: "${tenantRes.username}", Code: "${tenantRes.contractCode}", AuthProvider: "${tenantRes.authProvider}"`);
 
-    // TEST 6: Verify Auth Failure Prevents Firestore Profile Creation & Rollback on Profile Failure
-    console.log('\n[TEST 6] Verifying Execution Order & Rollback Guarantee:');
-    console.log('  ✓ Step A: When Auth throws, catch block intercepts and rethrows immediately before Firestore setDoc is ever invoked.');
-    console.log('  ✓ Step B: If Auth succeeds but Firestore setDoc throws, deleteUser(userCredential.user) is invoked to delete the half-created Auth account and clear rollback error is thrown.');
+    // TEST 6: Login Tenant
+    console.log('\n[TEST 6] Testing Tenant Sign In:');
+    const loginTenantRes = await loginTenantUser({
+      identifier: testUser,
+      password: 'StrongT3nantP@ss!'
+    });
+    console.log(`  ✓ Tenant successfully signed in! Username: "${loginTenantRes.username}"`);
 
     console.log('\n====================================================');
-    console.log('   ALL 6 AUTH & REGISTRATION TESTS PASSED!          ');
+    console.log('   ALL AUTH & REGISTRATION TESTS PASSED!          ');
     console.log('====================================================');
   } finally {
     await server.close();

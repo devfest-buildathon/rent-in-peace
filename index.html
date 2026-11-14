@@ -2,15 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/pwa-192x192.svg" />
+    <link rel="icon" type="image/png" href="/assets/logo-icon.png" />
+    <link rel="apple-touch-icon" href="/assets/logo-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#14532D" />
+    <meta name="theme-color" content="#144C2E" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Rent in Peace" />
-    <meta name="description" content="AI-assisted residential lease drafting and rental ledger for CDO landlords and tenants." />
+    <meta name="description" content="AI-assisted residential lease drafting and rental ledger for Philippine boarding houses and bedspaces." />
     <title>Rent in Peace — Smart Rental Architecture</title>
     
     <!-- Google Fonts: Plus Jakarta Sans / Inter -->
@@ -30,27 +30,43 @@
             colors: {
               brand: {
                 50: '#ecfdf5',
-                100: '#d1fae5',
+                100: '#d2e3d8',
                 200: '#a7f3d0',
                 300: '#6ee7b7',
-                400: '#34d399',
-                500: '#10b981',
-                600: '#059669',
-                700: '#047857',
-                800: '#14532D',
-                900: '#0f4022',
-                950: '#052e16',
+                400: '#449567',
+                500: '#2e7d4c',
+                600: '#1d633c',
+                700: '#185433',
+                800: '#144c2e',
+                900: '#0f3822',
+                950: '#0a2517',
               },
+              primary: {
+                DEFAULT: '#144c2e',
+                hover: '#0f3822',
+                light: '#ecfdf5',
+              },
+              secondary: {
+                DEFAULT: '#449567',
+                hover: '#377b54',
+                light: '#f0fdf4',
+              },
+              accent: {
+                DEFAULT: '#f1ae17',
+                hover: '#d99b0f',
+                light: '#fef3c7',
+              },
+              canvas: '#e4efe9',
               gold: {
-                400: '#FBBF24',
-                500: '#EAB308',
-                600: '#D97706',
+                400: '#f5be38',
+                500: '#f1ae17',
+                600: '#d99b0f',
               }
             },
             boxShadow: {
-              'ios-card': '0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 20px 25px -5px rgba(0, 0, 0, 0.02)',
-              'ios-float': '0 20px 35px -8px rgba(20, 83, 45, 0.15), 0 10px 15px -3px rgba(0, 0, 0, 0.05)',
-              'ios-glow': '0 10px 25px -3px rgba(20, 83, 45, 0.25)',
+              'ios-card': '0 10px 30px -5px rgba(20, 76, 46, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02)',
+              'ios-float': '0 20px 35px -8px rgba(20, 76, 46, 0.16), 0 10px 15px -3px rgba(0, 0, 0, 0.05)',
+              'ios-glow': '0 10px 25px -3px rgba(20, 76, 46, 0.22)',
               'ios-sheet': '0 -10px 30px rgba(0, 0, 0, 0.04)',
             }
           }
@@ -116,7 +132,7 @@
       }
     </style>
   </head>
-  <body class="bg-[#F1F5F2] text-slate-800 antialiased font-sans selection:bg-emerald-200 selection:text-emerald-900">
+  <body class="bg-[#E4EFE9] text-slate-800 antialiased font-sans selection:bg-emerald-200 selection:text-emerald-900">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

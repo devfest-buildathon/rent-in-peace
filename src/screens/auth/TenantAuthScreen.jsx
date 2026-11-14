@@ -20,6 +20,7 @@ import { checkPasswordStrength } from '../../auth/passwordStrength';
 export default function TenantAuthScreen({ initialTab = 'register' }) {
   const { 
     navigateBack,
+    setCurrentScreen,
     loginTenant,
     registerTenant,
     roomCodeInput,
@@ -34,6 +35,7 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
   const [regFullName, setRegFullName] = useState(() => {
     return isGenericTenantName(tenantName) ? '' : (tenantName || '');
   });
+  const [regPhone, setRegPhone] = useState('');
   const [regUsername, setRegUsername] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
@@ -82,6 +84,7 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
     const cleanUser = regUsername.trim().toLowerCase().replace(/\s+/g, '');
     const cleanCode = (regCode || displayCode).trim().toUpperCase();
     const cleanLegalName = regFullName.trim();
+    const cleanPhone = regPhone.trim();
 
     if (!cleanCode) {
       setError('Please enter your Landlord Room Code (e.g. RIP-XXXX).');
@@ -89,6 +92,10 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
     }
     if (!cleanLegalName || isGenericTenantName(cleanLegalName)) {
       setError('Please enter your full legal name as lessee.');
+      return;
+    }
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setError('Please enter a valid Philippine mobile number (e.g. 09181234567).');
       return;
     }
     if (!cleanUser) {
@@ -103,19 +110,25 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
     }
 
     setIsLoading(true);
-    const result = await registerTenant({
-      username: cleanUser,
-      password: regPassword,
-      email: regEmail.trim(),
-      code: cleanCode,
-      name: cleanLegalName
-    });
-    setIsLoading(false);
+    try {
+      const result = await registerTenant({
+        username: cleanUser,
+        password: regPassword,
+        email: regEmail.trim(),
+        code: cleanCode,
+        name: cleanLegalName,
+        phone: cleanPhone
+      });
 
-    if (result.success) {
-      // Transition handled in AppContext
-    } else {
-      setError(result.error || 'Failed to join rental unit. Please verify your room code.');
+      if (result.success) {
+        setCurrentScreen('TENANT_PORTAL');
+      } else {
+        setError(result.error || 'Failed to join rental unit. Please verify your room code.');
+      }
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -130,11 +143,17 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
     }
 
     setIsLoading(true);
-    const result = await loginTenant(cleanUser, loginPassword);
-    setIsLoading(false);
-
-    if (!result.success) {
-      setError(result.error || 'Login failed. Please verify your credentials.');
+    try {
+      const result = await loginTenant(cleanUser, loginPassword);
+      if (result.success) {
+        setCurrentScreen('TENANT_HOME');
+      } else {
+        setError(result.error || 'Login failed. Please verify your credentials.');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -165,16 +184,20 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
   return (
     <div className="flex-1 flex flex-col justify-between px-6 py-5 max-w-lg mx-auto w-full bg-[#F4F8F5]">
       <div>
-        {/* Header with Logical Back Button */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Header with Logical Back Button and Full Brand Logo */}
+        <div className="flex items-center justify-between mb-3">
           <button 
             type="button"
             onClick={navigateBack} 
-            className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#14532D] hover:bg-slate-50 transition cursor-pointer"
+            className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-center justify-center text-[#144C2E] hover:bg-slate-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
-          <span className="text-xs font-bold text-[#14532D] uppercase tracking-wider">Tenant Portal</span>
+          <img 
+            src="/assets/logo-full.png" 
+            alt="Rent in Peace" 
+            className="h-10 w-auto object-contain drop-shadow-2xs" 
+          />
           <div className="w-10"></div>
         </div>
 
@@ -267,6 +290,20 @@ export default function TenantAuthScreen({ initialTab = 'register' }) {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+                  Mobile Number (for GCash & Notices)
+                </label>
+                <input 
+                  type="tel"
+                  value={regPhone}
+                  onChange={(e) => setRegPhone(e.target.value)}
+                  placeholder="e.g. 09181234567"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                  required
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">

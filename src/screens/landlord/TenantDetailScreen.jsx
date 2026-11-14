@@ -23,7 +23,9 @@ export default function TenantDetailScreen() {
     contracts, 
     payments,
     verifyTenantPayment,
+    rejectTenantPayment,
     regenerateTenantAccessCode,
+    endTenantLease,
     lookupContractByCode
   } = useApp();
 
@@ -31,10 +33,16 @@ export default function TenantDetailScreen() {
   const [zoomReceiptUrl, setZoomReceiptUrl] = useState(null);
   const [confirmVerifyModal, setConfirmVerifyModal] = useState(false);
   const [confirmRegenModal, setConfirmRegenModal] = useState(false);
+  const [rejectModal, setRejectModal] = useState(false);
+  const [rejectionReasonInput, setRejectionReasonInput] = useState('');
+  const [confirmEndLeaseModal, setConfirmEndLeaseModal] = useState(false);
   const [pendingTargetPayment, setPendingTargetPayment] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isEndingLease, setIsEndingLease] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [showFrozenContract, setShowFrozenContract] = useState(false);
 
   const tenant = selectedTenant || {
     name: 'Tenant Resident',
@@ -113,6 +121,35 @@ export default function TenantDetailScreen() {
     setConfirmRegenModal(false);
   };
 
+  const confirmAndExecuteRejection = async () => {
+    if (!rejectionReasonInput.trim()) {
+      alert('Please specify a rejection reason so the tenant knows what to fix.');
+      return;
+    }
+    setIsRejecting(true);
+    const code = liveContract.code || liveContract.id || tenant.contract?.code;
+    if (code) {
+      await rejectTenantPayment(code, rejectionReasonInput.trim());
+      setVerificationToast(`Payment rejected. The tenant has been notified to resubmit.`);
+      setTimeout(() => setVerificationToast(''), 5000);
+    }
+    setIsRejecting(false);
+    setRejectModal(false);
+    setRejectionReasonInput('');
+  };
+
+  const confirmAndExecuteEndLease = async () => {
+    setIsEndingLease(true);
+    const code = liveContract.code || liveContract.id || tenant.contract?.code;
+    if (code) {
+      await endTenantLease(code);
+      setVerificationToast(`Lease ended. Active door access code has been permanently revoked.`);
+      setTimeout(() => setVerificationToast(''), 5000);
+    }
+    setIsEndingLease(false);
+    setConfirmEndLeaseModal(false);
+  };
+
   const handleOpenKasulatan = async () => {
     const code = liveContract.code || liveContract.id;
     if (code) {
@@ -140,7 +177,9 @@ export default function TenantDetailScreen() {
             <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
           <h2 className="text-sm font-bold text-slate-900">Resident Profile</h2>
-          <div className="w-10"></div>
+          <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200/80 p-1 flex items-center justify-center shadow-2xs overflow-hidden">
+            <img src="/assets/logo-icon.png" alt="Rent in Peace" className="w-full h-full object-contain rounded-xl" />
+          </div>
         </div>
 
         {/* Tenant Hero Card */}
@@ -218,31 +257,52 @@ export default function TenantDetailScreen() {
 
             {/* Verification trigger */}
             {!isVerified ? (
-              <div className="pt-1">
-                <p className="text-[11px] text-slate-500 mb-2 leading-relaxed">
-                  Confirm receipt match to issue a unique door lockbox access code for {tenant.name}.
+              <div className="pt-1 space-y-2">
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Review receipt and reference number match. Verify to approve check-in or Reject to request resubmission.
                 </p>
-                <button 
-                  type="button"
-                  onClick={() => triggerVerifyConfirmation(null)}
-                  className="w-full py-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Verify GCash Payment & Issue Access Code</span>
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    type="button"
+                    onClick={() => triggerVerifyConfirmation(null)}
+                    className="py-3 px-2 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                  >
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>Verify Payment</span>
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => setRejectModal(true)}
+                    className="py-3 px-2 bg-white border border-red-300 hover:bg-red-50 text-red-700 font-bold text-xs rounded-2xl shadow-2xs transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                  >
+                    <X className="w-4 h-4 shrink-0 text-red-600" />
+                    <span>Reject Payment</span>
+                  </button>
+                </div>
               </div>
             ) : (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs text-[#14532D] font-bold">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Payment Verified · Access Code Active</span>
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-1">
+                <div className="flex items-center justify-between text-xs text-[#14532D] font-bold">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Payment Verified · Access Code Active</span>
+                  </div>
+                  <span className="text-[10px] font-mono bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+                    Verified
+                  </span>
                 </div>
+                {liveContract.verifiedAt && (
+                  <p className="text-[10px] text-emerald-800">
+                    Verified: {new Date(liveContract.verifiedAt).toLocaleString()} {liveContract.verifiedBy ? `by ${liveContract.verifiedBy}` : ''}
+                  </p>
+                )}
               </div>
             )}
           </div>
         )}
 
-        {/* Per-Tenant Door Access Code Card (Requirements 4 & 5) */}
+        {/* Per-Tenant Door Access Code Card (Requirements 4, 5, 6, 8, 9) */}
         <div className="p-4 bg-[#052e16] text-white rounded-3xl shadow-md border border-emerald-900/60 mb-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
@@ -251,40 +311,64 @@ export default function TenantDetailScreen() {
                 <span>Door Access Keypad Code</span>
               </div>
               <p className="font-mono text-3xl font-black tracking-widest text-white mt-1">
-                {isVerified && activeAccessCode ? activeAccessCode : '•••• (Locked)'}
+                {liveContract.status === 'ended' 
+                  ? 'REVOKED' 
+                  : (isVerified && activeAccessCode ? activeAccessCode : '•••• (Locked)')}
               </p>
               <p className="text-[10px] text-emerald-200/80 mt-0.5">
-                {isVerified && activeAccessCode 
-                  ? 'Set this code on your physical door lock. It is now visible on the resident hub.' 
-                  : 'Locked until you verify the advance payment receipt.'}
+                {liveContract.status === 'ended'
+                  ? 'This lease has ended. Access code is permanently revoked.'
+                  : (isVerified && activeAccessCode 
+                    ? 'Set this code on your physical lock. Visible on resident app.' 
+                    : 'Protected until payment verification is approved.')}
               </p>
             </div>
 
-            <div className={`p-2.5 rounded-2xl ${isVerified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
-              {isVerified ? <CheckCircle2 className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
+            <div className="flex flex-col items-end gap-1.5">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                liveContract.status === 'ended'
+                  ? 'bg-red-500/30 text-red-300 border border-red-400/40'
+                  : (isVerified ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'bg-amber-500/20 text-amber-300 border border-amber-400/30')
+              }`}>
+                {liveContract.status === 'ended' ? 'Revoked' : (isVerified ? 'Active' : 'Locked')}
+              </span>
+              <div className={`p-2 rounded-xl ${
+                liveContract.status === 'ended' ? 'bg-red-500/20 text-red-300' : (isVerified ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300')
+              }`}>
+                {liveContract.status === 'ended' ? <X className="w-5 h-5" /> : (isVerified ? <CheckCircle2 className="w-5 h-5" /> : <Lock className="w-5 h-5" />)}
+              </div>
             </div>
           </div>
 
-          {/* Regenerate Code Button */}
-          {isVerified && (
-            <div className="pt-2 border-t border-emerald-900/60 flex items-center justify-between gap-2">
+          {/* Action Buttons: Copy, Regenerate, End Lease */}
+          {isVerified && liveContract.status !== 'ended' && (
+            <div className="pt-2 border-t border-emerald-900/60 flex items-center justify-between gap-1.5 flex-wrap">
               <button
                 type="button"
                 onClick={handleCopyAccessCode}
-                className="px-3 py-1.5 bg-emerald-800/80 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
+                className="px-2.5 py-1.5 bg-emerald-800/80 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
               >
                 {copiedCode ? <Check className="w-3 h-3 text-emerald-300 stroke-[3]" /> : <Copy className="w-3 h-3" />}
-                <span>{copiedCode ? 'Copied' : 'Copy Code'}</span>
+                <span>{copiedCode ? 'Copied' : 'Copy'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setConfirmRegenModal(true)}
-                className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/30 rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
-                title="Generate new code when tenant moves out or on request"
+                className="px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/30 rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
+                title="Invalidate old code and generate a new random code"
               >
                 <RefreshCw className="w-3 h-3" />
-                <span>Regenerate Code</span>
+                <span>Regenerate</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setConfirmEndLeaseModal(true)}
+                className="px-2.5 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-400/30 rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer transition"
+                title="End lease on tenant move-out and revoke code"
+              >
+                <span>End Lease</span>
               </button>
             </div>
           )}
@@ -394,14 +478,36 @@ export default function TenantDetailScreen() {
           </div>
         </div>
 
-        {/* View Official Kasulatan */}
+        {/* View Official Kasulatan & Frozen Copy (Step 8) */}
         <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3 mb-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-slate-900">Signed Kasulatan Agreement</h3>
+            <div>
+              <h3 className="text-xs font-bold text-slate-900">Signed Kasulatan Agreement</h3>
+              <p className="text-[10px] text-slate-400">Frozen copy archived at lease creation</p>
+            </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
               {liveContract.signingMode === 'WET_INK' ? 'Wet-Ink Signatory' : 'Digital E-Sign'}
             </span>
           </div>
+
+          {liveContract.frozenContractText && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowFrozenContract(!showFrozenContract)}
+                className="text-xs font-bold text-[#14532D] hover:underline flex items-center gap-1 cursor-pointer mb-2"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>{showFrozenContract ? 'Hide Frozen Contract Copy' : 'View Frozen Contract Text'}</span>
+              </button>
+
+              {showFrozenContract && (
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 text-[11px] font-mono whitespace-pre-wrap text-slate-700 max-h-60 overflow-y-auto leading-relaxed mb-2">
+                  {liveContract.frozenContractText}
+                </div>
+              )}
+            </div>
+          )}
 
           <button
             type="button"
@@ -538,6 +644,104 @@ export default function TenantDetailScreen() {
                 className="py-3 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-xs font-bold text-white shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
               >
                 {isRegenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Regenerate Now</span>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Reject Payment (Step 6) */}
+      {rejectModal && (
+        <div 
+          onClick={() => setRejectModal(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
+                <X className="w-6 h-6 stroke-[2.5]" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900">Reject Payment Submission?</h3>
+                <p className="text-[11px] text-slate-500">Tenant will be prompted to resubmit</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Please enter the reason for rejection (e.g. "Blurred screenshot", "Incorrect reference number", "Amount does not match advance rent"):
+            </p>
+
+            <textarea
+              rows={3}
+              value={rejectionReasonInput}
+              onChange={(e) => setRejectionReasonInput(e.target.value)}
+              placeholder="e.g. Reference number does not match receipt screenshot..."
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-600 resize-none"
+            />
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setRejectModal(false)}
+                className="py-3 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isRejecting}
+                onClick={confirmAndExecuteRejection}
+                className="py-3 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                {isRejecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Confirm Reject</span>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: End Lease (Step 9) */}
+      {confirmEndLeaseModal && (
+        <div 
+          onClick={() => setConfirmEndLeaseModal(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
+                <X className="w-6 h-6 stroke-[2.5]" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900">End Lease for {tenant.name}?</h3>
+                <p className="text-[11px] text-slate-500">Tenant move-out & code revocation</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Ending this lease marks the agreement status as <strong>ended</strong> and permanently revokes the door access code. Historical ledger records and frozen contract copy will be retained for audit.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmEndLeaseModal(false)}
+                className="py-3 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isEndingLease}
+                onClick={confirmAndExecuteEndLease}
+                className="py-3 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-xs font-bold text-white shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                {isEndingLease ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>End Lease Now</span>}
               </button>
             </div>
           </div>

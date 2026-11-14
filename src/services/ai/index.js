@@ -1,1 +1,1 @@
-export { generateClause, auditClauses } from './gemini';
+export { generateClause, auditClauses, generateFullKasulatan } from './gemini';
