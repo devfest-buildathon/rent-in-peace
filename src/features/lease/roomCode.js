@@ -27,8 +27,11 @@ export async function createUniqueRoomCode(db) {
     code = `RIP-${suffix}`;
 
     try {
-      const snap = await getDoc(doc(db, 'contracts', code));
-      if (!snap.exists()) {
+      const [snap1, snap2] = await Promise.all([
+        getDoc(doc(db, 'contracts', code)),
+        getDoc(doc(db, 'leases', code))
+      ]);
+      if (!snap1.exists() && !snap2.exists()) {
         isUnique = true;
       }
     } catch (e) {

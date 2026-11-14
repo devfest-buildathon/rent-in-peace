@@ -5,7 +5,8 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   sendPasswordResetEmail,
-  signOut
+  signOut,
+  deleteUser
 } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { checkPasswordStrength } from './passwordStrength';
@@ -22,6 +23,90 @@ export function normalizePhone(phone = '') {
 }
 
 /**
+ * Maps Firebase Auth error codes to user-friendly messages.
+ * Logs configuration errors to console with full details for debugging.
+ */
+export function formatAuthError(err, mode = 'register') {
+  const code = err?.code || '';
+  const rawMsg = err?.message || '';
+
+  // Configuration error detection (auth/configuration-not-found or backend CONFIGURATION_NOT_FOUND or operation-not-allowed)
+  if (
+    code === 'auth/configuration-not-found' || 
+    code === 'auth/operation-not-allowed' ||
+    rawMsg.includes('configuration-not-found') ||
+    rawMsg.includes('CONFIGURATION_NOT_FOUND') ||
+    rawMsg.includes('operation-not-allowed') ||
+    rawMsg.includes('OPERATION_NOT_ALLOWED')
+  ) {
+    console.error('[Firebase Auth Configuration Error] Code:', code || rawMsg, {
+      code,
+      message: rawMsg,
+      originalError: err,
+      hint: 'Check Firebase Console: Authentication -> Get Started, Sign-in method -> Email/Password enabled, Authorized domains includes localhost.'
+    });
+    const error = new Error('Registration is temporarily unavailable');
+    error.code = code || 'auth/configuration-not-found';
+    return error;
+  }
+
+  if (code === 'auth/email-already-in-use' || rawMsg.includes('email-already-in-use') || rawMsg.includes('EMAIL_EXISTS')) {
+    const error = new Error('An account with this email or mobile number already exists. Please Sign In instead.');
+    error.code = 'auth/email-already-in-use';
+    return error;
+  }
+
+  if (code === 'auth/weak-password' || rawMsg.includes('weak-password') || rawMsg.includes('WEAK_PASSWORD')) {
+    const error = new Error('Password is too weak. Please use at least 8 characters with uppercase, lowercase, numbers, and symbols.');
+    error.code = 'auth/weak-password';
+    return error;
+  }
+
+  if (code === 'auth/invalid-email' || rawMsg.includes('invalid-email') || rawMsg.includes('INVALID_EMAIL')) {
+    const error = new Error('The email address format is invalid. Please check your email and try again.');
+    error.code = 'auth/invalid-email';
+    return error;
+  }
+
+  if (code === 'auth/network-request-failed' || rawMsg.includes('network-request-failed') || rawMsg.includes('NETWORK_REQUEST_FAILED')) {
+    const error = new Error('Network error. Please check your internet connection and try again.');
+    error.code = 'auth/network-request-failed';
+    return error;
+  }
+
+  if (code === 'auth/user-not-found' || rawMsg.includes('user-not-found')) {
+    const error = new Error('No account found with these credentials. Please check your details or register.');
+    error.code = 'auth/user-not-found';
+    return error;
+  }
+
+  if (
+    code === 'auth/wrong-password' || 
+    code === 'auth/invalid-credential' || 
+    rawMsg.includes('wrong-password') || 
+    rawMsg.includes('invalid-credential')
+  ) {
+    const error = new Error('Incorrect credentials. Please verify your password and try again.');
+    error.code = code || 'auth/invalid-credential';
+    return error;
+  }
+
+  if (code === 'auth/too-many-requests' || rawMsg.includes('too-many-requests')) {
+    const error = new Error('Too many attempts. Access is temporarily blocked. Please try again later.');
+    error.code = 'auth/too-many-requests';
+    return error;
+  }
+
+  // Fallback: Show explicit message and do not hide failure
+  const fallbackMsg = mode === 'register' 
+    ? `Registration failed: ${rawMsg || 'Please try again.'}`
+    : `Sign in failed: ${rawMsg || 'Please try again.'}`;
+  const error = new Error(fallbackMsg);
+  error.code = code || 'auth/unknown';
+  return error;
+}
+
+/**
  * Register a new Landlord using Firebase Auth & Cloud Firestore
  */
 export async function registerLandlordUser({ 
@@ -31,11 +116,13 @@ export async function registerLandlordUser({
   phone, 
   propertyName, 
   propertyAddress, 
+  barangay,
   city 
 }) {
   const cleanPhone = normalizePhone(phone);
   const cleanName = (name || '').trim();
   const cleanCity = (city || '').trim();
+  const cleanBarangay = (barangay || '').trim();
   const cleanAddress = (propertyAddress || '').trim();
   const cleanPropName = (propertyName || '').trim();
 
@@ -55,29 +142,22 @@ export async function registerLandlordUser({
     throw new Error('Password is too weak. Please ensure it has 8+ characters, upper & lowercase letters, a number, and a symbol.');
   }
 
-  const authEmail = (email && email.trim()) 
-    ? email.trim().toLowerCase() 
+  const rawEmailOrUser = (email && email.trim()) ? email.trim().toLowerCase() : '';
+  const authEmail = rawEmailOrUser
+    ? (rawEmailOrUser.includes('@') ? rawEmailOrUser : `${rawEmailOrUser.replace(/[^a-z0-9_.-]/g, '')}@rentinpeace.ph`)
     : `landlord_${cleanPhone}@rentinpeace.ph`;
 
   let userCredential;
   try {
     userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
   } catch (err) {
-    if (err.code === 'auth/email-already-in-use') {
-      // If auth account already exists, try logging in
-      try {
-        userCredential = await signInWithEmailAndPassword(auth, authEmail, password);
-      } catch (signErr) {
-        throw new Error('An account with this email/mobile already exists. Please Sign In.');
-      }
-    } else {
-      throw new Error(`Registration error: ${err.message}`);
-    }
+    // If Auth fails, throw mapped error and stop. Firestore profile creation NEVER runs.
+    throw formatAuthError(err, 'register');
   }
 
-  const fullPropertyAddress = cleanAddress 
-    ? (cleanCity && !cleanAddress.includes(cleanCity) ? `${cleanAddress}, ${cleanCity}` : cleanAddress)
-    : `${cleanPropName || 'Rental Property'}, ${cleanCity || 'Philippines'}`;
+  const fullPropertyAddress = [cleanAddress, cleanBarangay, cleanCity]
+    .filter(Boolean)
+    .join(', ') || (cleanPropName ? `${cleanPropName}, Philippines` : 'Rental Property, Philippines');
 
   const profileData = {
     id: cleanPhone,
@@ -87,14 +167,33 @@ export async function registerLandlordUser({
     email: authEmail,
     propertyName: cleanPropName || 'Residential Rental Unit',
     propertyAddress: fullPropertyAddress,
+    barangay: cleanBarangay,
     city: cleanCity || 'Philippines',
     role: 'landlord',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
 
-  // Persist to Cloud Firestore
-  await setDoc(doc(db, 'landlords', cleanPhone), profileData, { merge: true });
+  // Persist to Cloud Firestore with rollback on failure
+  try {
+    await setDoc(doc(db, 'landlords', cleanPhone), profileData, { merge: true });
+    // Also index by UID
+    if (userCredential.user.uid) {
+      await setDoc(doc(db, 'landlords', userCredential.user.uid), profileData, { merge: true });
+    }
+  } catch (firestoreErr) {
+    console.error('[Firestore Profile Write Failed]', firestoreErr);
+    // Roll back half-created auth user account to avoid leaving orphaned auth credentials
+    try {
+      if (userCredential?.user) {
+        await deleteUser(userCredential.user);
+        console.warn('[Rollback] Successfully deleted orphaned Auth user after Firestore failure.');
+      }
+    } catch (delErr) {
+      console.error('[Rollback Warning] Could not delete orphaned Auth user:', delErr);
+    }
+    throw new Error('Failed to create landlord profile in database. Account creation was rolled back. Please try again.');
+  }
 
   return profileData;
 }
@@ -116,10 +215,14 @@ export async function loginLandlordUser({ identifier, password }) {
 
   // If mobile number was entered, check Firestore to find their registered email
   if (!cleanIdent.includes('@')) {
-    const landlordSnap = await getDoc(doc(db, 'landlords', cleanPhone));
-    if (landlordSnap.exists() && landlordSnap.data().email) {
-      authEmail = landlordSnap.data().email;
-    } else {
+    try {
+      const landlordSnap = await getDoc(doc(db, 'landlords', cleanPhone));
+      if (landlordSnap.exists() && landlordSnap.data().email) {
+        authEmail = landlordSnap.data().email;
+      } else {
+        authEmail = `landlord_${cleanPhone}@rentinpeace.ph`;
+      }
+    } catch (fsErr) {
       authEmail = `landlord_${cleanPhone}@rentinpeace.ph`;
     }
   }
@@ -128,22 +231,18 @@ export async function loginLandlordUser({ identifier, password }) {
   try {
     userCredential = await signInWithEmailAndPassword(auth, authEmail, password);
   } catch (err) {
-    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-      throw new Error('Incorrect password. Please verify your credentials or reset your password.');
-    }
-    if (err.code === 'auth/user-not-found') {
-      throw new Error('No landlord account found with these credentials. Please Register first.');
-    }
-    throw new Error(`Sign in failed: ${err.message}`);
+    throw formatAuthError(err, 'login');
   }
 
   // Load Firestore profile
   let profile = null;
   if (cleanPhone) {
-    const snap = await getDoc(doc(db, 'landlords', cleanPhone));
-    if (snap.exists()) {
-      profile = snap.data();
-    }
+    try {
+      const snap = await getDoc(doc(db, 'landlords', cleanPhone));
+      if (snap.exists()) {
+        profile = snap.data();
+      }
+    } catch (e) {}
   }
 
   if (!profile) {
@@ -171,7 +270,7 @@ export async function registerTenantUser({
   phone, 
   code 
 }) {
-  const cleanUser = (username || '').trim().toLowerCase().replace(/\s+/g, '');
+  const cleanUser = (username || '').trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '');
   const cleanName = (name || '').trim();
   const cleanCode = (code || '').trim().toUpperCase();
   const cleanPhone = normalizePhone(phone);
@@ -180,10 +279,13 @@ export async function registerTenantUser({
     throw new Error('Please enter a valid Landlord Room Code (e.g. RIP-XXXX).');
   }
   if (!cleanUser) {
-    throw new Error('Please choose a username.');
+    throw new Error('Please choose a valid username (letters, numbers, underscore or hyphen).');
   }
   if (!cleanName) {
     throw new Error('Please provide your full legal name as lessee.');
+  }
+  if (!cleanPhone || cleanPhone.length < 10) {
+    throw new Error('Please enter a valid Philippine mobile number (e.g. 09181234567).');
   }
 
   // Live password strength requirement
@@ -200,15 +302,8 @@ export async function registerTenantUser({
   try {
     userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
   } catch (err) {
-    if (err.code === 'auth/email-already-in-use') {
-      try {
-        userCredential = await signInWithEmailAndPassword(auth, authEmail, password);
-      } catch (signErr) {
-        throw new Error('An account with this username or email already exists. Please Sign In.');
-      }
-    } else {
-      throw new Error(`Tenant registration error: ${err.message}`);
-    }
+    // If Auth fails, throw mapped error and stop. Firestore profile creation NEVER runs.
+    throw formatAuthError(err, 'register');
   }
 
   const tenantRecord = {
@@ -219,12 +314,30 @@ export async function registerTenantUser({
     email: authEmail,
     phone: cleanPhone,
     contractCode: cleanCode,
+    leaseId: cleanCode,
     role: 'tenant',
     createdAt: new Date().toISOString()
   };
 
-  // Write to Cloud Firestore
-  await setDoc(doc(db, 'tenants', cleanUser), tenantRecord, { merge: true });
+  // Write to Cloud Firestore with rollback on failure
+  try {
+    await setDoc(doc(db, 'tenants', cleanUser), tenantRecord, { merge: true });
+    if (userCredential.user.uid) {
+      await setDoc(doc(db, 'tenants', userCredential.user.uid), tenantRecord, { merge: true });
+    }
+  } catch (firestoreErr) {
+    console.error('[Firestore Profile Write Failed]', firestoreErr);
+    // Roll back half-created auth user account
+    try {
+      if (userCredential?.user) {
+        await deleteUser(userCredential.user);
+        console.warn('[Rollback] Successfully deleted orphaned Auth user after Firestore failure.');
+      }
+    } catch (delErr) {
+      console.error('[Rollback Warning] Could not delete orphaned Auth user:', delErr);
+    }
+    throw new Error('Failed to create tenant profile in database. Account creation was rolled back. Please try again.');
+  }
 
   return tenantRecord;
 }
@@ -233,7 +346,7 @@ export async function registerTenantUser({
  * Sign in existing Tenant with Firebase Auth
  */
 export async function loginTenantUser({ identifier, password, code }) {
-  const cleanIdent = (identifier || '').trim().toLowerCase().replace(/\s+/g, '');
+  const cleanIdent = (identifier || '').trim().toLowerCase().replace(/[^a-z0-9_.-]/g, '');
   if (!cleanIdent) {
     throw new Error('Please enter your username or email.');
   }
@@ -243,10 +356,14 @@ export async function loginTenantUser({ identifier, password, code }) {
 
   let authEmail = cleanIdent;
   if (!cleanIdent.includes('@')) {
-    const tenantDoc = await getDoc(doc(db, 'tenants', cleanIdent));
-    if (tenantDoc.exists() && tenantDoc.data().email) {
-      authEmail = tenantDoc.data().email;
-    } else {
+    try {
+      const tenantDoc = await getDoc(doc(db, 'tenants', cleanIdent));
+      if (tenantDoc.exists() && tenantDoc.data().email) {
+        authEmail = tenantDoc.data().email;
+      } else {
+        authEmail = `tenant_${cleanIdent}@rentinpeace.ph`;
+      }
+    } catch (fsErr) {
       authEmail = `tenant_${cleanIdent}@rentinpeace.ph`;
     }
   }
@@ -255,20 +372,18 @@ export async function loginTenantUser({ identifier, password, code }) {
   try {
     userCredential = await signInWithEmailAndPassword(auth, authEmail, password);
   } catch (err) {
-    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-      throw new Error('Incorrect password. Please verify and try again.');
-    }
-    if (err.code === 'auth/user-not-found') {
-      throw new Error(`Account "${cleanIdent}" not found. Please join using your room code.`);
-    }
-    throw new Error(`Login failed: ${err.message}`);
+    throw formatAuthError(err, 'login');
   }
 
   let tenantProfile = null;
-  const snap = await getDoc(doc(db, 'tenants', cleanIdent));
-  if (snap.exists()) {
-    tenantProfile = snap.data();
-  } else {
+  try {
+    const snap = await getDoc(doc(db, 'tenants', cleanIdent));
+    if (snap.exists()) {
+      tenantProfile = snap.data();
+    }
+  } catch (e) {}
+
+  if (!tenantProfile) {
     tenantProfile = {
       id: cleanIdent,
       uid: userCredential.user.uid,
@@ -289,8 +404,12 @@ export async function requestPasswordReset(email) {
   if (!cleanEmail || !cleanEmail.includes('@')) {
     throw new Error('Please enter a valid email address to receive password reset instructions.');
   }
-  await sendPasswordResetEmail(auth, cleanEmail);
-  return true;
+  try {
+    await sendPasswordResetEmail(auth, cleanEmail);
+    return true;
+  } catch (err) {
+    throw formatAuthError(err, 'reset');
+  }
 }
 
 /**

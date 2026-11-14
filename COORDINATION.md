@@ -43,7 +43,7 @@ Shared files include:
 
 | Agent | Task | Status | Notes |
 | :--- | :--- | :--- | :--- |
-| **Agent A** | Auth & Navigation Setup | Done | Real passwords, strength meter, forgot password, history routing |
+| **Agent A** | Auth & Registration Diagnosis & Fix | Done | Diagnosed auth/configuration-not-found, mapped error codes, rollback on failed profile writes, zero mock fallbacks |
 | **Agent B** | Lease Flow & Access Code | Done | Kasulatan saving, unique room codes, verification, crypto access codes, dashboard links |
 | **Agent C** | Lease Templates | Done | Preset library, clause editor, live preview, custom placeholders |
 | **Agent D** | Gemini AI Service | Done | Gemini 2.0 Flash integration, real errors with retry, zero fallbacks |
@@ -94,3 +94,5 @@ The agreed function signatures that agents use to talk to each other:
 | 2026-11-14 | Agent C | `src/features/lease-templates/presets.js`, `src/components/shared/PrintableContract.jsx`, `src/screens/landlord/BasicsFormScreen.jsx`, `src/screens/landlord/ReviewShareScreen.jsx` | Removed hardcoded CDO and Article 1356 enforceability claims; added strict validation blocking generation when required fields are missing |
 | 2026-11-14 | Agent D | `src/services/ai/gemini.js`, `src/services/ai/index.js`, `src/lib/gemini.js`, `src/screens/landlord/KasulatanScreen.jsx`, `src/screens/landlord/SmartCheckScreen.jsx` | Integrated Gemini 2.0 Flash with real error handling and retry mechanism; deleted all fallback dummy text and mock clauses |
 | 2026-11-14 | Agent C | `src/features/lease-templates/*`, `src/App.jsx`, `src/screens/landlord/SettingsScreen.jsx`, `src/screens/landlord/LandlordHomeScreen.jsx`, `firestore.rules` | Built full Customize Lease module: preset library (Bedspace, Room with CR, Apartment), bilingual clause editor, live preview modal, placeholder insertion/validation, and Gemini clause drafting |
+| 2026-11-14 | Agent D & C | `src/services/ai/gemini.js`, `src/features/lease-templates/aiClauseHelper.ts`, `.env`, `.env.local` | Integrated user's API key and prioritized Gemini 3 model cascade (Gemini 3.5 Flash Lite -> Gemini 3.1 Flash Lite -> Gemini 3 Flash Preview) with automated failover |
+| 2026-11-14 | Agent A | `src/lib/firebase.js`, `src/auth/authService.js`, `scripts/test-registration-auth.mjs` | Diagnosed auth/configuration-not-found, singleton app init, exported deleteUser, robust formatAuthError mapping, rollback half-created accounts, safe SSR env access |
