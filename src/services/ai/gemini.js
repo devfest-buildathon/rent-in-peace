@@ -5,10 +5,14 @@ const GEMINI_API_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.V
 // 1. Gemini 3.5 Flash Lite (500 RPD, 15 RPM)
 // 2. Gemini 3.1 Flash Lite (500 RPD, 15 RPM)
 // 3. Gemini 3 Flash Preview (20 RPD, 5 RPM)
+// 4. Gemini 2.5 Flash / 2.0 Flash / 1.5 Flash (General Availability fallbacks)
 const GEMINI_MODELS = [
   "gemini-3.5-flash-lite",
   "gemini-3.1-flash-lite",
-  "gemini-3-flash-preview"
+  "gemini-3-flash-preview",
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash"
 ];
 
 /**
