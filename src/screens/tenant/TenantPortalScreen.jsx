@@ -14,7 +14,9 @@ import {
   ShieldCheck,
   FileText,
   Lock,
-  ArrowRight
+  ArrowRight,
+  QrCode,
+  Edit3
 } from 'lucide-react';
 import SignaturePad from '../../components/shared/SignaturePad';
 import FileUpload from '../../components/shared/FileUpload';
@@ -52,6 +54,7 @@ export default function TenantPortalScreen() {
   const [explainBisaya, setExplainBisaya] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [payChannel, setPayChannel] = useState('QRPH'); // 'QRPH' | 'CASH'
 
   const currentCode = activeCode || roomCodeInput || tenantProfile?.contractCode || tenantProfile?.leaseId;
   const activeContract = activeTenantContract || contracts.find(c => c.code === currentCode || c.id === currentCode) || {};
@@ -126,8 +129,28 @@ export default function TenantPortalScreen() {
   // Step 5: Submit Payment Proof -> status becomes "pending_verification"
   const handleSubmitPayment = async () => {
     setError('');
+    if (payChannel === 'CASH') {
+      setIsSubmitting(true);
+      try {
+        await submitTenantPaymentProof({
+          contractCode: currentCode,
+          amount: displayAdvance,
+          type: 'advance/deposit',
+          gcashRef: 'CASH-HANDOVER',
+          receiptData: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150"><rect width="300" height="150" fill="%23fef3c7" rx="12"/><text x="150" y="65" font-family="sans-serif" font-size="14" font-weight="bold" fill="%2378350f" text-anchor="middle">Physical Cash on Hand</text><text x="150" y="95" font-family="sans-serif" font-size="11" fill="%2392400e" text-anchor="middle">Handover to Landlord Pending</text></svg>',
+          file: null
+        });
+        setCurrentScreen('SUCCESS_PIN');
+      } catch (err) {
+        setError(err.message || 'Failed to submit cash handover request.');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     if (!gcashRefNumber.trim()) {
-      setError('GCash reference number is required.');
+      setError('Transaction reference number is required.');
       return;
     }
     if (!gcashFileData) {
@@ -378,16 +401,41 @@ export default function TenantPortalScreen() {
               ) : (
                 <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-2xl text-amber-950 space-y-2 mt-1">
                   <p className="text-[10px] text-amber-800 leading-snug">
-                    Print this Kasulatan to physically sign with ballpen together with the landlord.
+                    Print this Kasulatan to physically sign with ballpen together with the landlord (Civil Code Art. 1356).
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => window.print()}
-                    className="w-full py-2.5 px-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
-                  >
-                    <Printer className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Print Document for Physical Wet-Ink Signing (A4)</span>
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => window.print()}
+                      className="flex-1 py-2.5 px-3 bg-[#14532D] hover:bg-[#0f4022] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Print Document (A4)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 400;
+                        canvas.height = 150;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#f8fafc';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.font = 'bold 14px sans-serif';
+                        ctx.fillStyle = '#0f172a';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('✓ Signed Physical Kasulatan Page Uploaded', 200, 60);
+                        ctx.font = 'italic 12px serif';
+                        ctx.fillStyle = '#14532D';
+                        ctx.fillText(`~ ${tenantName || 'Tenant'} (Civil Code Art. 1356) ~`, 200, 95);
+                        setSignatureData(canvas.toDataURL('image/png'));
+                        setError('');
+                      }}
+                      className="py-2.5 px-3 bg-emerald-100 hover:bg-emerald-200 text-[#14532D] rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer shrink-0"
+                    >
+                      ⚡ Fast Demo
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -440,7 +488,7 @@ export default function TenantPortalScreen() {
               </div>
             )}
 
-            {/* GCash Advance Rent Submission Card */}
+            {/* Advance Rent Submission Card */}
             <div className="p-4 bg-white rounded-3xl border border-slate-200/80 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -448,41 +496,112 @@ export default function TenantPortalScreen() {
                     <CreditCard className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold text-slate-900">GCash Payment Proof</h3>
-                    <p className="text-[10px] text-slate-400">Advance Rent & Security Deposit</p>
+                    <h3 className="text-xs font-bold text-slate-900">Advance Rent Settlement</h3>
+                    <p className="text-[10px] text-slate-400">QR Ph, GCash, or Cash on Hand</p>
                   </div>
                 </div>
                 <span className="font-black text-[#14532D] text-base">₱{displayAdvance.toLocaleString()}</span>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-[11px] text-slate-600 leading-relaxed">
-                Send ₱{displayAdvance.toLocaleString()} to your landlord via GCash outside this app. Then upload the screenshot receipt and enter the GCash reference number below.
+              {/* Settlement Mode Selector: QR Ph (GCash/Maya/Banks) vs Physical Cash */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPayChannel('QRPH');
+                    if (gcashRefNumber === 'CASH-HANDOVER') setGcashRefNumber('');
+                  }}
+                  className={`p-2 rounded-xl border text-center transition cursor-pointer ${
+                    payChannel === 'QRPH' 
+                      ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] font-bold shadow-2xs' 
+                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="text-xs font-black">QR Ph / E-Wallet</div>
+                  <p className="text-[9px] text-slate-500">GCash, Maya, BDO, Banks</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPayChannel('CASH');
+                    setGcashRefNumber('CASH-HANDOVER');
+                  }}
+                  className={`p-2 rounded-xl border text-center transition cursor-pointer ${
+                    payChannel === 'CASH' 
+                      ? 'border-[#14532D] bg-[#ECFDF5] text-[#14532D] font-bold shadow-2xs' 
+                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="text-xs font-black">Cash on Hand</div>
+                  <p className="text-[9px] text-slate-500">Direct to Landlord</p>
+                </button>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
-                  GCash Receipt Screenshot <span className="text-red-500">*</span>
-                </label>
-                <FileUpload
-                  label="Upload GCash Screenshot Receipt"
-                  helperText="Screenshot must clearly show reference number and amount"
-                  initialPreview={gcashFileData?.dataUrl || gcashFileData}
-                  onFileSelect={(data) => setGcashFileData(data)}
-                />
-              </div>
+              {payChannel === 'QRPH' ? (
+                <div className="space-y-3 pt-1">
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-[11px] text-slate-600 leading-relaxed">
+                    Send ₱{displayAdvance.toLocaleString()} to your landlord via GCash / QR Ph. Then upload the screenshot receipt and enter the transaction reference number below.
+                  </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                  GCash Reference No. <span className="text-red-500">*</span>
-                </label>
-                <input 
-                  type="text" 
-                  value={gcashRefNumber} 
-                  onChange={(e) => setGcashRefNumber(e.target.value)} 
-                  placeholder="e.g. 9021481928" 
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
-                />
-              </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
+                      Receipt Screenshot <span className="text-red-500">*</span>
+                    </label>
+                    <FileUpload
+                      label="Upload Screenshot Receipt"
+                      helperText="Accepted: GCash, Maya, GoTyme, SeaBank, BDO, BPI"
+                      initialPreview={gcashFileData?.dataUrl || gcashFileData}
+                      onFileSelect={(data) => setGcashFileData(data)}
+                    />
+                  </div>
+
+                  {/* Fast Demo GCash Button */}
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGcashFileData({ 
+                          name: 'qrph_receipt.png', 
+                          dataUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150"><rect width="300" height="150" fill="%23007dfe" rx="12"/><text x="150" y="55" font-family="sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">QR Ph Transfer Verified</text><text x="150" y="85" font-family="monospace" font-size="12" fill="white" text-anchor="middle">Ref: 902837491028</text><text x="150" y="115" font-family="sans-serif" font-size="11" fill="%23a7f3d0" text-anchor="middle">Status: Completed</text></svg>' 
+                        });
+                        setGcashRefNumber('902837491028');
+                      }}
+                      className="text-[10px] bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg border border-blue-200 transition cursor-pointer flex items-center gap-1 shadow-2xs"
+                    >
+                      <span>⚡ Fast Demo QR Ph (Ref: 902837491028)</span>
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Transaction / GCash Ref No. <span className="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      value={gcashRefNumber} 
+                      onChange={(e) => setGcashRefNumber(e.target.value)} 
+                      placeholder="e.g. 9021481928" 
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600 transition"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-2xl space-y-2 text-amber-950 text-xs">
+                  <p className="font-bold text-[11px] flex items-center gap-1.5 text-amber-900">
+                    <span>💵 Physical Cash Settlement (Customary Law):</span>
+                  </p>
+                  <p className="text-[10px] leading-relaxed text-amber-800">
+                    You can hand physical banknotes directly to the landlord or designated property caretaker. Once received, the landlord will tap "Acknowledge Cash Received" on their dashboard to unlock your room PIN.
+                  </p>
+                  <div className="flex justify-between items-center pt-1.5 border-t border-amber-200">
+                    <span className="text-[10px] text-amber-700 font-medium">Status: Marked for Cash Handover</span>
+                    <span className="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">
+                      Cash on Hand
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Step 5 CTA: Submit Payment Proof */}
@@ -494,7 +613,7 @@ export default function TenantPortalScreen() {
               >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                   <>
-                    <span>Submit Payment Proof</span>
+                    <span>{payChannel === 'CASH' ? 'Confirm Cash Handover & Request PIN' : 'Submit Payment Proof'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -502,7 +621,6 @@ export default function TenantPortalScreen() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

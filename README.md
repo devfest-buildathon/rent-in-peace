@@ -275,3 +275,57 @@ DEMO_PROJECT_ID=rentinpeace npm run demo:reset -- --confirm
 ## ⚖️ Legal & Responsible AI Disclaimer
 
 *Rent in Peace is an operational management, record-keeping, and mutual transparency tool for residential rentals in the Philippines. It does not provide legal representation or formal statutory advice. All AI-generated clauses produced by Google Gemini must be explicitly reviewed and confirmed by the property owner before commitment. The platform strictly enforces statutory tenant caps under the Philippine Rent Control Act (Republic Act No. 9653).*
+
+### Philippine Legal Framework Alignment
+
+| Legal Framework | Implementation in Rent in Peace |
+|---|---|
+| **RA 386 (Civil Code Art. 1356)** | Customary residential lease format enforceable for barangay proceedings and informal dispute resolutions. |
+| **Civil Code Art. 1654 & 1687** | Prescribed statutory landlord maintenance covenants and 30-day move-out notification periods. |
+| **Rent Control Act of the Philippines** | Deposit caps (1 month advance, 1 to 2 months security deposit) automatically enforced in the wizard. |
+| **RA 8792 (E-Commerce Act)** | Electronic signatures recorded with cryptographic timestamps and PhilSys-verified legal name binding. |
+| **RA 10173 (Data Privacy Act)** | Strict isolation ensures co-tenants cannot view other tenants' balances, receipts, or contracts. |
+
+---
+
+## 🗄️ Database Collections (Cloud Firestore)
+
+- **`contracts/`**: Holds lease agreements, clause lists, room metadata, lockbox PINs, and verification flags (`paymentVerified: boolean`).
+- **`tenants/`**: Tenant credentials (username, password hash/pin), full legal names, and linked contract codes.
+- **`landlords/`**: Landlord profiles, registered phone numbers, property locations, and PINs.
+- **`payments/`**: Ledger entries with contract codes, cycle names, amounts, GCash reference numbers, and receipt image attachments.
+- **`checkins/`**: Audit trail of digital signatures, check-in timestamps, and tenant IDs.
+
+---
+
+## 🧪 Testing the Live Demo
+
+1. **Landlord Flow:**
+   - On the Splash Screen, click **Landlord Portal** -> **Create Account** or **Sign In**.
+   - Tap **"Create a new contract"**, fill out unit details (e.g. Unit 4, ₱3,500/mo), customize clauses with Gemini AI, and save.
+   - Share the room code (e.g. `RIP-XXXX`) or copy the invite link.
+2. **Tenant Flow:**
+   - Open the link with `?code=RIP-XXXX` or click **Tenant Portal** -> **Register**.
+   - Input your username and password.
+   - Land directly on your **Tenant Dashboard**: view your contract, pay rent via GCash, track your monthly schedule, and view lockbox status.
+3. **Verification Flow:**
+   - Tenant submits rent with a GCash ref.
+   - Landlord dashboard shows **"Action Required: Tenant Payment Pending"**.
+   - Landlord clicks **"Verify Payment & Grant Room Key Access"**.
+   - Tenant dashboard instantly unlocks Smart Keybox PIN `48291`!
+
+---
+
+## 👥 The Team Behind Rent in Peace (GDG CDO Buildathon 2026)
+
+| Member | Role | Responsibilities & Contributions |
+|---|---|---|
+| **Danlord Farell Soriano (Daf)** ([@Daffy-Ducky](https://github.com/Daffy-Ducky)) | **Team Lead & System Architect** | System prompts, stage pitch presenter, Phygital dual-signing architecture, feature orchestration |
+| **Pia Paña** (@pyuuh) | **Lead UI/UX Designer** | Figma 10-screen design system, branding, color palette, typography |
+| **Justine Roy Salva** ([@JRSstuff](https://github.com/JRSstuff)) | **Lead Backend & AI Engineer** | Google Gemini Flash integration, Cloud Firestore schemas, in-app GCash logic |
+| **John Kurt** | **Co-Developer & DevOps** | Deployment, persistence validation, PWA caching |
+
+---
+
+## 📄 License
+Licensed under the [MIT License](LICENSE).

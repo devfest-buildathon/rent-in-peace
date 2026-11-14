@@ -316,20 +316,20 @@ export default function TenantHomeScreen() {
       {showPayModal && (
         <div 
           onClick={() => setShowPayModal(false)}
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in"
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-sm sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#14532D] flex items-center justify-center">
-                  <CreditCard className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-xl bg-[#14532D] text-white flex items-center justify-center">
+                  <CreditCard className="w-4 h-4 text-amber-300" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Pay Monthly Rent</h3>
-                  <p className="text-[10px] text-slate-400">Submit GCash transfer proof</p>
+                  <h3 className="text-sm font-black text-slate-900">Pay Rent Settlement</h3>
+                  <p className="text-[10px] text-slate-500">QR Ph, GCash, Maya, or Cash to Landlord</p>
                 </div>
               </div>
               <button 
