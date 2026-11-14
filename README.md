@@ -237,6 +237,9 @@ Extracted directly from the official logo files (`public/assets/logo-full.png` a
 git clone https://github.com/devfest-buildathon/rent-in-peace.git
 cd rent-in-peace
 
+# Verify stable production branch (main)
+git checkout main
+
 # Install dependencies
 npm install
 
@@ -269,6 +272,38 @@ DEMO_PROJECT_ID=rentinpeace npm run demo:reset -- --confirm
 - **Name**: Maria Teresa Santos
 - **Room Assignment**: Room 201 (Corner Studio) · `RIP-ACTV`
 - **Active Keypad Access PIN**: `48291`
+
+---
+
+## 🌟 Key Application Features
+
+### 🏢 1. Landlord Lease Studio
+- **Guided Contract Wizard**: Step-by-step drafting for Boarding Houses, Bedspaces, and Apartments in Cagayan de Oro.
+- **Gemini AI Legal Clause Assistant**: Type natural language prompts (e.g. *"Strict curfew at 10 PM with ₱500 penalty"*, *"Translate rules into Bisaya"*, or *"Add sub-meter billing at ₱15/kWh"*). Google Gemini synthesizes enforceable, professional clauses adhering to Philippine Civil Code standards.
+- **Persistent Single-Use Room Codes**: Generates persistent unique room links (e.g. `?code=RIP-4B92`) that remain stable across edits and sessions.
+- **Real-Time Cloud Firestore Sync**: Changes to contracts and payment statuses sync instantly across all devices.
+
+### 🔑 2. Seamless Tenant Onboarding & Registration
+- **No Complex Forms for Tenants**: The landlord pre-fills the tenant's legal name, unit number, and rent amount. The tenant only needs to set up a **Username** and **Password** to register.
+- **Direct Login to Dashboard**: Logging in takes the tenant straight to their **Tenant Dashboard** (`TENANT_HOME`) without forcing them through repetitive onboarding or setup flows.
+
+### 💳 3. Universal Hybrid Payment Ledger (QR Ph & Physical Cash)
+- **BSP QR Ph Standard**: Accepts all Philippine e-wallets and banks (GCash, Maya, SeaBank, BDO, GoTyme).
+- **Physical Cash-on-Hand Mode**: Tenants paying in paper bills submit a cash receipt confirmation; landlords verify with a single tap to generate a digital acknowledgment receipt.
+- **Rent Schedule & Countdown Progress Tracker**: 
+  - Clear visual tracking of total payments (e.g., `6-month schedule: 1 of 6 payments completed · 5 remaining`).
+  - Next due date indicator (`Due every 5th of each month`).
+- **Live Transaction Ledger**: Both landlord and tenant see an immutable record of all submitted payments, cycles, and approval statuses (`Pending Verification` vs `Verified ✅`).
+
+### 🛡️ 4. Payment Verification & Smart Lockbox Key Access
+- **Locked Key PIN During Review**: When advance rent is submitted, the tenant's app displays an amber indicator: `⏳ Awaiting Landlord Verification`, keeping the physical door PIN masked (`● ● ● ●`).
+- **Landlord Review UI**: The landlord receives an action banner with the tenant's GCash reference number and receipt image.
+- **1-Click Key Release**: The landlord clicks **"Verify Payment & Grant Room Key Access"**. This instantly updates the cloud state and reveals the 5-digit door PIN (**`48291`**) on the tenant's screen for contactless move-in.
+
+### 📜 5. Official Legal Standard (Kasulatan sa Pag-Abang)
+- **Compact Standard A4 Document**: Formatted cleanly to fit standard A4 paper with zero overflow.
+- **Dual-Signing Mode**: Supports digital on-screen stylus signatures as well as wet-ink physical signing under **Philippine Civil Code Art. 1356**.
+- **Notarial Acknowledgment**: Includes certified notarial block for Barangay Lupon or judicial proceedings.
 
 ---
 
@@ -321,9 +356,8 @@ DEMO_PROJECT_ID=rentinpeace npm run demo:reset -- --confirm
 | Member | Role | Responsibilities & Contributions |
 |---|---|---|
 | **Danlord Farell Soriano (Daf)** ([@Daffy-Ducky](https://github.com/Daffy-Ducky)) | **Team Lead & System Architect** | System prompts, stage pitch presenter, Phygital dual-signing architecture, feature orchestration |
-| **Pia Paña** (@pyuuh) | **Lead UI/UX Designer** | Figma 10-screen design system, branding, color palette, typography |
-| **Justine Roy Salva** ([@JRSstuff](https://github.com/JRSstuff)) | **Lead Backend & AI Engineer** | Google Gemini Flash integration, Cloud Firestore schemas, in-app GCash logic |
-| **John Kurt** | **Co-Developer & DevOps** | Deployment, persistence validation, PWA caching |
+| **Justine Roy Salva** ([@JRSstuff](https://github.com/JRSstuff)) | **Lead Backend & AI Engineer** | Google Gemini Flash integration, Cloud Firestore schemas, in-app QR Ph/Cash logic |
+| **John Kurt** | **Co-Developer, UI/UX & DevOps** | Modern UI redesign across 26 screens, deployment, persistence validation, PWA caching |
 
 ---
 
