@@ -1,18 +1,24 @@
 // Gemini AI Service - Owned by Agent D per COORDINATION.md
-const GEMINI_API_KEY = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) || (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY) || "";
+function getGeminiApiKey() {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const stored = window.localStorage.getItem('VITE_GEMINI_API_KEY') || window.localStorage.getItem('gemini_api_key');
+    if (stored && stored.trim()) return stored.trim();
+  }
+  return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) || 
+         (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY) || "";
+}
 
 // Supported models from the active project quota in priority order:
 // 1. Gemini 3.5 Flash Lite (500 RPD, 15 RPM)
 // 2. Gemini 3.1 Flash Lite (500 RPD, 15 RPM)
 // 3. Gemini 3 Flash Preview (20 RPD, 5 RPM)
-// 4. Gemini 2.5 Flash / 2.0 Flash / 1.5 Flash (General Availability fallbacks)
+// 4. Gemini Flash Lite Latest / Flash Latest
 const GEMINI_MODELS = [
   "gemini-3.5-flash-lite",
   "gemini-3.1-flash-lite",
   "gemini-3-flash-preview",
-  "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash"
+  "gemini-flash-lite-latest",
+  "gemini-flash-latest"
 ];
 
 /**
@@ -21,7 +27,8 @@ const GEMINI_MODELS = [
  * to the next model in the list. Throws clearly if all attempts fail.
  */
 async function callGeminiApi(requestBody) {
-  if (!GEMINI_API_KEY) {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) {
     throw new Error('Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your environment.');
   }
 
@@ -29,7 +36,7 @@ async function callGeminiApi(requestBody) {
 
   for (const model of GEMINI_MODELS) {
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)

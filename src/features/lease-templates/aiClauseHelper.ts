@@ -7,18 +7,25 @@ export interface GeneratedClauseDraft {
   bisaya: string;
 }
 
+function getGeminiApiKey(): string {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const stored = window.localStorage.getItem('VITE_GEMINI_API_KEY') || window.localStorage.getItem('gemini_api_key');
+    if (stored && stored.trim()) return stored.trim();
+  }
+  return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) || '';
+}
+
 // Supported models from the active project quota in priority order:
 // 1. Gemini 3.5 Flash Lite (500 RPD, 15 RPM)
 // 2. Gemini 3.1 Flash Lite (500 RPD, 15 RPM)
 // 3. Gemini 3 Flash Preview (20 RPD, 5 RPM)
-// 4. Gemini 2.5 Flash / 2.0 Flash / 1.5 Flash (General Availability fallbacks)
+// 4. Gemini Flash Lite Latest / Flash Latest
 const GEMINI_MODELS = [
   'gemini-3.5-flash-lite',
   'gemini-3.1-flash-lite',
   'gemini-3-flash-preview',
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash'
+  'gemini-flash-lite-latest',
+  'gemini-flash-latest'
 ];
 
 /**
@@ -34,7 +41,7 @@ export async function suggestClauseWithGemini(userPrompt: string): Promise<Gener
     throw new Error('Please enter a description of the clause you want to draft.');
   }
 
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = getGeminiApiKey();
   if (!apiKey) {
     throw new Error('Gemini API key is not configured. Please check VITE_GEMINI_API_KEY in your environment.');
   }
@@ -167,7 +174,7 @@ export async function generateFullKasulatanWithGemini({
     throw new Error('Please describe the property, house rules, or terms you want in the Kasulatan.');
   }
 
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = getGeminiApiKey();
   if (!apiKey) {
     throw new Error('Gemini API key is not configured. Please check VITE_GEMINI_API_KEY in your environment.');
   }
